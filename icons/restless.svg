@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4c6fff"/>
+      <stop offset="1" stop-color="#2a3fb8"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#bg)"/>
+  <g transform="translate(-9 -4) scale(1.08)">
+    <!-- long tapered tail -->
+    <path d="M52 70 C42 80 30 92 16 106 C14 108 17 111 19 109 C34 98 48 88 60 80 Z" fill="#b9c3dc"/>
+    <!-- body -->
+    <path d="M90 26 C100 26 107 33 107 42 L121 46 L106 50 C104 62 97 72 86 78 C76 84 64 85 56 82 C46 79 44 70 47 62 C52 46 64 32 80 28 C83 27 87 26 90 26 Z" fill="#f4f6fb"/>
+    <!-- wing with white wing bar -->
+    <path d="M52 62 C62 50 78 49 90 57 C82 69 68 75 52 78 C48 74 48 67 52 62 Z" fill="#7f8bab"/>
+    <path d="M62 62 C68 58 75 57 81 59" stroke="#ffffff" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <!-- wide-open (restless) eye -->
+    <circle cx="93" cy="39" r="7" fill="#ffffff" stroke="#1c2340" stroke-width="3"/>
+    <circle cx="95" cy="39" r="3.2" fill="#1c2340"/>
+    <!-- legs -->
+    <path d="M72 82 L70 96 M80 81 L81 96" stroke="#1c2340" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <path d="M36 101 H104" stroke="#c9d4ff" stroke-width="6" stroke-linecap="round" opacity=".5"/>
+</svg>

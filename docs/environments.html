@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Environments &amp; users · RESTless</title><meta name="description" content="Send your requests to another server, as another user, without touching the app.">
+<link rel="icon" href="img/favicon.png"><link rel="stylesheet" href="style.css">
+<script>try{const t=localStorage.getItem('rl-theme');if(t)document.documentElement.classList.add(t)}catch(e){}</script>
+</head><body>
+<header class="top"><button class="tbtn menu" id="mbtn" aria-expanded="false" aria-controls="side" aria-label="Pages">☰</button>
+<a class="brand" href="index.html"><img src="img/logo.png" alt=""><b>RESTless</b></a><span class="ver">v0.85.1</span><span class="sp"></span>
+<a class="tlink" href="demo/index.html">Live demo</a><a class="tlink" href="https://github.com/varnica95/restless">GitHub</a>
+<button class="tbtn" id="theme" aria-label="Switch between light and dark" title="Light / dark"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.8a6.2 6.2 0 0 1 0 12.4z" fill="currentColor"/></svg></button></header>
+<div class="wrap"><nav class="side" id="side" aria-label="Pages"><ul><li><a href="index.html">Overview</a></li><li><a href="getting-started.html">Getting started</a></li><li><a href="requests.html">Requests</a></li><li><a href="request-screen.html">The request screen</a></li><li><a href="mocks.html">Mock endpoints</a></li><li><a href="api-docs.html">API docs</a></li><li><a href="environments.html" class=on aria-current=page>Environments &amp; users</a></li><li><a href="testing-tools.html">Testing tools</a></li><li><a href="settings.html">Settings</a></li><li><a href="how-it-works.html">How it works</a></li><li><a href="demo/index.html">Live demo</a></li></ul></nav>
+<main id="main"><h1>Environments &amp; users</h1><p class="lead">Send your requests to another server, as another user, without touching the app.</p><div class="shots n1"><figure class="shot"><img class="th-d" src="img/where-as-dark.webp" alt="Each environment with its own users" loading="lazy"><img class="th-l" src="img/where-as-light.webp" alt="Each environment with its own users" loading="lazy"><figcaption>Each environment with its own users</figcaption></figure></div>
+
+<h2 id="pick-where-and-who">Pick where and who</h2>
+<p>Click the chip in the header. Pick an <strong>environment</strong> (where requests go) and a <strong>user</strong> under it (who they’re sent as).</p>
+<p><strong>Default</strong> is wherever the app itself sends its calls, as the user you’re logged in as.</p>
+<h2 id="add-an-environment">Add an environment</h2>
+<p><strong>+ Add environment</strong> → name, URL and colour.</p>
+<h2 id="add-a-user">Add a user</h2>
+<p><strong>+ Add user</strong> under an environment → paste a token. The name fills in from the token. Tick <strong>Add current login</strong> to use the account you’re logged in with.</p>
+<h2 id="move-and-copy-users">Move and copy users</h2>
+<p>Drag a user onto another environment, or use <strong>⋯ → Move to / Copy to</strong>.</p>
+<blockquote>
+<p><strong>Good to know:</strong> a user’s token only goes to its own environment, never anywhere else.</p>
+</blockquote><nav class="pn" aria-label="Previous and next"><a class="prev" href="api-docs.html"><span>Previous</span>API docs</a><a class="next" href="testing-tools.html"><span>Next</span>Testing tools</a></nav><footer>RESTless v0.85.1 · <a href="https://github.com/varnica95/restless">GitHub</a></footer></main>
+<aside class="toc" aria-label="On this page"><b>On this page</b><ul><li><a href="#pick-where-and-who">Pick where and who</a></li><li><a href="#add-an-environment">Add an environment</a></li><li><a href="#add-a-user">Add a user</a></li><li><a href="#move-and-copy-users">Move and copy users</a></li></ul></aside></div>
+<script src="site.js"></script></body></html>

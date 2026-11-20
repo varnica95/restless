@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RESTless demo</title>
+<style>
+  body { font: 15px/1.5 system-ui, sans-serif; margin: 0; background: #f4f5f7; color: #1b1d22; }
+  main { max-width: 820px; margin: 32px auto; padding: 0 16px; display: grid; gap: 24px; }
+  section { background: #fff; border-radius: 10px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  h2 { margin: 0 0 4px; font-size: 18px; }
+  p.hint { margin: 0 0 14px; color: #666; font-size: 13px; }
+  form { display: grid; gap: 10px; max-width: 360px; }
+  input { padding: 8px 10px; border: 1px solid #ccd; border-radius: 6px; font: inherit; }
+  button { padding: 9px 14px; border-radius: 6px; border: 0; background: #2f5cff; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; }
+  th { font-size: 12px; text-transform: uppercase; color: #777; letter-spacing: .04em; }
+  #result { font-size: 13px; color: #2a7a3b; }
+</style>
+</head>
+<body>
+<main>
+  <section>
+    <h2>Registration</h2>
+    <p class="hint">Press Ctrl+Shift+K (or ⌖ Inspect in the panel), then click the button. Right-click → “Inspect API call” works too.</p>
+    <form id="reg">
+      <input name="email" type="email" placeholder="Email" value="ana@example.com" required>
+      <input name="name" placeholder="Full name" value="Ana Horvat" required>
+      <input name="password" type="password" placeholder="Password" value="hunter22" required>
+      <button type="submit" data-testid="register">Register</button>
+      <div id="result"></div>
+    </form>
+  </section>
+
+  <section>
+    <h2>Tasks</h2>
+    <p class="hint">Loaded on page load with <code>projectId</code>, <code>status</code> and <code>filters[0].name</code>. Inspect a row the same way.</p>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <input id="search" type="search" placeholder="Search tasks" value="Hyper" style="flex:1">
+      <select id="status" aria-label="Status"><option>Draft</option><option>Active</option></select>
+    </div>
+    <p id="loadstate" style="min-height:20px;margin:0 0 6px;font-size:13px;color:#a15c00"></p>
+    <table id="tasks">
+      <thead><tr><th>ID</th><th>Name</th><th>Status</th><th>Owner</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p><button id="refresh" type="button">Refresh (XHR)</button></p>
+  </section>
+</main>
+<script>
+  const search = document.getElementById('search');
+  const status = document.getElementById('status');
+  const qs = () => new URLSearchParams({ projectId: '42', status: status.value, 'filters[0].name': search.value });
+
+  function render(data) {
+    document.querySelector('#tasks tbody').innerHTML = data.items
+      .map((t) => `<tr><td>${t.id}</td><td>${t.name}</td><td>${t.status}</td><td>${t.owner}</td></tr>`).join('');
+  }
+
+  // A demo JWT shaped like an ASP.NET one (not signed for real), valid for 4 minutes from page load.
+  const b64url = (o) => btoa(JSON.stringify(o)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+  const now = Math.floor(Date.now() / 1000);
+  const TOKEN = [b64url({ alg: 'HS256', typ: 'JWT', kid: 'demo-key-1' }), b64url({
+    sub: 'b7e1c2d4-5a6f-4b8c-9d0e-1f2a3b4c5d6e', name: 'Ana Horvat', email: 'ana@example.com',
+    'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': ['Planner', 'User'],
+    scope: 'tasks.read tasks.write', tenant: 'demo',
+    iss: 'https://login.example.com', aud: 'tasks-api', iat: now - 60, nbf: now - 60, exp: now + 4 * 60,
+  }), 'demo-signature'].join('.');
+  const loadState = (t, bad) => { const el = document.getElementById('loadstate'); el.textContent = t; el.style.color = bad ? '#c62828' : '#a15c00'; };
+  const load = () => {
+    loadState('Loading…');
+    return fetch(`/api/tasks?${qs()}`, { headers: { Authorization: `Bearer ${TOKEN}`, 'X-Tenant': 'demo' } })
+      .then((r) => { if (!r.ok) throw new Error(`server answered ${r.status}`); return r.json(); })
+      .then((d) => { render(d); loadState(''); })
+      .catch((e) => loadState(`Couldn't load tasks: ${e.message}`, true));
+  };
+  load(); // page-load GET via fetch
+
+  // Like React Query / SWR: refetch when the tab becomes visible again
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') load(); });
+
+  // Search-as-you-type (debounced) and status dropdown
+  let t;
+  search.addEventListener('input', () => { clearTimeout(t); t = setTimeout(load, 250); });
+  status.addEventListener('change', load);
+
+  // Polling, like a notifications badge (every 3 s here so the demo fills up quickly)
+  let since = 0;
+  setInterval(() => { fetch(`/api/notifications?since=${since}`).then((r) => r.json()); since += 1; }, 3000);
+
+  // Refresh button via XMLHttpRequest
+  document.getElementById('refresh').addEventListener('click', () => {
+    const x = new XMLHttpRequest();
+    x.open('GET', `/api/tasks?${qs()}`);
+    loadState('Loading…');
+    x.onload = () => {
+      if (x.status >= 400) { loadState(`Couldn't load tasks: server answered ${x.status}`, true); return; }
+      render(JSON.parse(x.responseText)); loadState('');
+    };
+    x.onerror = () => loadState('Couldn\'t load tasks: network error', true);
+    x.send();
+  });
+
+  // Registration POST with a JSON body
+  document.getElementById('reg').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: f.get('email'), name: f.get('name'), password: f.get('password'), marketingOptIn: false }),
+    });
+    const data = await res.json();
+    document.getElementById('result').textContent = `Server: ${res.status} ${JSON.stringify(data.received ?? data)}`;
+  });
+</script>
+</body>
+</html>
