@@ -4922,10 +4922,66 @@
     .rstatsrow.picking { flex-wrap: wrap; row-gap: 8px; }
     .rstatsrow.picking .rstats-t { flex: 1 1 auto; }
     .rstatsrow.picking .ltools { margin-left: auto; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+
+    /* ================= 0.90: variables ================= */
+    .var-sec .var-grp { margin: 0 0 10px; }
+    .var-sec .var-gh { display: flex; align-items: center; gap: 7px; padding: 2px 2px 5px; font-size: 11.5px; font-weight: 600; color: var(--dim); letter-spacing: .02em; }
+    .var-sec .var-cur { font-weight: 400; font-size: 11px; }
+    .var-list { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 8px; }
+    .var-row { display: grid; grid-template-columns: minmax(70px, max-content) minmax(0, 1fr) auto 28px; align-items: center; gap: 10px; min-height: 36px; padding: 0 4px 0 10px; border-bottom: 1px solid var(--line); cursor: pointer; font-size: 12px; }
+    .var-row:first-child { border-radius: 7px 7px 0 0; }
+    .var-row:last-child { border-bottom: 0; border-radius: 0 0 7px 7px; }
+    .var-row:only-child { border-radius: 7px; }
+    .var-row:hover { background: var(--hover); }
+    .var-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .var-row .var-n { color: var(--accent); font-weight: 500; max-width: 18ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .var-row .var-v { color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .var-row .var-note { font-size: 11px; max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .var-row.idle .var-n, .var-row.idle .var-v { opacity: .55; }
+    .var-sec > .pf-edit.var-edit, .var-grp .pf-edit.var-edit { margin: 4px 0 8px; padding: 10px 12px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); display: flex; flex-direction: column; gap: 8px; }
+    .var-edit .env-fld { grid-template-columns: 52px minmax(0, 1fr); }
+    .var-edit select.var-scope { width: 100%; }
+    .var-edit label.chk, .cv-pop label.chk { display: flex; align-items: flex-start; justify-content: flex-start; gap: 8px; font-size: 12px; color: var(--fg); text-align: left; line-height: 1.4; cursor: pointer; }
+    .var-edit label.chk input, .cv-pop label.chk input { flex: none; width: 14px; height: 14px; margin: 1px 0 0; accent-color: var(--accent); }
+    .var-edit .var-srcnote { font-size: 11.5px; }
+    @container rlmain (max-width: 400px) {
+      .var-row { grid-template-columns: minmax(60px, max-content) minmax(0, 1fr) 28px; row-gap: 0; padding-top: 6px; padding-bottom: 6px; }
+      .var-row .var-note { grid-column: 1 / 3; grid-row: 2; max-width: none; }
+      .var-row .newwrap { grid-column: 3; grid-row: 1 / span 2; }
+    }
+    /* {{names}} in editors */
+    .cedit-hl .j-var { color: var(--accent); background: var(--accent-soft); border-radius: 3px; }
+    .cedit-hl .j-var.bad { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); text-decoration: underline wavy var(--bad); text-underline-offset: 3px; }
+    input.var-bad { border-color: var(--bad) !important; box-shadow: 0 0 0 2px color-mix(in srgb, var(--bad) 18%, transparent) !important; }
+    .rq-pathvars { margin: 4px 2px 0; font-size: 11.5px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rq-pathvars.bad { color: var(--bad); }
+    /* autocomplete */
+    .var-ac { position: absolute; z-index: 60; min-width: 220px; max-width: 320px; padding: 4px; background: var(--pop); border: 1px solid var(--line2); border-radius: var(--r-sm); box-shadow: var(--pop-shadow); font-size: 12px; }
+    .var-ac-i { display: flex; align-items: center; gap: 10px; padding: 5px 8px; border-radius: 5px; cursor: pointer; }
+    .var-ac-i.on, .var-ac-i:hover { background: var(--accent-soft); }
+    .var-ac-n { color: var(--accent); font-weight: 500; flex: none; }
+    .var-ac-v { color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: auto; font-size: 11.5px; }
+    .var-ac-foot { padding: 5px 8px 3px; font-size: 11px; border-top: 1px solid var(--line); margin-top: 3px; }
+    /* Save as… */
+    .cv-copy button.cv-btn.cv-save { color: var(--accent); }
+    .cv-pop { position: absolute; right: 8px; z-index: 4; width: min(300px, calc(100% - 16px)); display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: var(--pop); border: 1px solid var(--line2); border-radius: var(--r-lg); box-shadow: var(--pop-shadow); font-size: 12px; }
+    .cv-pop-t { color: var(--dim); }
+    .cv-pop-t .mono { color: var(--fg); }
+    .cv-pop input.pf-tok { height: 30px; padding: 0 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); font-size: 12px; }
+    .cv-pop select.var-scope { height: 30px; }
+    .cv-pop-hint { font-size: 11.5px; min-height: 0; }
+    .cv-pop-hint:empty { display: none; }
+    .cv-pop-hint.bad { color: var(--bad); }
+    .cv-pop-acts { display: flex; align-items: center; gap: 10px; }
+    .cv-pop .btn-sm.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .var-row .var-note:empty { display: none; }
+    @container rlmain (min-width: 401px) { .var-row .var-note:empty { display: block; } }
   `;
 
   // ---------- helpers
   const short = (url) => { try { const u = new URL(url); return u.pathname + u.search; } catch { return url; } };
+  // URLs encode {{ and }}; put them back so {{variables}} read as typed.
+  const keepBraces = (x) => String(x).replace(/%7B%7B/gi, '{{').replace(/%7D%7D/gi, '}}');
   const splitUrl = (url) => { const u = new URL(url); return { base: u.origin + u.pathname, params: [...u.searchParams.entries()] }; };
   const statusCls = (s) => (typeof s === 'number' ? (s < 400 ? 'ok' : 'bad') : s === 'error' ? 'bad' : '');
   const pretty = (text) => { try { return JSON.stringify(JSON.parse(text), null, 2); } catch { return text; } };
@@ -5863,6 +5919,13 @@
     if (docs) out.apiDocs = specApi.exportRecord();
     if (muted) out.stoppedEndpoints = core.mute.list().map((m) => m.key);
     if (pins) out.pinnedEndpoints = core.pins.list();
+    // Variables go with environments: global ones, and each environment's own (by its id, 'default' for
+    // Default). Secret values only with tokens; where they updated from is kept.
+    if (envs) {
+      const vs = (list) => list.map((v) => ({ name: v.name, ...(v.secret ? { secret: true } : {}), ...(!v.secret || tokens ? { value: v.value ?? '' } : {}), ...(v.src ? { src: v.src } : {}) }));
+      const snap = varsApi.snapshot();
+      out.variables = { global: vs(snap.global), environments: Object.fromEntries(Object.entries(snap.env).map(([k, l]) => [k, vs(l)])) };
+    }
     return out;
   }
   // Read and check a file's JSON. Throws a message for the person.
@@ -5879,19 +5942,21 @@
       docs: d.apiDocs && (d.apiDocs.text || d.apiDocs.url) ? d.apiDocs : (('apiDocs' in d) ? null : undefined),
       muted: Array.isArray(d.stoppedEndpoints) ? d.stoppedEndpoints.filter((k) => typeof k === 'string') : null,
       pins: Array.isArray(d.pinnedEndpoints) ? d.pinnedEndpoints.filter((k) => typeof k === 'string') : null,
+      vars: d.variables && typeof d.variables === 'object' ? d.variables : null,
     };
   }
   // Everything an import can change, to put back with Undo.
   function ioSnapshot() {
     return { env: JSON.parse(JSON.stringify(envState)), profiles: core.auth.get().profiles.map((p) => ({ ...p })),
       rules: core.rules.list().map((r) => ({ ...r })), breaks: core.breaks.list().map((b) => ({ ...b })),
-      muted: core.mute.list().map((m) => m.key), pins: core.pins.list(), docs: specApi.exportRecord() };
+      muted: core.mute.list().map((m) => m.key), pins: core.pins.list(), docs: specApi.exportRecord(), vars: varsApi.snapshot() };
   }
   function ioRestore(s) {
     envApi.set({ list: s.env.list, active: s.env.active ?? null, picked: s.env.picked || {} });
     core.auth.set({ profiles: s.profiles });
     core.rules.replace(s.rules); core.breaks.replace(s.breaks); core.mute.replace(s.muted); core.pins.replace(s.pins);
     specApi.importRecord(s.docs);
+    if (s.vars) varsApi.restore(s.vars);
     syncAuth(); renderTab();
   }
   const newId = (pre) => `${pre}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -5927,6 +5992,22 @@
       envApi.set({ list, ...(mode === 'replace' ? { active: null, picked: {} } : {}) });
       core.auth.set({ profiles });
       done.push(plural(fileEnvs.length, 'environment'), plural(nUsers, 'user'));
+      // Variables: global, and each environment's (file ids mapped to the environments made above).
+      if (f.vars) {
+        const snap = mode === 'replace' ? { global: [], env: {} } : varsApi.snapshot();
+        const clean = (l) => (Array.isArray(l) ? l : []).filter((v) => v && VAR_NAME.test(String(v.name || ''))).map((v) => ({ name: String(v.name), value: v.value == null ? '' : String(v.value), ...(v.secret ? { secret: true } : {}), ...(v.src && Array.isArray(v.src.path) ? { src: v.src } : {}) }));
+        const mergeIn = (cur, inc) => { const out = (cur || []).slice(); for (const v of inc) { const i = out.findIndex((x) => x.name === v.name); if (i >= 0) out[i] = { ...out[i], ...v, ...(v.secret && !('value' in v) ? { value: out[i].value } : {}) }; else out.push(v); } return out; };
+        let nVars = 0;
+        const g = clean(f.vars.global); snap.global = mergeIn(snap.global, g); nVars += g.length;
+        for (const [k, l] of Object.entries(f.vars.environments || {})) {
+          const envId = k === 'default' ? null : map.get(k);
+          if (envId === undefined) continue;
+          const key = envId == null ? 'default' : String(envId);
+          const inc = clean(l); snap.env[key] = mergeIn(snap.env[key], inc); nVars += inc.length;
+        }
+        varsApi.restore(snap);
+        if (nVars) done.push(plural(nVars, 'variable'));
+      }
     }
     if (pick.rules && (f.rules || f.breaks)) {
       const merge = (cur, inc, pre) => {
@@ -5979,9 +6060,11 @@
   }
   function openExportSettings() {
     const n = ioNow();
-    const envs = ioOpt('Environments and users', n.envs || n.users ? `${plural(n.envs + 1, 'environment')} (with Default) · ${plural(n.users, 'user')}` : 'Default only, no users');
+    const nv = varsApi.count();
+    const envs = ioOpt('Environments, users and variables', n.envs || n.users || nv ? `${plural(n.envs + 1, 'environment')} (with Default) · ${plural(n.users, 'user')}${nv ? ` · ${plural(nv, 'variable')}` : ''}` : 'Default only, no users');
     const warn = h('span', { class: 'io-warn' }, 'Anyone with the file can send requests as these users.');
-    const tokens = ioOpt('Include tokens', null, { sub: true, disabled: !n.users, note: n.users ? warn : null });
+    const hasSecretVars = [...varsApi.snapshot().global, ...Object.values(varsApi.snapshot().env).flat()].some((v) => v.secret);
+    const tokens = ioOpt('Include tokens', hasSecretVars ? 'and secret variable values' : null, { sub: true, disabled: !n.users && !hasSecretVars, note: n.users || hasSecretVars ? warn : null });
     const rules = ioOpt('Rules', n.rules || n.breaks ? [plural(n.rules, 'rule'), n.breaks ? plural(n.breaks, 'breakpoint') : ''].filter(Boolean).join(' · ') : 'None', { disabled: !n.rules && !n.breaks });
     const docs = ioOpt('API docs', n.docs ? `${docsTitle(n.docs)}${n.docs.text ? '' : ' (link only)'}` : 'Not loaded', { disabled: !n.docs });
     const muted = ioOpt('Stopped endpoints', n.muted ? plural(n.muted, 'endpoint') : 'None', { disabled: !n.muted });
@@ -5990,7 +6073,7 @@
     const drawName = () => { fname.textContent = `restless_settings_${ioStamp()}.json`; };
     drawName();
     const sync = () => {
-      tokens.box.disabled = !envs.box.checked || !n.users; tokens.row.classList.toggle('off', tokens.box.disabled);
+      tokens.box.disabled = !envs.box.checked || (!n.users && !hasSecretVars); tokens.row.classList.toggle('off', tokens.box.disabled);
       warn.hidden = !tokens.box.checked || tokens.box.disabled;
       dlg.ok.disabled = ![envs, rules, docs, muted, pins].some((o) => o.box.checked);
     };
@@ -6025,7 +6108,8 @@
       const users = f.envs.flatMap((e) => (Array.isArray(e.users) ? e.users : []));
       const noTok = users.filter((u) => !u.token).length;
       const named = f.envs.filter((e) => e.id != null).map((e) => e.name).filter(Boolean);
-      opts.envs = ioOpt('Environments and users', `${named.length ? named.join(', ') : 'Default only'} · ${plural(users.length, 'user')}`,
+      const fv = f.vars ? (f.vars.global || []).length + Object.values(f.vars.environments || {}).reduce((a, l) => a + (Array.isArray(l) ? l.length : 0), 0) : 0;
+      opts.envs = ioOpt('Environments, users and variables', `${named.length ? named.join(', ') : 'Default only'} · ${plural(users.length, 'user')}${fv ? ` · ${plural(fv, 'variable')}` : ''}`,
         { note: noTok ? h('span', { class: 'io-warn' }, `${plural(noTok, 'user')} without a token: add it with Edit after importing.`) : null });
       rows.push(opts.envs.row);
     }
@@ -6321,6 +6405,89 @@
         return `<span class="j-num">${m}</span>`;
       });
   }
+  // {{names}} in highlighted editor HTML: purple when there's a value where you send, red when there isn't.
+  function markVars(html) {
+    if (!html.includes('{{')) return html;
+    return html.replace(/\{\{\s*(\$?[A-Za-z_][\w.-]*)\s*\}\}/g, (m, k) => `<span class="j-var${varsApi.lookup(k) ? '' : ' bad'}">${m}</span>`);
+  }
+  // Variable help on a text field: typing {{ lists the variables (value or what a built-in does), filtered as
+  // you type; ↑ ↓ to move, Enter or Tab to pick, Esc to close. Fields also get a tooltip with what their
+  // {{names}} turn into, and a red outline while one has no value.
+  let varAcEl = null;
+  function closeVarAc() { varAcEl?.remove(); varAcEl = null; }
+  function varAssist(el, { onPick = null } = {}) {
+    let items = []; let at = 0; let from = -1;
+    const isTa = el.tagName === 'TEXTAREA';
+    const tip = () => {
+      if (isTa) return;
+      const v = el.value;
+      if (!v.includes('{{')) { el.classList.remove('var-bad'); if (el.dataset.vtip) { el.title = ''; delete el.dataset.vtip; } return; }
+      const miss = varsApi.unknown(v);
+      el.classList.toggle('var-bad', miss.length > 0);
+      el.title = miss.length ? `No variable ${miss.map((x) => `{{${x}}}`).join(', ')} in ${envApi.active().name}` : `Sent as: ${varsApi.fill(v)}`;
+      el.dataset.vtip = '1';
+    };
+    const place = () => {
+      if (!varAcEl || !dockEl) return;
+      const r = el.getBoundingClientRect(); const dr = dockEl.getBoundingClientRect();
+      let top = r.bottom - dr.top + 2; let left = r.left - dr.left;
+      if (isTa) {
+        // Near the caret: line and column of {{ in a monospace field.
+        const cs = getComputedStyle(el);
+        const lh = parseFloat(cs.lineHeight) || 18;
+        const before = el.value.slice(0, from);
+        const line = before.split('\n').length - 1; const col = before.length - before.lastIndexOf('\n') - 1;
+        const cw = (() => { const c = document.createElement('canvas').getContext('2d'); c.font = `${cs.fontSize} ${cs.fontFamily}`; return c.measureText('0').width || 7; })();
+        top = r.top - dr.top + parseFloat(cs.paddingTop) + (line + 1) * lh - el.scrollTop + 2;
+        left = r.left - dr.left + parseFloat(cs.paddingLeft) + col * cw - el.scrollLeft;
+      }
+      varAcEl.style.top = `${Math.round(Math.min(top, dr.height - 40))}px`;
+      varAcEl.style.left = `${Math.round(Math.max(4, Math.min(left, dr.width - 240)))}px`;
+    };
+    const draw = () => {
+      if (!items.length) { closeVarAc(); return; }
+      if (!varAcEl) { varAcEl = h('div', { class: 'var-ac ui', role: 'listbox', 'aria-label': 'Variables' }); dockEl.append(varAcEl); }
+      varAcEl.replaceChildren(...items.map((v, i) => h('div', { class: `var-ac-i${i === at ? ' on' : ''}`, role: 'option', 'aria-selected': String(i === at),
+        onmousedown: (e) => { e.preventDefault(); at = i; pick(); } },
+      h('span', { class: 'mono var-ac-n' }, v.name),
+      h('span', { class: `var-ac-v${v.builtin ? ' muted' : ''}` }, v.secret ? '••••••' : v.builtin ? v.value : (String(v.value).slice(0, 40) || '(empty)')))));
+      if (varsApi.count() === 0) varAcEl.append(h('div', { class: 'var-ac-foot muted' }, 'Add your own under Rules → Variables'));
+      place();
+    };
+    const update = () => {
+      const c = el.selectionStart; const before = el.value.slice(0, c);
+      const m = /\{\{\s*(\$?[\w.-]*)$/.exec(before);
+      if (!m || document.activeElement !== el && el.getRootNode().activeElement !== el) { items = []; closeVarAc(); return; }
+      from = m.index;
+      const q = m[1].toLowerCase();
+      items = varsApi.names().filter((v) => v.name.toLowerCase().includes(q)).sort((a, b) => (b.name.toLowerCase().startsWith(q) ? 1 : 0) - (a.name.toLowerCase().startsWith(q) ? 1 : 0)).slice(0, 8);
+      at = Math.min(at, Math.max(0, items.length - 1));
+      draw();
+    };
+    const pick = () => {
+      const v = items[at]; if (!v) return;
+      const c = el.selectionStart;
+      const after = el.value.slice(c);
+      const close = /^\s*\}\}/.exec(after);
+      el.focus();
+      el.setSelectionRange(from, c + (close ? close[0].length : 0));
+      const text = `{{${v.name}}}`;
+      if (!document.execCommand('insertText', false, text)) { el.setRangeText(text, from, c + (close ? close[0].length : 0), 'end'); el.dispatchEvent(new Event('input', { bubbles: true })); }
+      items = []; closeVarAc(); tip(); onPick?.();
+    };
+    el.addEventListener('input', () => { update(); tip(); });
+    el.addEventListener('keydown', (e) => {
+      if (!varAcEl || !items.length) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); e.stopImmediatePropagation(); at = (at + 1) % items.length; draw(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); e.stopImmediatePropagation(); at = (at - 1 + items.length) % items.length; draw(); }
+      else if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); e.stopImmediatePropagation(); pick(); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); items = []; closeVarAc(); }
+    }, true);
+    el.addEventListener('blur', () => setTimeout(() => { if (el.getRootNode().activeElement !== el) { items = []; closeVarAc(); } }, 120));
+    el.addEventListener('scroll', () => { if (varAcEl) place(); });
+    requestAnimationFrame(tip);
+    return el;
+  }
   // A textarea with JSON colours behind it (a highlighted <pre> under a transparent textarea, kept
   // in sync), and JSON-friendly typing when isJson() says so: Enter keeps the indent (one more
   // after { or [, and } or ] on their own line), a closing } or ] on an empty line steps back,
@@ -6332,7 +6499,9 @@
     area.classList.add('cedit-ta');
     const paint = () => {
       const v = area.value;
-      if (isJson() && v.length < 200000) setHTML(hl, `${highlightJson(v)}\n`); else hl.textContent = `${v}\n`;
+      if (isJson() && v.length < 200000) setHTML(hl, `${markVars(highlightJson(v))}\n`);
+      else if (v.includes('{{') && v.length < 200000) setHTML(hl, `${markVars(escapeHtml(v))}\n`);
+      else hl.textContent = `${v}\n`;
       hl.scrollTop = area.scrollTop; hl.scrollLeft = area.scrollLeft;
     };
     const insert = (text) => {
@@ -6411,6 +6580,7 @@
       const { scrollTop } = area;
       area.value = f; changed(); area.scrollTop = scrollTop;
     });
+    varAssist(area);
     paint();
     return { el: wrap, paint };
   }
@@ -6538,7 +6708,7 @@
   // Editor-like JSON view: line numbers, indentation guides and folding ({ … } / [ … ]) on top of the
   // same highlighting. Line numbers are drawn by CSS, so search marks and copying only see the code.
   const CODE_MAX_LINES = 20000;
-  function codeView(text, { wrap = false } = {}) {
+  function codeView(text, { wrap = false, saveVar = null } = {}) {
     const lines = text.split('\n');
     if (lines.length > CODE_MAX_LINES || text.length > 400000) {
       const pre = h('pre', { class: `resp-pre${wrap ? ' wrap' : ''}` });
@@ -6574,7 +6744,24 @@
         el.classList.toggle('hid', n > 0);
       }
     });
-    return withLineCopy(box, lines, end);
+    return withLineCopy(box, lines, end, saveVar);
+  }
+  // The JSON path of every line of pretty JSON (null for closing lines): ['data', 'id'], ['items', 0].
+  function linePaths(lines) {
+    const out = []; const stack = [];
+    for (const line of lines) {
+      const t = line.trim();
+      if (/^[}\]]/.test(t)) { stack.pop(); out.push(null); continue; }
+      const m = /^"((?:\\.|[^"\\])*)"\s*:\s?(.*)$/.exec(t);
+      const parent = stack[stack.length - 1];
+      let seg = null;
+      if (parent) seg = parent.arr ? parent.n++ : (() => { try { return JSON.parse(`"${m ? m[1] : ''}"`); } catch { return m ? m[1] : ''; } })();
+      const path = parent ? [...parent.path, seg] : [];
+      out.push(path);
+      const rest = (m ? m[2] : t).replace(/,$/, '').trim();
+      if (rest === '{' || rest === '[') stack.push({ path, arr: rest === '[', n: 0 });
+    }
+    return out;
   }
 
   // Hovering a JSON line shows a small "Value · Key + value" chip at the right edge of the view.
@@ -6593,8 +6780,9 @@
     if (raw.startsWith('"')) { try { value = JSON.parse(raw); } catch { /* keep as shown */ } }
     return { key, raw, value: String(value), pair: key ? `${key}: ${raw}` : null };
   }
-  function withLineCopy(box, lines, end) {
+  function withLineCopy(box, lines, end, saveVar = null) {
     const wrap = h('div', { class: 'cv-wrap' }, box);
+    const paths = saveVar ? linePaths(lines) : null;
     let bar = null; let cur = null;
     const hide = () => { if (bar) bar.hidden = true; cur = null; };
     const copy = async (btn, text, label) => {
@@ -6604,7 +6792,10 @@
     const make = () => {
       const val = h('button', { type: 'button', class: 'cv-btn', onclick: () => cur && copy(val, cur.value, 'Value') }, 'Value');
       const pair = h('button', { type: 'button', class: 'cv-btn', onclick: () => cur && copy(pair, cur.pair, 'Key + value') }, 'Key + value');
-      bar = h('div', { class: 'cv-copy', onmouseleave: (e) => { if (!wrap.contains(e.relatedTarget)) hide(); } }, val, pair);
+      // Save as…: make this value a variable ({{name}}), optionally kept up to date from this endpoint.
+      const sv = saveVar ? h('button', { type: 'button', class: 'cv-btn cv-save', title: 'Save this value as a variable to use as {{name}}',
+        onclick: () => { if (cur) saveVar({ path: cur.path, value: cur.json, key: cur.key ? JSON.parse(cur.key) : null, anchor: wrap, top: bar.style.top }); } }, 'Save as…') : null;
+      bar = h('div', { class: 'cv-copy', onmouseleave: (e) => { if (!wrap.contains(e.relatedTarget)) hide(); } }, val, pair, sv);
       bar.val = val; bar.pair = pair;
       bar.hidden = true;
       wrap.append(bar);
@@ -6612,8 +6803,10 @@
     box.addEventListener('mouseover', (e) => {
       const line = e.target.closest?.('.cl');
       if (!line || !box.contains(line)) return;
-      const entry = lineEntry(lines, end, Number(line.dataset.n) - 1);
+      const idx = Number(line.dataset.n) - 1;
+      const entry = lineEntry(lines, end, idx);
       if (!entry) { hide(); return; }
+      if (paths) { entry.path = paths[idx]; try { entry.json = JSON.parse(entry.raw); } catch { entry.json = entry.value; } }
       if (!bar) make();
       cur = entry;
       bar.val.textContent = 'Value'; bar.pair.textContent = 'Key + value';
@@ -6648,7 +6841,7 @@
     try { f.srcdoc = ttPolicy ? ttPolicy.createHTML(doc) : doc; return f; } catch { /* Trusted Types without our policy */ }
     return h('div', { class: 'muted rv-empty' }, 'This page\'s security policy doesn\'t allow a preview here. Use Raw, or copy the HTML.');
   }
-  function responseView(res, { highlight = null, above = [], pretty: prettyNode = null, title = null, state = {}, tools = [], bare = false, baseUrl = null } = {}) {
+  function responseView(res, { highlight = null, above = [], pretty: prettyNode = null, title = null, state = {}, tools = [], bare = false, baseUrl = null, saveVar = null } = {}) {
     const isJsonBody = core.isJson(res.text || '');
     const canPreview = !isJsonBody && !!(res.text || '').trim() && isHtmlResponse(res);
     if (!state.view || (state.view === 'preview' && !canPreview)) state.view = highlight && prettyNode ? 'raw' : canPreview && !highlight ? 'preview' : 'pretty';
@@ -6688,7 +6881,7 @@
       if (state.view === 'pretty' && prettyNode) { out.replaceChildren(prettyNode); return; }
       let view;
       // When Pretty is the error explained, Raw shows the JSON formatted (it's usually one long line).
-      if (text && isJsonBody && (state.view === 'pretty' || prettyNode)) view = codeView(pretty(text), { wrap: state.wrap });
+      if (text && isJsonBody && (state.view === 'pretty' || prettyNode)) view = codeView(pretty(text), { wrap: state.wrap, saveVar });
       else {
         view = h('pre', { class: `resp-pre${state.wrap ? ' wrap' : ''}` });
         view.textContent = text || '(empty body)';
@@ -7343,6 +7536,208 @@
     core.auth.set({ profiles });
   })();
   syncAuth();
+
+  // ---------- Variables: {{name}} in a request's path, params, headers and body.
+  // Global ones apply everywhere; an environment's own ones apply while you send to it and win over a
+  // global one with the same name. Saved for this site, like environments and users. A variable can
+  // keep itself up to date from a response (src: which request and which JSON path; see "Save as…").
+  // Built-ins need no setup: {{$uuid}}, {{$timestamp}} (Unix seconds), {{$now}} (ISO time), {{$randomInt}}.
+  const VARS_KEY = '__apiPeek.vars';
+  const VAR_NAME = /^[A-Za-z_][\w.-]{0,63}$/;
+  const VAR_RE = /\{\{\s*(\$?[A-Za-z_][\w.-]*)\s*\}\}/g;
+  const BUILTINS = {
+    $uuid: { d: 'A new random UUID', v: () => uuid() },
+    $timestamp: { d: 'Now, in Unix seconds', v: () => String(Math.floor(Date.now() / 1000)) },
+    $now: { d: 'Now, as an ISO date and time', v: () => new Date().toISOString() },
+    $randomInt: { d: 'A random number from 0 to 1000', v: () => String(Math.floor(Math.random() * 1001)) },
+  };
+  let varState = (() => { try { const v = JSON.parse(localStorage.getItem(VARS_KEY) || '{}'); return { global: Array.isArray(v.global) ? v.global : [], env: v.env && typeof v.env === 'object' ? v.env : {} }; } catch { return { global: [], env: {} }; } })();
+  const scopeKey = (envId) => (envId == null ? 'default' : String(envId));
+  const varsApi = {
+    // scope: 'global', or an environment id (null = Default)
+    list(scope) { return scope === 'global' ? varState.global : varState.env[scopeKey(scope)] || []; },
+    count() { return varState.global.length + Object.values(varState.env).reduce((n, l) => n + l.length, 0); },
+    save() { try { localStorage.setItem(VARS_KEY, JSON.stringify(varState)); } catch { /* storage blocked */ } },
+    put(scope, list) {
+      if (scope === 'global') varState = { ...varState, global: list };
+      else { const env = { ...varState.env }; if (list.length) env[scopeKey(scope)] = list; else delete env[scopeKey(scope)]; varState = { ...varState, env }; }
+      varsApi.save(); varsChanged();
+    },
+    get(scope, name) { return varsApi.list(scope).find((v) => v.name === name) || null; },
+    // Add or change one (by name). patch.name renames it.
+    set(scope, name, patch) {
+      const list = varsApi.list(scope).slice();
+      const i = list.findIndex((v) => v.name === name);
+      const next = { ...(i >= 0 ? list[i] : { name, value: '' }), ...patch };
+      if (i >= 0) list[i] = next; else list.push(next);
+      varsApi.put(scope, list);
+      return next;
+    },
+    remove(scope, name) { varsApi.put(scope, varsApi.list(scope).filter((v) => v.name !== name)); },
+    snapshot() { return JSON.parse(JSON.stringify(varState)); },
+    restore(snap) { varState = JSON.parse(JSON.stringify(snap)); varsApi.save(); varsChanged(); },
+    // What {{name}} is when sending to env: { value, scope, secret } or null.
+    lookup(name, env = envApi.active()) {
+      if (BUILTINS[name]) return { value: null, scope: 'builtin', builtin: true };
+      const own = varsApi.get(env?.id ?? null, name);
+      if (own) return { value: own.value ?? '', scope: env?.id ?? null, secret: !!own.secret, v: own };
+      const g = varsApi.get('global', name);
+      return g ? { value: g.value ?? '', scope: 'global', secret: !!g.secret, v: g } : null;
+    },
+    value(name, env) { return BUILTINS[name] ? BUILTINS[name].v() : varsApi.lookup(name, env)?.value ?? null; },
+    // Names usable while sending to env, for autocomplete: environment ones first, then global, then built-ins.
+    names(env = envApi.active()) {
+      const seen = new Set(); const out = [];
+      for (const [list, scope] of [[varsApi.list(env?.id ?? null), env?.id ?? null], [varState.global, 'global']]) {
+        for (const v of list) if (!seen.has(v.name)) { seen.add(v.name); out.push({ name: v.name, value: v.value ?? '', secret: !!v.secret, scope }); }
+      }
+      for (const [k, b] of Object.entries(BUILTINS)) out.push({ name: k, value: b.d, builtin: true, scope: 'builtin' });
+      return out;
+    },
+    // Unknown {{names}} in a text (built-ins and known variables don't count).
+    unknown(text, env) {
+      const out = new Set();
+      String(text ?? '').replace(VAR_RE, (m, k) => { if (!varsApi.lookup(k, env)) out.add(k); return m; });
+      return [...out];
+    },
+    // Fill {{names}} in plain text. Unknown ones stay as they are.
+    fill(text, env) {
+      if (text == null) return text;
+      return String(text).replace(VAR_RE, (m, k) => { const v = varsApi.value(k, env); return v == null ? m : String(v); });
+    },
+    // Fill a JSON body: inside a string the value is escaped for JSON; outside a string it goes in as is
+    // when it's a number, true/false/null or JSON, else as a JSON string. So "id": {{orderId}} and
+    // "note": "Order {{orderId}}" both work.
+    fillJson(text, env) {
+      if (text == null || !String(text).includes('{{')) return text;
+      const t = String(text); let out = ''; let inStr = false;
+      for (let i = 0; i < t.length; i++) {
+        const c = t[i];
+        if (inStr && c === '\\') { out += c + (t[i + 1] ?? ''); i++; continue; }
+        if (c === '"') { inStr = !inStr; out += c; continue; }
+        if (c === '{' && t[i + 1] === '{') {
+          VAR_RE.lastIndex = i;
+          const m = VAR_RE.exec(t);
+          if (m && m.index === i) {
+            const v = varsApi.value(m[1], env);
+            if (v == null) out += m[0];
+            else if (inStr) out += JSON.stringify(String(v)).slice(1, -1);
+            else out += core.isJson(String(v).trim()) ? String(v).trim() : JSON.stringify(String(v));
+            i += m[0].length - 1;
+            continue;
+          }
+        }
+        out += c;
+      }
+      VAR_RE.lastIndex = 0;
+      return out;
+    },
+    // JSON check that accepts bare {{names}} (they're filled in before sending).
+    jsonOk(text) { return core.isJson(String(text ?? '').replace(/("(?:\\.|[^"\\])*")|\{\{\s*\$?[A-Za-z_][\w.-]*\s*\}\}/g, (m, str) => str || '0')); },
+  };
+  const varsListeners = new Set();
+  function varsChanged() { varsListeners.forEach((fn) => { try { fn(); } catch { /* ignore */ } }); }
+  // Read a value at a JSON path (['data', 'id'], ['items', 0, 'name']) of a response text.
+  function valueAtPath(text, path) {
+    let v; try { v = JSON.parse(text); } catch { return undefined; }
+    for (const k of path) { if (v == null || typeof v !== 'object') return undefined; v = v[k]; }
+    return v;
+  }
+  // The Variables section's state (Rules tab): which row is being edited, or a new one being added.
+  const varsUi = { editing: null, add: null, scrollTo: false };
+  // Open Rules → Variables, optionally with a new one started (add: { name, scope }).
+  function openVariables({ add = null } = {}) {
+    varsUi.add = add; varsUi.editing = null; varsUi.scrollTo = true;
+    dock.tab = 'rules'; ss.set('__apiPeek.tab', 'rules');
+    renderTab();
+  }
+  // "Save as…" on a response line: a small card under the line. Name (from the key), where (Global or an
+  // environment; the one you send to when there are environments), and "Update from every response" (on),
+  // which keeps the variable in step with this endpoint (see varsFromResponse).
+  function openSaveVar({ path, value, key, anchor, top, method, url }) {
+    anchor.querySelector('.cv-pop')?.remove();
+    const guess = String(typeof key === 'string' ? key : [...(path || [])].reverse().find((k) => typeof k === 'string') || 'value')
+      .replace(/[^\w.-]/g, '_').replace(/^[^A-Za-z_]+/, '') || 'value';
+    const cur = envApi.active();
+    let scope = envState.list.length ? cur.id ?? null : 'global';
+    const nameIn = h('input', { class: 'pf-tok mono', value: guess, 'aria-label': 'Variable name', spellcheck: 'false', maxlength: '64' });
+    const pick = envState.list.length ? scopeSelect(scope, (x) => { scope = x; note(); }) : null;
+    let pathname = url; try { pathname = new URL(url, location.href).pathname; } catch { /* keep */ }
+    const label = `${method} ${pathname}`;
+    const auto = h('input', { type: 'checkbox', checked: true });
+    const hint = h('div', { class: 'muted cv-pop-hint' });
+    const note = () => {
+      const name = nameIn.value.trim();
+      const ex = VAR_NAME.test(name) ? varsApi.get(scope, name) : null;
+      hint.textContent = !VAR_NAME.test(name) ? 'Use letters, digits, _ . or -, starting with a letter or _.' : ex ? `Replaces {{${name}}} (now ${ex.secret ? 'hidden' : `“${String(ex.value).slice(0, 40)}”`}).` : '';
+      hint.classList.toggle('bad', !VAR_NAME.test(name));
+    };
+    nameIn.addEventListener('input', note);
+    const close = () => pop.remove();
+    const save = () => {
+      const name = nameIn.value.trim();
+      if (!VAR_NAME.test(name)) { note(); nameIn.focus(); return; }
+      let k; try { k = core.matchKey(url); } catch { k = null; }
+      varsApi.set(scope, name, { value: varText(value), src: auto.checked && k ? { method, key: k, path, label } : undefined });
+      close();
+      toast(`Saved {{${name}}}${scope === 'global' ? '' : ` in ${envApi.byId(scope).name}`}`, '', 4000, { label: 'Show', run: () => openVariables() });
+    };
+    const pop = h('div', { class: 'cv-pop', role: 'dialog', 'aria-label': 'Save as variable',
+      onkeydown: (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { e.preventDefault(); save(); } } },
+    h('div', { class: 'cv-pop-t' }, 'Save ', h('span', { class: 'mono' }, pathLabel(path || [])), ' as'),
+    nameIn,
+    pick,
+    h('label', { class: 'chk' }, auto, h('span', {}, `Update from every response of ${label}`)),
+    hint,
+    h('div', { class: 'cv-pop-acts' }, h('button', { type: 'button', class: 'btn-sm primary', onclick: save }, 'Save'), h('button', { type: 'button', class: 'linkbtn', onclick: close }, 'Cancel')));
+    pop.style.top = `calc(${top} + 30px)`;
+    anchor.append(pop);
+    note();
+    requestAnimationFrame(() => { nameIn.focus(); nameIn.select(); pop.scrollIntoView({ block: 'nearest' }); });
+  }
+  // Variables that keep themselves updated (v.src): when a response comes from their endpoint (your Run or
+  // the app's own call), read the value at their JSON path. An environment's variable only takes
+  // responses from that environment; a global one from anywhere. Returns the names that changed.
+  function varsFromResponse(method, url, text, envId) {
+    if (!text || !varsApi.count()) return [];
+    let key; try { key = core.matchKey(url); } catch { return []; }
+    const changed = [];
+    const scopes = ['global', ...envApi.all().map((e) => e.id ?? null)];
+    for (const sc of scopes) {
+      if (sc !== 'global' && (sc ?? null) !== (envId ?? null)) continue;
+      for (const v of varsApi.list(sc)) {
+        if (!v.src || v.src.method !== method || v.src.key !== key) continue;
+        const got = valueAtPath(text, v.src.path);
+        if (got === undefined) continue;
+        const val = varText(got);
+        if (val !== v.value) { varsApi.set(sc, v.name, { value: val }); changed.push(v.name); }
+      }
+    }
+    return changed;
+  }
+  // The app's own calls feed them too, once each, when their response is in.
+  const varsSeen = new WeakSet();
+  core.subscribe(() => {
+    if (!varsApi.count()) return;
+    for (let i = core.state.requests.length - 1, n = 0; i >= 0 && n < 50; i--, n++) {
+      const r = core.state.requests[i];
+      if (varsSeen.has(r) || r.manual || r.dryRun || r.responseText == null || typeof r.status !== 'number') continue;
+      varsSeen.add(r);
+      if (r.status < 400) varsFromResponse(r.method, r.url, r.responseText, envOfUrl(r.url)?.id ?? null);
+    }
+  });
+  const pathLabel = (path) => path.reduce((s, k) => (typeof k === 'number' ? `${s}[${k}]` : s ? `${s}.${k}` : String(k)), '') || '(whole response)';
+  // A <select> of where a variable lives: Global, then each environment. onPick gets 'global' or an env id (null = Default).
+  function scopeSelect(scope, onPick) {
+    const val = (sc) => (sc === 'global' ? 'global' : `e:${sc ?? ''}`);
+    const sel = h('select', { class: 'var-scope', 'aria-label': 'Where',
+      onchange: () => { const x = sel.value; onPick(x === 'global' ? 'global' : x.slice(2) === '' ? null : x.slice(2)); } },
+    h('option', { value: 'global', selected: scope === 'global' }, 'Global: every environment'),
+    ...envApi.all().map((e) => h('option', { value: val(e.id ?? null), selected: scope !== 'global' && (scope ?? null) === (e.id ?? null) }, e.name)));
+    return sel;
+  }
+  const varText = (v) => (v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v));
+
   // Production in red, staging in amber, the rest in blue; App stays neutral.
   const envTone = (env) => (!env || env.id == null ? 'local' : /prod|live/i.test(`${env.name} ${env.url}`) ? 'prod' : /stag|uat|pre/i.test(`${env.name} ${env.url}`) ? 'stage' : 'dev');
   const hostOf = (s) => { try { return new URL(s).host; } catch { return s; } };
@@ -7509,6 +7904,8 @@
         // {{projectId}}: copy the request's query param with that name
         const k = kind.toLowerCase();
         if (k in ctx.refs) return ctx.refs[k];
+        const uv = varsApi.value(kind); // your variables work here too
+        if (uv != null) return uv;
         ctx.unknown.add(kind);
         return '';
       }
@@ -7666,7 +8063,7 @@
   };
   const tabLabel = (d) => {
     if (d.entry.manual && d.entry.status === 'draft' && /^\/api\/?$/.test(tabPath(d))) return 'New request';
-    const segs = tabPath(d).split('/').filter(Boolean);
+    const segs = keepBraces(tabPath(d)).split('/').filter(Boolean);
     return segs.length ? `/${segs.slice(-2).join('/')}` : '/';
   };
   // Briefly highlight a tab (opened in the background, or already open) and scroll it into view.
@@ -7746,21 +8143,36 @@
     const hasBody = () => !NO_BODY(draft.method);
     const kind = () => entry.bodyKind || 'json'; // a body added to a call that had none is JSON
     const pathOnly = !entry.manual || retargetable(entry.url); // a request to a known host shows just its path
-    const sentPath = pathOnly ? u.pathname : u.origin + u.pathname;
-    const target = () => new URL(draft.path || '/', u.origin); // path field accepts "/path" or a full URL
+    const sentPath = keepBraces(pathOnly ? u.pathname : u.origin + u.pathname);
+    // The path field accepts "/path" or a full URL, with {{variables}} filled for env (the one you send to).
+    // raw keeps the {{names}} (for Duplicate and the like).
+    const target = (env, raw = false) => new URL(raw ? draft.path || '/' : varsApi.fill(draft.path || '/', env ?? runEnv()), u.origin);
     const routeEdited = () => draft.method !== entry.method || (() => { try { const t = target(); return t.origin !== u.origin || t.pathname !== u.pathname; } catch { return true; } })();
 
     // header: method + path are editable
     const METHOD_LIST = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
     const methodSel = h('select', { class: `msel2 mtone ${draft.method}`, 'aria-label': 'Method', title: 'Method to send' },
       [...new Set([...METHOD_LIST, entry.method])].map((m) => h('option', { value: m, selected: draft.method === m }, m)));
-    const pathIn = h('input', { class: 'rq-path-in mono', value: draft.path, spellcheck: 'false', 'aria-label': 'Path', title: 'Path to send to. A full URL sends it to another host.' });
+    const pathIn = varAssist(h('input', { class: 'rq-path-in mono', value: draft.path, spellcheck: 'false', 'aria-label': 'Path', title: 'Path to send to. A full URL sends it to another host. {{name}} uses a variable.' }));
     const editedTag = h('span', { class: 'tag rw', title: 'You changed the method or path' }, 'edited');
     const undoRoute = h('button', { type: 'button', class: 'urlundo', title: 'Undo method and path changes', 'aria-label': 'Undo method and path changes', onclick: () => {
       draft.method = entry.method; draft.path = sentPath;
       methodSel.value = draft.method; pathIn.value = draft.path; onRoute();
     } }, '↺');
     const pathErr = h('div', { class: 'valid bad rq-patherr', hidden: true }, 'Not a valid path or URL.');
+    // With {{variables}} in the path: where it really goes (or which variable has no value).
+    const pathVars = h('div', { class: 'rq-pathvars mono', hidden: true });
+    function drawPathVars() {
+      const p = draft.path || '';
+      if (!p.includes('{{')) { pathVars.hidden = true; return; }
+      const miss = varsApi.unknown(p);
+      pathVars.hidden = false;
+      pathVars.classList.toggle('bad', miss.length > 0);
+      if (miss.length) { pathVars.textContent = `No variable ${miss.map((x) => `{{${x}}}`).join(', ')} in ${envApi.active().name}`; return; }
+      let shown = varsApi.fill(p); try { const t = target(); shown = t.origin === u.origin && !/^https?:/i.test(varsApi.fill(p)) ? t.pathname : t.href; } catch { /* keep */ }
+      pathVars.textContent = `→ ${keepBraces(shown)}`;
+    }
+    requestAnimationFrame(drawPathVars);
     function onRoute() {
       methodSel.className = `msel2 mtone ${draft.method}`;
       const edited = routeEdited();
@@ -7769,6 +8181,7 @@
       let ok = true;
       try { target(); } catch { ok = false; }
       pathErr.hidden = ok;
+      drawPathVars();
       drawTabs?.();
       if (d.tab === 'body') drawPane?.();
     }
@@ -7828,6 +8241,7 @@
     const head = h('div', { class: 'rq-head' },
       h('div', { class: 'rq-bar' }, (() => { const c = h('span', { class: 'mselchev', 'aria-hidden': 'true' }); setHTML(c, ICONS.chev); return h('span', { class: 'mselwrap' }, methodSel, c); })(), urlBox, runSlot, menuSlot),
       pathErr,
+      pathVars,
       metaRight,
       original,
       d.notice ? h('div', { class: 'rq-note notice' }, h('span', { style: 'flex:1' }, d.notice),
@@ -7983,8 +8397,8 @@
             onchange: (e) => { p.off = !e.target.checked; draw(); opts.onChange?.(); } });
           const key = h('input', { class: 'kv-in kv-key', value: p[0], placeholder: opts.keyPlaceholder, spellcheck: 'false', 'aria-label': `${opts.keyLabel} ${i + 1}`,
             oninput: (e) => { p[0] = e.target.value; opts.onChange?.(); } });
-          const val = h('input', { class: `kv-in kv-val${secret && !p.shown ? ' masked' : ''}`, value: p[1], placeholder: 'value', spellcheck: 'false', 'aria-label': `${opts.valueLabel} for ${p[0] || `row ${i + 1}`}`,
-            oninput: (e) => { p[1] = e.target.value; opts.onChange?.(); } });
+          const val = varAssist(h('input', { class: `kv-in kv-val${secret && !p.shown ? ' masked' : ''}`, value: p[1], placeholder: 'value', spellcheck: 'false', 'aria-label': `${opts.valueLabel} for ${p[0] || `row ${i + 1}`}`,
+            oninput: (e) => { p[1] = e.target.value; opts.onChange?.(); } }));
           const edit = iconBtn('pencil', `Edit ${p[0] || 'value'}`, () => { val.focus(); val.select(); }, 'kv-edit');
           const remove = iconBtn('trash', `Remove ${p[0] || 'row'}`, () => { list.splice(i, 1); draw(); opts.onChange?.(); }, 'danger kv-del');
           const row = h('div', { class: `kvt-row${p.off ? ' off' : ''}`, role: 'row' }, h('span', { class: 'kv-check' }, on), key, val,
@@ -8030,6 +8444,7 @@
         placeholder: 'page:1',
         style: 'min-height:180px',
       });
+      varAssist(area);
       const areaStatus = h('div', { class: 'muted', style: 'margin-top:4px;font-size:11.5px' });
       area.addEventListener('input', () => {
         const { params: parsed, bad } = parseTextLines(area.value, parseBulk);
@@ -8080,9 +8495,9 @@
       const check = () => {
         if (kind() !== 'json') return;
         if (!area.value.trim()) { valid.className = 'valid'; valid.textContent = 'empty: sent without a body'; return; }
-        const ok = core.isJson(area.value);
+        const ok = varsApi.jsonOk(area.value);
         valid.className = `valid ${ok ? 'ok' : 'bad'}`;
-        valid.textContent = ok ? 'valid JSON' : 'invalid JSON';
+        valid.textContent = ok ? (/\{\{/.test(area.value) ? 'valid JSON (with variables)' : 'valid JSON') : 'invalid JSON';
       };
       const ed = codeEditor(area, { isJson: () => kind() === 'json', onChange: () => { draft.body = area.value; check(); } });
       check();
@@ -8125,7 +8540,7 @@
           blocked.length ? `Browsers don't let pages set ${blocked.join(', ')}; ${blocked.length === 1 ? 'it' : 'they'} will be ignored.` : '',
         ].filter(Boolean).join(' ');
       };
-      const area = h('textarea', { spellcheck: 'false', placeholder: 'Accept: application/json', style: 'min-height:180px' });
+      const area = varAssist(h('textarea', { spellcheck: 'false', placeholder: 'Accept: application/json', style: 'min-height:180px' }));
       const areaStatus = h('div', { class: 'muted', style: 'margin-top:4px;font-size:11.5px' });
       area.addEventListener('input', () => {
         const { params: parsed, bad } = parseTextLines(area.value, parseHeaderText);
@@ -8297,6 +8712,7 @@
         if (!d.respView) d.respView = {};
         const viewState = d.respView[src] || (d.respView[src] = {});
         return responseView(one.res, {
+          saveVar: (info) => openSaveVar({ ...info, method: sentM, url: sentU }),
           highlight: d.highlight, above: [auth], state: viewState, title: prob ? prob.title || 'Error' : null, bare: true, baseUrl: sentU,
           pretty: prob ? problemCard(one.res, prob, ctx) : null, tools: [srcSeg, cmpBtn],
         });
@@ -8358,7 +8774,8 @@
     // A failed send still opens the comparison, with the error in place of B's response.
     async function runOnEnv(env) {
       if (!routeOk() || !headersOk() || !bodyOk()) { say('Fix the request first.', 'warn'); return; }
-      const req = current();
+      if (!varsReady(env)) return;
+      const req = current(env);
       const sendUrl = retarget(req.url, env);
       const eid = env.id ?? 'local';
       say(`Sending to ${env.name}…`);
@@ -8551,6 +8968,7 @@
     // ---------- Run as every user: the same request once per user (Where & as), statuses side by side.
     async function runAsEveryUser() {
       if (!routeOk() || !headersOk() || !bodyOk()) { say('Fix the request first.', 'warn'); return; }
+      if (!varsReady()) return;
       const req = current();
       const env = runEnv();
       const sendUrl = retarget(req.url, env);
@@ -9599,18 +10017,37 @@
 
     // actions
     const bodyText = () => (hasBody() && draft.body != null && String(draft.body).trim() !== '' ? draft.body : null);
-    const current = () => {
-      const url = target();
-      url.search = new URLSearchParams(activeParams().map(([k, v]) => [k, v])).toString();
-      const body = bodyText();
+    // The request as it will be sent to env, {{variables}} filled in. raw: keep them (Duplicate).
+    const current = (env = runEnv(), { raw = false } = {}) => {
+      const fill = (t) => (raw ? t : varsApi.fill(t, env));
+      const url = target(env, raw);
+      url.search = new URLSearchParams(activeParams().map(([k, v]) => [fill(k), fill(v)])).toString();
+      let body = bodyText();
+      if (!raw && body != null) body = kind() === 'json' ? varsApi.fillJson(body, env) : varsApi.fill(body, env);
       const headers = {};
-      for (const [k, v] of activeHeaders()) if (HEADER_NAME.test(k.trim())) headers[k.trim().toLowerCase()] = v;
+      for (const [k, v] of activeHeaders()) if (HEADER_NAME.test(k.trim())) headers[k.trim().toLowerCase()] = fill(v);
       if (body != null && kind() === 'json' && !Object.keys(headers).some((k) => k.toLowerCase() === 'content-type')) headers['content-type'] = 'application/json';
-      return { method: draft.method, url: url.href, headers, body, bodyKind: kind() };
+      return { method: draft.method, url: raw ? keepBraces(url.href) : url.href, headers, body, bodyKind: kind() };
     };
+    // {{names}} this request uses that have no value where it's sent (built-ins don't count).
+    const unknownVars = (env = runEnv()) => [...new Set([draft.path, ...activeParams().flat(), ...activeHeaders().map(([, v]) => v), bodyText()]
+      .flatMap((t) => varsApi.unknown(t, env)))];
     const routeOk = () => { try { target(); return true; } catch { return false; } };
+    // Before sending: every {{name}} needs a value where it goes. Otherwise say which, with Add variable
+    // (opens it in Rules → Variables) and Send anyway (sends the {{names}} as written).
+    const varsReady = (env = runEnv()) => {
+      const miss = unknownVars(env);
+      if (!miss.length) return true;
+      const sig = `${env?.id ?? ''}|${miss.join()}`;
+      if (d.varsAnyway === sig) { d.varsAnyway = null; return true; }
+      const where = envState.list.length ? ` in ${env?.name || 'Default'}` : '';
+      say(`${miss.length === 1 ? 'No variable' : 'No variables'} ${miss.map((x) => `{{${x}}}`).join(', ')}${where}.`, 'warn',
+        h('button', { type: 'button', class: 'linkbtn', onclick: () => openVariables({ add: { name: miss[0], scope: 'global' } }) }, 'Add variable'),
+        h('button', { type: 'button', class: 'linkbtn', onclick: () => { d.varsAnyway = sig; runBtn.click(); } }, 'Send anyway'));
+      return false;
+    };
     const headersOk = () => activeHeaders().every(([k]) => HEADER_NAME.test(k.trim()));
-    const bodyOk = () => kind() !== 'json' || bodyText() == null || core.isJson(bodyText());
+    const bodyOk = () => kind() !== 'json' || bodyText() == null || varsApi.jsonOk(bodyText());
     // One bar under the route for everything contextual: the last message (with its action) or,
     // when nothing was said, what changed and how to keep it. Nothing else stacks up above the tabs.
     const actBar = h('div', { class: 'actbar', hidden: true, role: 'status' });
@@ -9916,6 +10353,7 @@
         if (!routeOk()) { say('Fix the path first.', 'warn'); return; }
         if (!headersOk()) { say('Fix the header names first.', 'warn'); return; }
         if (!bodyOk()) { say('Fix the JSON body first.', 'warn'); return; }
+        if (!varsReady()) return;
         runBtn.disabled = true;
         runBtn.classList.add('busy');
         const env = runEnv();
@@ -9964,7 +10402,8 @@
           d.copyAt = Date.now();
           if (d.respSource === 'compare' && !entry.manual) d.cmp = { ...(d.cmp || {}), a: d.cmp?.a && d.cmp.a !== 'copy' ? d.cmp.a : 'app', b: 'copy' };
           else d.respSource = 'copy';
-          say('');
+          const updated = typeof r.status === 'number' && r.status < 400 ? varsFromResponse(req.method, sendUrl, r.text, env.id ?? null) : [];
+          say(updated.length ? `Updated ${updated.map((x) => `{{${x}}}`).join(', ')}` : '', updated.length ? 'info' : '');
           if (entry.manual) renderTab(); // header shows the new status and time
           else { drawTabs(); drawLower(); drawLowerHead(); }
           requestAnimationFrame(() => mainEl.querySelector('.rq-lower')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
@@ -9988,7 +10427,7 @@
     const origMethod0 = entry.originalMethod || entry.method;
     const origMatch0 = core.matchKey(entry.originalUrl || entry.url);
     const duplicate = () => {
-      const req = current();
+      const req = current(runEnv(), { raw: true });
       const copyEntry = core.addManual({ method: req.method, url: req.url, headers: req.headers, body: req.body, bodyKind: req.bodyKind });
       openDetail(copyEntry, { notice: 'Duplicated as your own request. Edit it and press Run; the original call is unchanged.' });
     };
@@ -10959,7 +11398,7 @@
 
     // Import & export: the settings file (environments and users, rules, API docs, stopped endpoints).
     const io = h('section', { class: 'st-sec' }, head('Import & export'),
-      row('Export', 'Environments and users, rules, API docs, stopped and pinned endpoints, as a JSON file.',
+      row('Export', 'Environments, users and variables, rules, API docs, stopped and pinned endpoints, as a JSON file.',
         h('button', { type: 'button', class: 'sbtn2 io-exp', onclick: openExportSettings }, 'Export…')),
       row('Import', 'From a RESTless settings file. You choose what to bring in.',
         h('button', { type: 'button', class: 'sbtn2 io-imp', onclick: importSettingsFile }, 'Import…')));
@@ -12595,6 +13034,115 @@
       del);
     }
 
+    // ---------- Variables: first on this tab. Global, then the environment you send to (marked current),
+    // then other environments that have some. A row: name, value (secret ones masked), a note (where it updates
+    // from, or what overrides it), ⋯ (Edit, Move to, Copy to, Delete). Click a row to edit it in place.
+    const scopeName = (sc) => (sc === 'global' ? 'Global' : envApi.byId(sc).name);
+    const sameScope = (a, b) => (a === 'global' || b === 'global' ? a === b : (a ?? null) === (b ?? null));
+    function varForm(sc, v) {
+      const isNew = !v;
+      const hasEnvs = envState.list.length > 0;
+      const nameIn = h('input', { class: 'pf-tok mono var-name', value: v?.name || varsUi.add?.name || '', placeholder: 'orderId', 'aria-label': 'Name', spellcheck: 'false', maxlength: '64' });
+      const valIn = h('input', { class: 'pf-tok mono var-val', value: v?.value ?? '', placeholder: 'Value', 'aria-label': 'Value', spellcheck: 'false', autocomplete: 'off', type: v?.secret ? 'password' : 'text' });
+      const secret = h('input', { type: 'checkbox', checked: !!v?.secret, onchange: () => { valIn.type = secret.checked ? 'password' : 'text'; } });
+      let scope = sc;
+      const scopePick = isNew && hasEnvs ? scopeSelect(scope, (x) => { scope = x; }) : null;
+      const err = h('div', { class: 'valid bad', hidden: true });
+      const src = v?.src;
+      const stopSrc = src ? h('button', { type: 'button', class: 'linkbtn', onclick: () => { varsApi.set(sc, v.name, { src: undefined }); varsUi.editing = null; draw(true); } }, 'Stop updating') : null;
+      const save = () => {
+        const name = nameIn.value.trim();
+        if (!VAR_NAME.test(name)) { err.hidden = false; err.textContent = 'Use letters, digits, _ . or -, starting with a letter or _.'; nameIn.focus(); return; }
+        if ((isNew || name !== v.name) && varsApi.get(scope, name)) { err.hidden = false; err.textContent = `${scopeName(scope)} already has {{${name}}}.`; nameIn.focus(); return; }
+        if (isNew) varsApi.set(scope, name, { value: valIn.value, secret: secret.checked || undefined });
+        else varsApi.set(sc, v.name, { name, value: valIn.value, secret: secret.checked || undefined });
+        varsUi.editing = null; varsUi.add = null;
+        draw(true);
+      };
+      const cancel = () => { varsUi.editing = null; varsUi.add = null; draw(true); };
+      const fld = (lab, el) => h('label', { class: 'env-fld' }, h('span', { class: 'env-fl' }, lab), el);
+      const box = editBox([
+        fld('Name', nameIn),
+        fld('Value', valIn),
+        scopePick ? fld('Where', scopePick) : null,
+        h('label', { class: 'chk var-secret' }, secret, h('span', {}, 'Secret: hide the value')),
+        src ? h('div', { class: 'muted var-srcnote' }, `Updates from every response of ${src.label} · ${pathLabel(src.path)}. `, stopSrc) : null,
+        err,
+      ].filter(Boolean), save, cancel, { saveLabel: isNew ? 'Add variable' : 'Save', title: isNew ? 'New variable' : `Edit {{${v.name}}}` });
+      box.classList.add('var-edit', 'env-form');
+      box.querySelector('.pf-save')?.classList.add('primary');
+      requestAnimationFrame(() => ((isNew && !nameIn.value) ? nameIn : valIn).focus());
+      return box;
+    }
+    function varRow(sc, v) {
+      if (varsUi.editing && sameScope(varsUi.editing.scope, sc) && varsUi.editing.name === v.name) return varForm(sc, v);
+      const cur = envApi.active();
+      const others = [{ id: 'global', name: 'Global' }, ...envApi.all()].filter((e) => !sameScope(e.id ?? null, sc) && !(sc === 'global' && e.id === 'global'));
+      const target = (e) => (e.id === 'global' ? 'global' : e.id ?? null);
+      const moveTo = (e, copy) => {
+        const to = target(e);
+        if (varsApi.get(to, v.name)) { toast(`${scopeName(to)} already has {{${v.name}}}`, '', 3000); return; }
+        const snap = varsApi.snapshot();
+        varsApi.set(to, v.name, { ...v });
+        if (!copy) varsApi.remove(sc, v.name);
+        toast(`${copy ? 'Copied' : 'Moved'} {{${v.name}}} to ${scopeName(to)}`, '', 5000, { label: 'Undo', run: () => varsApi.restore(snap) });
+      };
+      const sub = (copy) => others.map((e) => ({ id: `${copy ? 'cp' : 'mv'}-${e.id ?? 'default'}`, label: e.name, env: e.id === 'global' ? undefined : e,
+        disabled: !!varsApi.get(target(e), v.name), run: () => moveTo(e, copy) }));
+      const menu = dropMenu(`Actions for {{${v.name}}}`, [
+        { id: 'edit', label: 'Edit', icon: ICONS.pencil, run: () => { varsUi.editing = { scope: sc, name: v.name }; draw(true); } },
+        ...(others.length ? [{ id: 'move', label: 'Move to', icon: ICONS.chevRight, children: sub(false) }, { id: 'copyto', label: 'Copy to', icon: ICONS.dup, children: sub(true) }] : []),
+        { id: 'del', label: 'Delete', icon: ICONS.trash, danger: true, sepBefore: true, run: () => {
+          const snap = varsApi.snapshot();
+          varsApi.remove(sc, v.name);
+          toast(`Deleted {{${v.name}}}`, '', 5000, { label: 'Undo', run: () => varsApi.restore(snap) });
+        } },
+      ], { icon: ICONS.more, btnClass: 'ibtn mk-more', title: 'More actions', align: 'right' });
+      // Notes: a global one overridden by an environment; an environment one that overrides a global one.
+      const overriddenIn = sc === 'global' ? envApi.all().filter((e) => varsApi.get(e.id ?? null, v.name)) : [];
+      const note = v.src ? `↻ ${v.src.label} · ${pathLabel(v.src.path)}`
+        : overriddenIn.length ? `overridden in ${overriddenIn.map((e) => e.name).join(', ')}`
+        : sc !== 'global' && varsApi.get('global', v.name) ? 'overrides global' : '';
+      const inUse = sc === 'global' ? !overriddenIn.some((e) => (e.id ?? null) === (cur.id ?? null)) : sameScope(sc, cur.id ?? null);
+      const shown = v.secret ? '••••••••' : (v.value === '' ? '(empty)' : v.value);
+      const open = () => { varsUi.editing = { scope: sc, name: v.name }; varsUi.add = null; draw(true); };
+      return h('div', { class: `var-row${inUse ? '' : ' idle'}`, role: 'listitem', tabindex: '0',
+        title: `{{${v.name}}}${v.secret ? ' (secret)' : ` = ${v.value}`}\n${sc === 'global' ? 'Global' : scopeName(sc)}${note ? ` · ${note}` : ''}\nClick to edit`,
+        onclick: (e) => { if (!e.target.closest('.newwrap')) open(); }, onkeydown: (e) => { if (e.key === 'Enter' && e.target === e.currentTarget) open(); } },
+      h('span', { class: 'var-n mono' }, v.name),
+      h('span', { class: `var-v mono${v.value === '' && !v.secret ? ' muted' : ''}` }, shown),
+      h('span', { class: 'var-note muted' }, note),
+      menu);
+    }
+    function varGroup(sc, label, lead, list, extra = null) {
+      return h('div', { class: 'var-grp' },
+        h('div', { class: 'var-gh' }, ...lead, h('span', { class: 'var-gt' }, label), extra),
+        list.length ? h('div', { class: 'var-list', role: 'list' }, ...list.map((v) => varRow(sc, v))) : null);
+    }
+    function varSection() {
+      const cur = envApi.active();
+      const n = varsApi.count();
+      const adding = varsUi.add ? varForm(varsUi.add.scope === undefined ? 'global' : varsUi.add.scope, null) : null;
+      const groups = [];
+      const g = varsApi.list('global');
+      if (g.length) groups.push(varGroup('global', 'Global', [], g));
+      const envs = envApi.all();
+      const curFirst = [cur, ...envs.filter((e) => (e.id ?? null) !== (cur.id ?? null))];
+      for (const e of curFirst) {
+        const list = varsApi.list(e.id ?? null);
+        if (!list.length) continue;
+        const isCur = (e.id ?? null) === (cur.id ?? null);
+        groups.push(varGroup(e.id ?? null, e.name, [envDot(e)], list, isCur && envState.list.length ? h('span', { class: 'muted var-cur' }, 'current') : null));
+      }
+      const addBtn = h('button', { type: 'button', class: 'linkbtn mk-new', onclick: () => { varsUi.add = { scope: 'global' }; varsUi.editing = null; draw(true); } }, '+ Variable');
+      return h('section', { class: 'mk-sec var-sec', id: 'variables', 'aria-label': 'Variables' },
+        h('div', { class: 'mk-sech' }, h('span', { class: 'mk-sect' }, 'Variables'), n ? h('span', { class: 'muted mk-live' }, String(n)) : null, h('span', { class: 'hspace' }), n || adding ? addBtn : null),
+        adding,
+        ...groups,
+        !n && !adding ? h('div', { class: 'mk-empty' }, h('span', { class: 'muted' }, 'Use {{name}} in a request’s path, params, headers or body. Global ones work everywhere; an environment’s own ones win while you send there. Or save one from a response: hover a JSON line → Save as…'),
+          h('button', { type: 'button', class: 'btn-sm mk-new', onclick: () => { varsUi.add = { scope: 'global' }; draw(true); } }, '+ Variable')) : null);
+    }
+
     // Mock endpoints: their own short section at the top. A row: method, path, status, on/off switch, ⋯ (Duplicate,
     // Delete). Click a row to edit it.
     function mockRow(x) {
@@ -12625,23 +13173,28 @@
             h('button', { type: 'button', class: 'btn-sm mk-new', onclick: () => openMockEditor() }, '+ Mock endpoint')));
     }
 
-    function draw() {
+    function draw(force = false) {
       // Captured calls redraw this list; don't pull a mock's open ⋯ menu out from under the pointer.
-      if (box.querySelector('.dmenu:not([hidden])')) return;
+      if (!force && box.querySelector('.dmenu:not([hidden])')) return;
+      // …nor a variable being edited (its own buttons redraw with force).
+      if (!force && box.querySelector('.var-edit')) return;
       const bl = core.breaks.list(); const rl = core.rules.list().filter((r) => r.kind !== 'mock');
       if (!bl.length && !rl.length) {
-        box.replaceChildren(mockSection(), h('div', { class: 'rl-empty muted' }, mocks().length ? 'No rules or breakpoints yet. On a request page, use ' : 'Nothing changes this site\'s calls. On a request page, use ', h('b', {}, 'Save rewrite rule'), ' or ⋯ → Testing & debugging → ', h('b', {}, 'Break on next call'), '.'));
+        box.replaceChildren(varSection(), mockSection(), h('div', { class: 'rl-empty muted' }, mocks().length ? 'No rules or breakpoints yet. On a request page, use ' : 'Nothing changes this site\'s calls. On a request page, use ', h('b', {}, 'Save rewrite rule'), ' or ⋯ → Testing & debugging → ', h('b', {}, 'Break on next call'), '.'));
         return;
       }
       const sum = [bl.length && plural(bl.length, 'breakpoint'), rl.length && plural(rl.length, 'rule')].filter(Boolean).join(' · ');
-      box.replaceChildren(mockSection(),
+      box.replaceChildren(varSection(), mockSection(),
         h('div', { class: 'rl-top' }, h('span', { class: 'muted rl-sum' }, sum), h('span', { class: 'hspace' }),
           h('button', { type: 'button', class: 'linkbtn', title: 'Remove every breakpoint and rule on this site; mock endpoints stay (you can undo)', onclick: clearAll }, 'Clear all')),
         h('div', { class: 'rl-list', role: 'list' }, ...bl.map((b) => row('break', b)), ...rl.map((r) => row('rule', r))));
     }
     mainEl.append(box);
     draw();
-    refreshers.push(draw);
+    refreshers.push(() => draw());
+    const onVars = () => { if (box.isConnected) draw(!box.querySelector('.var-edit')); else varsListeners.delete(onVars); };
+    varsListeners.add(onVars);
+    if (varsUi.scrollTo) { varsUi.scrollTo = false; requestAnimationFrame(() => box.querySelector('#variables')?.scrollIntoView({ block: 'start' })); }
   }
 
   // Turn Offline on/off for this tab. It acts on the calls RESTless sees, so it needs capture on for this site.
