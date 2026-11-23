@@ -78,6 +78,8 @@ Under them, the count line is also the filter: *10 endpoints · 2 called · 8 no
 
 ### What changed in the API
 
+**New version available**: docs loaded from a URL are checked quietly in the background (when you open the API Docs tab, when the page gets focus again while you're on it, and every 5 minutes while the panel is open; at most once a minute, only where capturing is on, and the check isn't listed under Requests). When the version or an endpoint changed, a note appears above the list: *A new version of the API docs is available*, with the versions (e.g. `v1.4 → v1.5`) and how many endpoints changed, a **Refresh** button and ✕. The **API Docs** tab gets a small dot meanwhile, so you see it from any tab. **Refresh** does the same as ⋯ → Reload below. ✕ hides the note until the docs change again. Pasted or file-loaded docs have no link, so they aren't checked.
+
 After **⋯ → Reload** on the API docs tab: if nothing changed, a short message says so. Otherwise a one-line **What changed** bar appears above the list: *3 changes · 2 breaking · View*, with copy and ✕. **View** expands it: the counts (**+N new**, **−N removed**, **~N changed**, **⚠ N breaking**), the versions (or the reload time) and the details:
 
 - **New endpoints** are clickable and open as a new request.

@@ -16,4 +16,5 @@ Click any endpoint to open it as a request. Before you run it, you see the respo
 
 - After a run, the response is checked against the docs (**Matches docs**).
 - Each endpoint shows whether the app has called it. Filter by **called** or **not called** to find what’s unused.
+- When the docs at your URL change, a note says **a new version is available**. Press **Refresh** to load it.
 - **⋯ → Reload** shows **What changed**: new, removed and changed endpoints, with the changes that can break your app marked.

@@ -591,11 +591,11 @@
     return spec;
   }
 
-  async function fetchText(url) {
+  async function fetchText(url, { fresh = false } = {}) {
     let res;
     try {
       const f = window.__apiPeekCore?.rawFetch || window.fetch.bind(window);
-      res = await f(url, { headers: { accept: 'application/json' }, credentials: 'include' });
+      res = await f(url, { headers: { accept: 'application/json' }, credentials: 'include', ...(fresh ? { cache: 'no-store' } : {}) });
     } catch {
       throw new Error(`Couldn't reach ${url}. If the docs are on another origin, its server must allow CORS from this page; otherwise paste the JSON or choose the file.`);
     }
@@ -644,6 +644,23 @@
       if (window.__apiPeekCore?.capture?.on?.()) api.loadPending().catch(() => {});
     },
     get pending() { return current ? null : pending; },
+    // Is there a newer version at the docs' URL? Downloads it quietly (nothing changes here) and compares:
+    // { available, changes, from, to, sig } where changes counts new, removed and changed endpoints.
+    // Only a version or endpoint change counts, so a reworded description doesn't nag.
+    async checkUpdate() {
+      const cur = current;
+      if (!cur?.sourceUrl) return null;
+      const text = await fetchText(cur.sourceUrl, { fresh: true });
+      let doc;
+      try { doc = JSON.parse(text); } catch { return null; }
+      if (current !== cur) return null; // reloaded meanwhile
+      const next = normalize(doc, cur.sourceUrl);
+      const d = diffSpecs(cur, next);
+      const changes = d.added.length + d.removed.length + d.changed.length;
+      const from = cur.version || null; const to = next.version || null;
+      const available = changes > 0 || (!!to && to !== from);
+      return { available, changes, from, to, sig: `${to}|${d.added.map((o) => o.id).join()}|${d.removed.map((o) => o.id).join()}|${d.changed.map((c) => c.op.id).join()}|${changes}` };
+    },
     async loadPending() {
       if (!pending) throw new Error('Nothing to load.');
       const p = pending;

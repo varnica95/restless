@@ -1737,11 +1737,11 @@
     return spec;
   }
 
-  async function fetchText(url) {
+  async function fetchText(url, { fresh = false } = {}) {
     let res;
     try {
       const f = window.__apiPeekCore?.rawFetch || window.fetch.bind(window);
-      res = await f(url, { headers: { accept: 'application/json' }, credentials: 'include' });
+      res = await f(url, { headers: { accept: 'application/json' }, credentials: 'include', ...(fresh ? { cache: 'no-store' } : {}) });
     } catch {
       throw new Error(`Couldn't reach ${url}. If the docs are on another origin, its server must allow CORS from this page; otherwise paste the JSON or choose the file.`);
     }
@@ -1790,6 +1790,23 @@
       if (window.__apiPeekCore?.capture?.on?.()) api.loadPending().catch(() => {});
     },
     get pending() { return current ? null : pending; },
+    // Is there a newer version at the docs' URL? Downloads it quietly (nothing changes here) and compares:
+    // { available, changes, from, to, sig } where changes counts new, removed and changed endpoints.
+    // Only a version or endpoint change counts, so a reworded description doesn't nag.
+    async checkUpdate() {
+      const cur = current;
+      if (!cur?.sourceUrl) return null;
+      const text = await fetchText(cur.sourceUrl, { fresh: true });
+      let doc;
+      try { doc = JSON.parse(text); } catch { return null; }
+      if (current !== cur) return null; // reloaded meanwhile
+      const next = normalize(doc, cur.sourceUrl);
+      const d = diffSpecs(cur, next);
+      const changes = d.added.length + d.removed.length + d.changed.length;
+      const from = cur.version || null; const to = next.version || null;
+      const available = changes > 0 || (!!to && to !== from);
+      return { available, changes, from, to, sig: `${to}|${d.added.map((o) => o.id).join()}|${d.removed.map((o) => o.id).join()}|${d.changed.map((c) => c.op.id).join()}|${changes}` };
+    },
     async loadPending() {
       if (!pending) throw new Error('Nothing to load.');
       const p = pending;
@@ -4860,7 +4877,7 @@
 
     /* ================= 0.87: main tabs in their own row, always labelled ================= */
     .dhead.one .brand-name { align-self: center; flex: none; margin-left: -2px; font-weight: 650; font-size: 14px; letter-spacing: -.01em; color: var(--fg); }
-    .nav.navrow { display: flex; align-items: flex-end; gap: 2px; height: 38px; padding: 0 10px; border-bottom: 1px solid var(--line); background: var(--bg); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; container-type: normal; }
+    .nav.navrow { display: flex; align-items: flex-end; gap: 2px; height: 38px; padding: 0 10px; border-bottom: 1px solid var(--line); background: var(--bg); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; container-type: inline-size; container-name: rlnav; }
     .nav.navrow::-webkit-scrollbar { display: none; }
     .nav.navrow .tab { flex: none; height: 32px; padding: 0 12px; gap: 7px; font-size: 13px; white-space: nowrap; border-radius: var(--r-lg) var(--r-lg) 0 0; }
     .nav.navrow .tab::after { left: 10px; right: 10px; }
@@ -4875,6 +4892,20 @@
     @keyframes rtflash { 0% { background: var(--accent-soft); border-color: var(--accent-line); color: var(--fg); } 100% { } }
     .dhead.one .brand-name { display: inline-block; }
     @container rlhead (max-width: 330px) { .dhead.one .brand-name { display: none; } }
+
+    /* ================= 0.88: API docs update note ================= */
+    .upd-note { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; padding: 8px 6px 8px 12px; border: 1px solid var(--accent-line); border-radius: var(--r-lg); background: var(--accent-soft); }
+    .upd-ic { flex: none; display: inline-grid; place-items: center; width: 16px; height: 16px; color: var(--accent); }
+    .upd-ic svg { width: 15px; height: 15px; }
+    .upd-t { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; font-size: 12.5px; line-height: 1.35; }
+    .upd-t b { font-weight: 600; color: var(--fg); }
+    .upd-d { color: var(--dim); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+    .upd-note button.upd-btn { flex: none; background: var(--accent-solid); border-color: transparent; color: var(--on-accent); }
+    .upd-note button.upd-btn:hover { filter: brightness(1.08); background: var(--accent-solid); color: var(--on-accent); }
+    .nav.navrow .tab.upd .tl { position: relative; }
+    .nav.navrow .tab.upd .tl::after { content: ''; position: absolute; top: -1px; right: -7px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--bg); }
+    .nav.navrow .tab.upd .tl { margin-right: 5px; }
+    @container rlnav (max-width: 380px) { .nav.navrow .tab .tico { display: none; } .nav.navrow .tab { padding: 0 10px; } }
   `;
 
   // ---------- helpers
@@ -5182,6 +5213,10 @@
     // Settings isn't a tab: it opens from the gear button on the right, which stays highlighted.
     navEl.setAttribute('role', 'tablist');
     navEl.replaceChildren(...TABS.map(([id, label]) => tabBtn(id, label)));
+    // API Docs: a dot while a newer version of the docs is available (see checkDocsUpdate).
+    const dt = navEl.querySelector('.tab[data-tab=docs]');
+    if (dt && docsUpdateShown()) { dt.classList.add('upd'); dt.title = 'API Docs: a new version is available'; }
+    checkDocsUpdate();
     renderHeadMenus();
     updateCounts();
   }
@@ -10995,6 +11030,59 @@
     return `Reloaded: ${n} endpoint${n === 1 ? '' : 's'} changed.`;
   }
 
+  // ↻ Reload (⋯ menu) and Refresh (the "new version" note): download again; the changes show in
+  // the What changed card, only "nothing changed" is a toast.
+  async function reloadDocs() {
+    toast('Reloading…', '', 10000);
+    try {
+      const msg = await refreshSpec();
+      specView.status = specView.diff ? null : msg;
+      if (!specView.status) dockEl?.querySelector('.toast')?.classList.remove('show');
+    } catch (err) { specView.status = err.message; }
+    docsUpdate.info = null;
+    renderTab();
+  }
+
+  // ---------- "A new version of the API docs is available"
+  // Docs loaded from a URL are checked quietly: when the API Docs tab opens, when the page gets focus
+  // again, and every 5 minutes while the panel is open (at most once a minute). If the version or an
+  // endpoint changed, a note above the list offers Refresh, and the API Docs tab gets a dot.
+  // ✕ hides that note until something else changes.
+  const docsUpdate = { info: null, at: 0, busy: false, dismissed: ss.get('__apiPeek.docsUpdateDismissed', '') };
+  async function checkDocsUpdate({ force = false } = {}) {
+    const spec = specApi?.current;
+    if (!spec?.sourceUrl || docsUpdate.busy || !core.capture.on()) return;
+    if (!force && Date.now() - docsUpdate.at < 60000) return;
+    docsUpdate.busy = true; docsUpdate.at = Date.now();
+    let info = null;
+    try { info = await specApi.checkUpdate(); } catch { /* offline or blocked: try again later */ }
+    docsUpdate.busy = false;
+    const next = info?.available ? info : null;
+    if ((next?.sig || '') === (docsUpdate.info?.sig || '')) return;
+    docsUpdate.info = next;
+    if (dock.state !== 'open') return;
+    if (dock.tab === 'docs' && !specView.loader) renderTab(); else renderNav();
+  }
+  const docsUpdateShown = () => !!docsUpdate.info && docsUpdate.info.sig !== docsUpdate.dismissed;
+  setInterval(() => { if (dock.state === 'open') checkDocsUpdate(); }, 300000);
+  addEventListener('focus', () => { if (dock.state === 'open' && dock.tab === 'docs') checkDocsUpdate(); });
+  function updateNote() {
+    if (!docsUpdateShown()) return null;
+    const u = docsUpdate.info;
+    const v = (x) => (/^v/i.test(String(x)) ? String(x) : `v${x}`);
+    const detail = [u.to && u.to !== u.from ? `${u.from ? `${v(u.from)} → ` : ''}${v(u.to)}` : null,
+      u.changes ? `${u.changes} endpoint${u.changes === 1 ? '' : 's'} changed` : null].filter(Boolean).join(' · ');
+    const ic = h('span', { class: 'upd-ic', 'aria-hidden': 'true' });
+    setHTML(ic, ICONS.reload);
+    const close = h('button', { type: 'button', class: 'ibtn', 'aria-label': 'Dismiss', title: 'Hide until the docs change again',
+      onclick: () => { docsUpdate.dismissed = u.sig; ss.set('__apiPeek.docsUpdateDismissed', u.sig); renderTab(); } });
+    setHTML(close, ICONS.x);
+    return h('div', { class: 'upd-note', role: 'status' }, ic,
+      h('div', { class: 'upd-t' }, h('b', {}, 'A new version of the API docs is available'), detail ? h('span', { class: 'upd-d' }, detail) : null),
+      h('button', { type: 'button', class: 'btn-sm upd-btn', title: 'Download the docs again and see what changed', onclick: () => reloadDocs() }, 'Refresh'),
+      close);
+  }
+
   // "What changed" card shown after a Reload that found differences
   function diffText(dv) {
     const lines = [`API changes: ${dv.title}${dv.from || dv.to ? ` ${dv.from && dv.from !== dv.to ? `v${dv.from} → ` : ''}v${dv.to || dv.from}` : ''} (${new Date(dv.at).toLocaleString()})`];
@@ -11079,6 +11167,7 @@
       return;
     }
     specApi.autoServer();
+    checkDocsUpdate();
 
     // How often the app called each operation (from the captured list)
     const used = new Map();
@@ -11241,21 +11330,14 @@
         h('span', { style: 'flex:1' }),
         dropMenu('More actions', [
           { id: 'reload', label: '↻ Reload', sub: spec.sourceUrl ? `Download again from ${short(spec.sourceUrl)}` : 'Pasted JSON: no link to reload from', disabled: !spec.sourceUrl,
-            run: async () => {
-              toast('Reloading…', '', 10000);
-              try {
-                const msg = await refreshSpec();
-                specView.status = specView.diff ? null : msg; // changes show in the card; only "nothing changed" is a toast
-                if (!specView.status) dockEl?.querySelector('.toast')?.classList.remove('show');
-              } catch (err) { specView.status = err.message; }
-              renderTab();
-            } },
+            run: () => reloadDocs() },
           { id: 'change', label: 'Load API docs…', sub: 'A URL, pasted JSON or a file', run: () => { specView.loader = true; renderTab(); } },
           choice ? null : { id: 'server', label: 'Server URL…', sub: `Calls go to ${spec.base}`, run: () => { specView.serverEdit = true; renderTab(); } },
-          { id: 'remove', label: 'Remove', sub: 'Forget these docs on this site', danger: true, sepBefore: true, run: () => { specApi.clear(); specView.autoTried = true; renderTab(); } },
+          { id: 'remove', label: 'Remove', sub: 'Forget these docs on this site', danger: true, sepBefore: true, run: () => { specApi.clear(); specView.autoTried = true; docsUpdate.info = null; renderTab(); } },
         ].filter(Boolean))),
       specView.loader ? loaderRow({ spec, bar: true }) : null,
       specView.serverEdit ? serverEditRow(spec) : null,
+      updateNote(),
       diffCard(specView.diff),
       h('div', { class: 'docs-toolbar2' }, search, methodsMenu.el),
       stats,
@@ -11269,7 +11351,7 @@
     const msg = h('div', { class: 'ld-msg', role: 'status' });
     const say = (text, cls = '') => { msg.className = `ld-msg ${cls}`; msg.textContent = text; };
     const done = (s) => {
-      specView.loader = false; specView.loadErr = null; specView.diff = null; specView.newIds = null; specView.changedIds = null;
+      specView.loader = false; specView.loadErr = null; specView.diff = null; specView.newIds = null; specView.changedIds = null; docsUpdate.info = null;
       specView.status = s.savedFully === false ? 'These docs are too big to keep offline; they\'ll be downloaded again when you open this tab.' : null;
       renderTab();
     };
