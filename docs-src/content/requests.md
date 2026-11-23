@@ -14,6 +14,7 @@ lead: Every API call your app makes, grouped by endpoint.
 
 - **Pin** an endpoint to keep it at the top: hover the row and click the pin, or use **⋯ → Pin to top**.
 - **Preserve log** (the history icon) keeps calls when the page reloads.
+- **Middle-click** a request to open it in a new tab and stay on the list.
 - Open request tabs come back after a reload, with your edits.
 
 ## Read the tags

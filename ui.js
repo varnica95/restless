@@ -2646,7 +2646,7 @@
     @container cmptop (max-width: 400px) { .cchip-face .prof-chev { display: none; } .cchip-face { gap: 5px; } button.cchip { padding: 0 6px 0 5px; } }
     @container cmptop (max-width: 400px) { .cchip .cdot { display: none; } .cchip-nm { font-size: 12px; } }
     /* ================= 0.73: Where & as ================= */
-    button.wachip { display: inline-flex; align-items: center; gap: 7px; height: 32px; max-width: 128px; min-width: 0; padding: 0 4px 0 10px; border-radius: 999px; border: 1px solid var(--line2); background: var(--bg2); color: var(--fg); font: 500 12.5px/1 var(--font); cursor: pointer; flex: none; }
+    button.wachip { display: inline-flex; align-items: center; gap: 7px; height: 32px; max-width: 180px; min-width: 0; padding: 0 4px 0 10px; border-radius: 999px; border: 1px solid var(--line2); background: var(--bg2); color: var(--fg); font: 500 12.5px/1 var(--font); cursor: pointer; flex: none; }
     button.wachip:hover { border-color: color-mix(in srgb, var(--envc, var(--dim)) 60%, var(--line2)); }
     button.wachip:not(.app) { border-color: color-mix(in srgb, var(--envc) 45%, var(--line2)); background: color-mix(in srgb, var(--envc) 10%, var(--bg2)); }
     .wachip .wa-env { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2697,7 +2697,7 @@
     .waask .pdlg-body { gap: 10px; }
     .wa-askacts { gap: 8px; flex-wrap: wrap; }
     .wa-askrem { gap: 8px; font-size: 12.5px; color: var(--dim); }
-    @container rlhead (max-width: 420px) { button.wachip.hbox { max-width: 96px; } }
+    @container rlhead (max-width: 420px) { button.wachip.hbox { max-width: 150px; } }
     .wa-list .pf-row .pf-detail { flex: 0 1 auto; max-width: none; }
     .wa-list .pf-row .pf-rline > .hspace { min-width: 4px; }
     .wa-acts { display: inline-flex; align-items: center; gap: 2px; flex: none; }
@@ -2709,7 +2709,7 @@
     .wa-hdr .wa-ht { white-space: normal; }
     button.wachip.pre { max-width: 104px; }
     .dhead.one .hmenus > button.wachip { flex: 0 1 auto; min-width: 52px; }
-    @container rlhead (max-width: 430px) { button.wachip.hbox .wa-env { display: none; } button.wachip.hbox { padding-left: 9px; gap: 6px; } }
+    @container rlhead (max-width: 300px) { button.wachip.hbox .wa-env { display: none; } button.wachip.hbox { padding-left: 9px; gap: 6px; } }
     @container rlhead (max-width: 430px) { .dhead.one .nav .tab { padding-left: 7px; padding-right: 7px; } .dhead.one .nav { gap: 0; } }
     /* ================= 0.73.1: header tabs as icons; the active tab shows its name ================= */
     .dhead.one .nav .tab .tico { display: inline-grid !important; }
@@ -3002,6 +3002,24 @@
     .dp-none { font-size: 12px; padding: 8px 0; }
     .dp-foot { font-size: 11.5px; }
     .sim-docex { font-size: 12px; margin-top: 4px; }
+
+    /* ================= 0.87: main tabs in their own row, always labelled ================= */
+    .dhead.one .brand-name { align-self: center; flex: none; margin-left: -2px; font-weight: 650; font-size: 14px; letter-spacing: -.01em; color: var(--fg); }
+    .nav.navrow { display: flex; align-items: flex-end; gap: 2px; height: 38px; padding: 0 10px; border-bottom: 1px solid var(--line); background: var(--bg); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; container-type: normal; }
+    .nav.navrow::-webkit-scrollbar { display: none; }
+    .nav.navrow .tab { flex: none; height: 32px; padding: 0 12px; gap: 7px; font-size: 13px; white-space: nowrap; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+    .nav.navrow .tab::after { left: 10px; right: 10px; }
+    .nav.navrow .tab .tico { display: inline-grid; place-items: center; width: 15px; height: 15px; color: currentColor; opacity: .85; }
+    .nav.navrow .tab .tico svg { width: 15px; height: 15px; }
+    .nav.navrow .tab .tl { display: inline; }
+    .nav.navrow .tab .ts { display: none; }
+    .nav.navrow .tab.live .count { background: var(--warn-soft); color: var(--warn); }
+    .pos-top .nav.navrow, .pos-bottom .nav.navrow { height: 34px; }
+    .pos-top .nav.navrow .tab, .pos-bottom .nav.navrow .tab { height: 29px; }
+    button.rtabi.flash { animation: rtflash 1.1s ease-out; }
+    @keyframes rtflash { 0% { background: var(--accent-soft); border-color: var(--accent-line); color: var(--fg); } 100% { } }
+    .dhead.one .brand-name { display: inline-block; }
+    @container rlhead (max-width: 330px) { .dhead.one .brand-name { display: none; } }
   `;
 
   // ---------- helpers
@@ -3051,23 +3069,24 @@
 
   function buildDock() {
     grip = h('div', { class: 'grip', title: 'Drag to resize' });
-    navEl = h('div', { class: 'nav' });
+    navEl = h('div', { class: 'nav navrow' });
     mainEl = h('div', { class: 'main' });
     footEl = h('div', { class: 'foot' });
     headMenus = h('div', { class: 'hmenus' });
     themeBtn = null; // the theme control is a menu now (see renderHeadMenus)
     minBtn = h('button', { type: 'button', class: 'fbtn minbtn', onclick: () => setState('hidden') });
-    // One row: logo · Requests · API Docs (· Rules / Settings while open) · context chip · ⋯
+    // Header: logo and name · chips (offline, Where & As, settings). Under it, always visible:
+    // the main tabs (Requests · Rules · API Docs), then the open request tabs.
     const head = h('div', { class: 'dhead one' },
       h('span', { class: 'brand', title: 'RESTless', 'aria-label': 'RESTless', role: 'img' }, bird(22)),
-      navEl,
+      h('span', { class: 'brand-name', 'aria-hidden': 'true' }, 'RESTless'),
       h('span', { class: 'hspace' }),
       headMenus);
     statusEl = null; // list controls (Preserve, Clear) live above the table, see renderRequests
     reqTabsEl = h('div', { class: 'reqtabs', role: 'tablist', 'aria-label': 'Open requests', hidden: true });
     // Double-click the empty part of the strip: a new request in a new tab.
     reqTabsEl.addEventListener('dblclick', (e) => { if (!e.target.closest('button')) newRequest(); });
-    dockEl = h('div', { class: 'dock ui', hidden: true }, grip, head, reqTabsEl, mainEl, footEl);
+    dockEl = h('div', { class: 'dock ui', hidden: true }, grip, head, navEl, reqTabsEl, mainEl, footEl);
     root.append(dockEl);
 
     const drag = (onMove, onUp) => {
@@ -3299,9 +3318,8 @@
     headMenus.replaceChildren(...[mockChip, netChip, whereAsChip({ cls: 'hbox' }), actions].filter(Boolean));
   }
   function renderNav() {
-    // While a request tab is showing, that tab is the selected one, so Requests itself isn't highlighted.
-    const onReqTab = dock.tab === 'requests' && !!(reqView.detail || reqView.importing);
-    const isOn = (id) => dock.tab === id && !(id === 'requests' && onReqTab);
+    // Request tabs sit under Requests, so Requests stays selected while one of them shows.
+    const isOn = (id) => dock.tab === id;
     const tabBtn = (id, label) => h('button', { type: 'button', role: 'tab', 'aria-selected': isOn(id) ? 'true' : 'false', class: `tab${isOn(id) ? ' on' : ''}`, 'data-tab': id, 'aria-label': label, title: label,
       onclick: () => { if (id === 'requests') { reqView.focus = null; reqView.detail = null; reqView.importing = false; } if (id === 'docs') specView.loader = false; showTab(id); } },
     (() => { const i = h('span', { class: 'tico', 'aria-hidden': 'true' }); setHTML(i, ICONS[`tab_${id}`] || ''); return i; })(),
@@ -5615,7 +5633,7 @@
 
   // ---------- request screen
   // reqView.detail = { entry, element, backTo: 'list' | 'focus', draft, tab, copy, keepRule, notice }
-  function openDetail(entry, { element = null, backTo = 'list', notice = null, headersNote = null, routeNote = null, optionalParams = null, tab = null, highlight = null, fresh = false, compareWith = null, restore = false } = {}) {
+  function openDetail(entry, { element = null, backTo = 'list', notice = null, headersNote = null, routeNote = null, optionalParams = null, tab = null, highlight = null, fresh = false, compareWith = null, restore = false, background = false } = {}) {
     // Compare with another call (picked in the list): that call joins this one's responses, compared as B.
     const withCompare = (x) => {
       if (!compareWith) return;
@@ -5625,6 +5643,7 @@
     // A request that already has a tab: switch to it and keep its edits (a search hit still jumps to its match).
     const open = reqView.tabs.find((t) => t.entry === entry);
     if (restore && open) return null;
+    if (background && open) { flashTab(open); return open; }
     if (open && !fresh && !notice && !headersNote && !routeNote && !optionalParams) {
       withCompare(open);
       if (highlight) { open.highlight = highlight; open.lower = 'response'; open.respSource = entry.manual ? 'copy' : 'app'; }
@@ -5660,6 +5679,14 @@
     };
     withCompare(d);
     if (restore) { reqView.tabs.push(d); return d; } // after a reload: put the tab back, don't switch to it
+    if (background) { // middle-click: a new tab, but stay where you are
+      d.usedAt = ++tabSeq;
+      reqView.tabs.push(d);
+      trimTabs(d);
+      drawReqTabs();
+      flashTab(d);
+      return d;
+    }
     if (open) reqView.tabs[reqView.tabs.indexOf(open)] = d; // same request opened again (e.g. after Import cURL): fresh state, same place
     else {
       reqView.tabs.push(d);
@@ -5697,6 +5724,17 @@
     const segs = tabPath(d).split('/').filter(Boolean);
     return segs.length ? `/${segs.slice(-2).join('/')}` : '/';
   };
+  // Briefly highlight a tab (opened in the background, or already open) and scroll it into view.
+  function flashTab(d) {
+    const i = reqView.tabs.indexOf(d);
+    const el = reqTabsEl?.querySelectorAll('.rtabi')[i];
+    if (!el) return;
+    el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+  }
+  // Middle-click (or Ctrl/⌘+click) on a call: open it in a new tab without leaving the list.
+  const openInBackground = (entry) => { if (entry && !entry.stub) openDetail(entry, { background: true }); };
+  const bgClick = (e) => e.button === 1 || (e.button === 0 && (e.ctrlKey || e.metaKey));
   function closeTab(d) {
     const i = reqView.tabs.indexOf(d);
     if (i < 0) return;
@@ -5711,12 +5749,13 @@
   }
   function drawReqTabs() {
     if (!reqTabsEl) return;
-    // Only while a request tab is open (or a call waits at a breakpoint); New request (+) sits next to the search otherwise.
-    const show = dock.tab === 'requests' && (reqView.tabs.length > 0 || core.state.paused.length > 0);
+    // While a request tab is open (or a call waits at a breakpoint), on every main tab: switching to Rules
+    // or API Docs keeps them in reach. One is selected only while it shows.
+    const show = reqView.tabs.length > 0 || core.state.paused.length > 0;
     reqTabsEl.hidden = !show;
     if (!show) return;
     const tabs = reqView.tabs.map((d) => {
-      const on = reqView.detail === d;
+      const on = dock.tab === 'requests' && reqView.detail === d;
       const method = d.draft.method || d.entry.method;
       const close = h('span', { class: 'rtx', role: 'button', 'aria-label': `Close ${method} ${tabLabel(d)}`, title: 'Close tab',
         onclick: (e) => { e.stopPropagation(); closeTab(d); } });
@@ -5739,7 +5778,7 @@
     const scroller = h('div', { class: 'rtscroll' }, ...tabs);
     // A vertical wheel scrolls the strip sideways when the tabs don't fit.
     scroller.addEventListener('wheel', (e) => { if (scroller.scrollWidth > scroller.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) { e.preventDefault(); scroller.scrollLeft += e.deltaY; } }, { passive: false });
-    const onList = !reqView.detail && !reqView.importing;
+    const onList = dock.tab === 'requests' && !reqView.detail && !reqView.importing;
     reqTabsEl.replaceChildren(...[scroller, onList ? null : add, count].filter(Boolean));
     reqTabsEl.querySelector('.rtabi.on')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }
@@ -10111,7 +10150,9 @@
       return h('div', {
         class: `lrow call${withPath ? '' : ' sub'}${reqView.selected === r.id ? ' sel' : ''}${errTone(r)}${r.prev ? ' prev' : ''}${isStopped(r) ? ' stopped' : ''}${r.stub ? ' stub' : ''}`, tabindex: '0', role: 'button',
         title: `${r.method} ${r.url}\n${r.stub ? `Not captured since ${when.toLocaleString()}. Resume it from ⋯.` : when.toLocaleString()}${pt ? `\n${r.status}: ${pt}` : ''}`,
-        onclick: () => { if (r.stub) return; if (reqView.cmpPick) { finishComparePick(r); return; } if (reqView.picking) togglePick([r.id], !reqView.picked.has(r.id)); else selectCall(r); },
+        onclick: (e) => { if (r.stub) return; if (reqView.cmpPick) { finishComparePick(r); return; } if (reqView.picking) togglePick([r.id], !reqView.picked.has(r.id)); else if (bgClick(e)) openInBackground(r); else selectCall(r); },
+        onmousedown: (e) => { if (e.button === 1) e.preventDefault(); }, // no autoscroll cursor
+        onauxclick: (e) => { if (e.button === 1 && !reqView.cmpPick && !reqView.picking) { e.preventDefault(); openInBackground(r); } },
         onkeydown: (e) => { if (r.stub) return; if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (reqView.cmpPick) { finishComparePick(r); return; } if (reqView.picking) togglePick([r.id], !reqView.picked.has(r.id)); else selectCall(r); } },
       },
       h('span', {}),
@@ -10414,7 +10455,9 @@
             class: `lrow grp${open ? ' open' : ''}${headSel ? ' sel' : ''}${errTone(last)}${last.prev ? ' prev' : ''}${stopped ? ' stopped' : ''}${last.stub ? ' stub' : ''}`, tabindex: '0', role: 'button',
             title: last.stub ? `${g.key}\nNot captured since ${new Date(last.startedAt).toLocaleString()}. Resume it from ⋯.`
               : `${g.key}\nLast call ${fmtAgo(last.startedAt)} (${new Date(last.startedAt).toLocaleTimeString()})${pt ? `\n${last.status}: ${pt}` : ''}${stopped ? '\nCapturing paused: new calls aren\'t listed' : ''}`,
-            onclick: toggle,
+            onclick: (e) => { if (bgClick(e) && !reqView.cmpPick && !reqView.picking) openInBackground(last); else toggle(); },
+            onmousedown: (e) => { if (e.button === 1) e.preventDefault(); },
+            onauxclick: (e) => { if (e.button === 1 && !reqView.cmpPick && !reqView.picking) { e.preventDefault(); openInBackground(last); } },
             onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } },
           },
           single ? h('span', {}) : exp,

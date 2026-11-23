@@ -25,6 +25,8 @@ RESTless records nothing until you allow it, one site at a time. Click **Turn on
 - **Rules**: everything you’ve changed, in one list.
 - **API Docs**: your OpenAPI / Swagger docs.
 
+These tabs sit under the header. Open requests get their own tabs below them, visible everywhere.
+
 In the header: where your requests go (**Where & as**), the **Offline** switch and **Settings**.
 
 > **Tip:** <kbd>Ctrl</kbd>+click a button or table in your app (or right-click → **Inspect API call**) to jump straight to the call behind it.
