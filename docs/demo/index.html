@@ -1884,7 +1884,7 @@
   let host = null;
   let root = null;
   let refreshers = [];
-  const DEFAULT_PREFS = { modifier: 'ctrl', action: 'click', dock: 'push', width: 460, theme: 'dark', position: 'right', height: 340, float: null, maxTabs: 5 };
+  const DEFAULT_PREFS = { modifier: 'ctrl', action: 'click', dock: 'push', width: 460, theme: 'dark', position: 'right', height: 340, float: null, maxTabs: 5, badgeCount: true };
   let prefs = { ...DEFAULT_PREFS }; // real values arrive from chrome.storage via bridge.js
   const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
   const prefListeners = new Set();
@@ -4906,6 +4906,20 @@
     .nav.navrow .tab.upd .tl::after { content: ''; position: absolute; top: -1px; right: -7px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--bg); }
     .nav.navrow .tab.upd .tl { margin-right: 5px; }
     @container rlnav (max-width: 380px) { .nav.navrow .tab .tico { display: none; } .nav.navrow .tab { padding: 0 10px; } }
+
+    /* ================= 0.89: select → pause / resume capturing ================= */
+    button.ibtn.lselect { width: 28px; height: 28px; color: var(--dim); border-radius: var(--r-sm); }
+    button.ibtn.lselect svg { width: 15px; height: 15px; }
+    button.ibtn.lselect:hover:not(:disabled) { color: var(--fg); background: var(--hover); }
+    button.ibtn.lselect:disabled { opacity: .4; cursor: default; }
+    .ltools button.pk-cap { height: 28px; padding: 0 10px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .ltools button.pk-cap .pk-ic { display: inline-grid; width: 14px; height: 14px; }
+    .ltools button.pk-cap .pk-ic svg { width: 14px; height: 14px; }
+    .ltools button.pk-pause { color: var(--warn); border-color: var(--warn-line); background: var(--warn-soft); }
+    .ltools button.pk-pause:hover { color: var(--warn); border-color: var(--warn); background: var(--warn-soft); }
+    .rstatsrow.picking { flex-wrap: wrap; row-gap: 8px; }
+    .rstatsrow.picking .rstats-t { flex: 1 1 auto; }
+    .rstatsrow.picking .ltools { margin-left: auto; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
   `;
 
   // ---------- helpers
@@ -5262,6 +5276,26 @@
     if (b.responseText == null) { toast('That call has no response body to compare. Pick another one.'); reqView.cmpPick = a; return; }
     openDetail(a, { compareWith: b });
   }
+  // Endpoints behind the selection (stopped endpoints listed without calls count too).
+  function pickedKeys() {
+    const keys = new Set();
+    const byId = new Map(core.state.requests.map((r) => [r.id, r]));
+    for (const id of reqView.picked) {
+      if (typeof id === 'string' && id.startsWith('stop:')) keys.add(id.slice(5));
+      else if (byId.has(id)) keys.add(captureKey(byId.get(id)));
+    }
+    return [...keys];
+  }
+  // Pause (or resume) capturing for every selected endpoint at once; one Undo puts them all back.
+  function setPickedCapture(pause) {
+    const keys = pickedKeys().filter((k) => core.mute.has(k) !== pause);
+    if (!keys.length) return;
+    keys.forEach((k) => core.mute.set(k, pause));
+    const n = keys.length;
+    toast(`${pause ? 'Paused' : 'Resumed'} capturing ${n} endpoint${n === 1 ? '' : 's'}`, '', 6000,
+      { label: 'Undo', run: () => keys.forEach((k) => core.mute.set(k, !pause)) });
+    stopPicking();
+  }
   function stopPicking() {
     reqView.picking = false; reqView.picked.clear();
     listApi?.render(); drawStatus(true);
@@ -5275,6 +5309,7 @@
     const key = [onRequestList(), total > 0, clearAsk, clearAsk ? total : '', keep, reqView.picking, reqView.picked.size].join('|');
     if (!force && key === statusKey) return;
     statusKey = key;
+    statusEl.parentElement?.classList.toggle('picking', !!reqView.picking && onRequestList());
     if (!onRequestList()) { statusEl.replaceChildren(); return; }
     if (clearAsk) {
       statusEl.replaceChildren(h('span', { class: 'clear-ask' },
@@ -5290,9 +5325,21 @@
     }
     if (reqView.picking) {
       const n = pickedEntries().length;
+      const keys = pickedKeys();
+      const nPause = keys.filter((k) => !core.mute.has(k)).length;
+      const nResume = keys.length - nPause;
+      const capBtn = (pause, count) => {
+        const b = h('button', { type: 'button', class: `sbtn pk-cap ${pause ? 'pk-pause' : 'pk-resume'}`,
+          title: pause ? `Stop capturing ${count} selected endpoint${count === 1 ? '' : 's'}: their new calls aren't listed or changed` : `Capture ${count} selected endpoint${count === 1 ? '' : 's'} again`,
+          onclick: () => setPickedCapture(pause) });
+        const i = h('span', { class: 'pk-ic', 'aria-hidden': 'true' }); setHTML(i, pause ? ICONS.pause : ICONS.play);
+        b.append(i, h('span', {}, `${pause ? 'Pause' : 'Resume'} ${count}`));
+        return b;
+      };
       const go = h('button', { type: 'button', class: 'pf-done xp-go', disabled: !n,
         onclick: () => openExport(pickedEntries(), { onDone: () => stopPicking() }) }, n ? `Export ${n}` : 'Export');
-      statusEl.replaceChildren(h('button', { type: 'button', class: 'sbtn xp-cancel', onclick: () => stopPicking() }, 'Cancel'), go);
+      statusEl.replaceChildren(...[h('button', { type: 'button', class: 'sbtn xp-cancel', onclick: () => stopPicking() }, 'Cancel'),
+        nPause ? capBtn(true, nPause) : null, nResume ? capBtn(false, nResume) : null, go].filter(Boolean));
       return;
     }
     const xpBtn = h('button', { type: 'button', class: 'ibtn lexport', disabled: !total, 'aria-label': 'Export requests',
@@ -5301,6 +5348,10 @@
         openExport(list.length ? list : core.state.requests, { onChoose: (ids) => startPicking(ids) });
       } });
     setHTML(xpBtn, ICONS.download);
+    // Select: checkboxes on the list, then Pause / Resume capturing or Export for the selection.
+    const selBtn = h('button', { type: 'button', class: 'ibtn lselect', disabled: !total && !core.mute.list().length, 'aria-label': 'Select requests',
+      title: 'Select several requests: pause or resume capturing their endpoints, or export them', onclick: () => startPicking([]) });
+    setHTML(selBtn, ICONS.select);
     const keepBtn = h('button', { type: 'button', class: `ibtn lkeep${keep ? ' on' : ''}`, 'aria-pressed': String(keep), 'aria-label': 'Preserve log',
       title: keep ? 'Preserve log: on. Requests stay when the page reloads or navigates (this site). Click to turn off.'
         : 'Preserve log: off. Click to keep the captured requests when the page reloads or navigates, like DevTools.',
@@ -5310,7 +5361,7 @@
       title: 'Clear all captured requests (rules and recorded clicks are kept)',
       onclick: () => { core.clearRequests(); reqView.expanded.clear(); updateCounts(); drawStatus(true); toast('Requests cleared'); } });
     setHTML(clear, ICONS.trash);
-    statusEl.replaceChildren(xpBtn, keepBtn, clear);
+    statusEl.replaceChildren(selBtn, xpBtn, keepBtn, clear);
   }
   // ---------- Shared pieces of the Login profiles and Environments dialogs: one row per item.
   // A row: radio mark · [dot] · name · muted detail · [icon] · ⋯ (hover/focus). Click selects; Edit expands in place.
@@ -6199,13 +6250,15 @@
   // ---------- toolbar badge: the request count (orange with the paused count when calls are held)
   let badgeTimer = null;
   let lastBadge = '';
+  prefListeners.add(() => { lastBadge = null; scheduleBadge(); });
   function scheduleBadge() {
     if (window !== window.top) return; // the tab's badge belongs to the top page
     if (badgeTimer) return;
     badgeTimer = setTimeout(() => {
       badgeTimer = null;
       const paused = core.state.paused?.length || 0;
-      const count = core.state.requests.length;
+      // The request count can be turned off in Settings; paused calls and Offline always show.
+      const count = prefs.badgeCount === false ? 0 : core.state.requests.length;
       const offline = !!core.net.get().offline;
       const key = `${count}|${paused}|${offline}`;
       if (key === lastBadge) return;
@@ -10265,6 +10318,7 @@
     eyeoff: svg('<path d="M2 2l12 12M6.6 3.7A6.6 6.6 0 0 1 8 3.5c4.1 0 6.5 4.5 6.5 4.5a11 11 0 0 1-1.8 2.4M10.1 10.6A2.5 2.5 0 0 1 6.3 7.1M4 5.2A10.8 10.8 0 0 0 1.5 8s2.4 4.5 6.5 4.5a6.3 6.3 0 0 0 2.3-.4"/>'),
     dup: svg('<rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M9.5 8v3M8 9.5h3M10.5 5.5V3.8A1.3 1.3 0 0 0 9.2 2.5H3.8A1.3 1.3 0 0 0 2.5 3.8v5.4a1.3 1.3 0 0 0 1.3 1.3h1.7"/>'),
     x: svg('<path d="M4 4l8 8M12 4l-8 8"/>'),
+    select: svg('<rect x="2.5" y="2.5" width="11" height="11" rx="2.5"/><path d="M5.3 8.2 7.2 10l3.5-4"/>'),
     check: svg('<path d="M3 8.5 6.5 12 13 4.5"/>'),
     spark: svg('<path d="M8 1.8l1.3 3.6 3.7 1.3-3.7 1.3L8 11.6 6.7 8 3 6.7l3.7-1.3Z"/><path d="M12.6 10.6l.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6Z"/>'),
     trash: svg('<path d="M2.8 4.3h10.4M6.3 4.3V2.8h3.4v1.5M4.2 4.3l.6 8.6c.1.7.6 1.2 1.3 1.2h3.8c.7 0 1.2-.5 1.3-1.2l.6-8.6M6.7 6.8v4.6M9.3 6.8v4.6"/>'),
@@ -10845,10 +10899,13 @@
     const position = seg([['left', 'Left'], ['right', 'Right'], ['top', 'Top'], ['bottom', 'Bottom'], ['float', 'Floating']], prefs.position,
       (id) => { set({ position: id }); syncDocked(); }, 'Position');
     syncDocked();
+    const badgeSw = sw(prefs.badgeCount !== false, 'Request count on the toolbar icon', (on) => set({ badgeCount: on }));
     const look = h('section', { class: 'st-sec' }, head('Appearance and panel'),
       row('Theme', null, theme),
       row('Position', null, position),
-      dockedRow);
+      dockedRow,
+      row('Request count on icon', 'Show how many requests were captured on the RESTless toolbar icon.', badgeSw,
+        { tip: 'Applies to every site. Paused calls (‖2) and Offline (OFF) still show on the icon when this is off.' }));
 
     // Shortcut: comes from Chrome (chrome://extensions/shortcuts).
     const k = h('span', { class: 'kbd' });
@@ -12087,14 +12144,14 @@
       return h('div', {
         class: `lrow call${withPath ? '' : ' sub'}${reqView.selected === r.id ? ' sel' : ''}${errTone(r)}${r.prev ? ' prev' : ''}${isStopped(r) ? ' stopped' : ''}${r.stub ? ' stub' : ''}`, tabindex: '0', role: 'button',
         title: `${r.method} ${r.url}\n${r.stub ? `Not captured since ${when.toLocaleString()}. Resume it from ⋯.` : when.toLocaleString()}${pt ? `\n${r.status}: ${pt}` : ''}`,
-        onclick: (e) => { if (r.stub) return; if (reqView.cmpPick) { finishComparePick(r); return; } if (reqView.picking) togglePick([r.id], !reqView.picked.has(r.id)); else if (bgClick(e)) openInBackground(r); else selectCall(r); },
+        onclick: (e) => { if (reqView.picking && !r.pinStub) { togglePick([r.id], !reqView.picked.has(r.id)); return; } if (r.stub) return; if (reqView.cmpPick) { finishComparePick(r); return; } if (reqView.picking) togglePick([r.id], !reqView.picked.has(r.id)); else if (bgClick(e)) openInBackground(r); else selectCall(r); },
         onmousedown: (e) => { if (e.button === 1) e.preventDefault(); }, // no autoscroll cursor
         onauxclick: (e) => { if (e.button === 1 && !reqView.cmpPick && !reqView.picking) { e.preventDefault(); openInBackground(r); } },
         onkeydown: (e) => { if (r.stub) return; if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (reqView.cmpPick) { finishComparePick(r); return; } if (reqView.picking) togglePick([r.id], !reqView.picked.has(r.id)); else selectCall(r); } },
       },
       h('span', {}),
       h('span', { class: 'rc-main' },
-        reqView.picking ? pickBox([r.id], `Export ${r.method} ${r.url}`) : null,
+        reqView.picking ? pickBox([r.id], `Select ${r.method} ${r.url}`) : null,
         withPath ? [methodBadge(r.method), h('span', { class: 'path mono' }, short(r.url))]
           : [h('span', { class: 'mono rc-clock' }, fmtClock(r.startedAt)), q ? h('span', { class: 'path mono muted' }, `?${q}`) : h('span', { class: 'rc-none' }, 'no query')],
         h('span', { class: 'rc-tags' }, withPath && isStopped(r) ? stoppedTag() : null, r.stub ? null : callTags(r))),
@@ -12381,7 +12438,7 @@
           const open = reqView.expanded.has(g.key);
           const gids = g.calls.map((c) => c.id);
           const stopped = isStopped(last);
-          const toggle = () => { if (last.stub) return; if (reqView.cmpPick) { finishComparePick(last); return; } if (reqView.picking) togglePick(gids, !allPicked(gids)); else if (single) selectCall(last); else toggleGroup(g.key); };
+          const toggle = () => { if (reqView.picking && !last.pinStub) { togglePick(gids, !allPicked(gids)); return; } if (last.stub) return; if (reqView.cmpPick) { finishComparePick(last); return; } if (reqView.picking) togglePick(gids, !allPicked(gids)); else if (single) selectCall(last); else toggleGroup(g.key); };
           const exp = h('button', { type: 'button', class: `rexp${open ? ' open' : ''}`, 'aria-expanded': String(open),
             title: open ? 'Hide calls' : `Show ${single ? 'the call' : `all ${g.calls.length} calls`}`, 'aria-label': open ? 'Hide calls' : 'Show calls',
             onclick: (e) => { e.stopPropagation(); toggleGroup(g.key); },
@@ -12399,7 +12456,7 @@
           },
           single ? h('span', {}) : exp,
           h('span', { class: 'rc-main' },
-            reqView.picking ? pickBox(gids, `Export ${g.key}`) : null,
+            reqView.picking ? pickBox(gids, `Select ${g.key}`) : null,
             methodBadge(g.method),
             h('span', { class: 'path mono' }, (() => { try { return new URL(g.url).pathname; } catch { return g.url; } })()),
             h('span', { class: 'rc-tags' },

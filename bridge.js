@@ -2,7 +2,7 @@ if (!globalThis.__restlessBridge) {
 globalThis.__restlessBridge = true;
 // RESTless — isolated-world bridge between the extension and the MAIN-world UI:
 // relays context-menu / toolbar / shortcut messages, the toolbar badge, and syncs preferences.
-const DEFAULT_PREFS = { modifier: 'ctrl', action: 'click', dock: 'push', width: 460, theme: 'dark', position: 'right', height: 340, float: null, maxTabs: 5 };
+const DEFAULT_PREFS = { modifier: 'ctrl', action: 'click', dock: 'push', width: 460, theme: 'dark', position: 'right', height: 340, float: null, maxTabs: 5, badgeCount: true };
 const postPrefs = (prefs) => window.postMessage({ __apiPeek: 'prefs', prefs: { ...DEFAULT_PREFS, ...(prefs || {}) } }, '*');
 const sendStored = () => chrome.storage.sync.get('prefs').then(({ prefs }) => postPrefs(prefs), () => postPrefs());
 
@@ -39,6 +39,7 @@ window.addEventListener('message', (e) => {
         height: num(p.height, 200, 4000) ?? DEFAULT_PREFS.height,
         float: f,
         maxTabs: num(p.maxTabs, 1, 20) ?? DEFAULT_PREFS.maxTabs,
+        badgeCount: p.badgeCount !== false,
       } });
     }
   }

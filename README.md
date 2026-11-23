@@ -30,7 +30,7 @@ Everything happens in one panel. It docks to the right edge by default; it can a
 | Action | What you get |
 |---|---|
 | Toolbar icon or **Ctrl+Y** (**Control+Y** on Mac too) | Show / hide the panel |
-| Toolbar icon badge | The number of requests captured on this page; turns orange (`‖2`) when calls are paused at a breakpoint |
+| Toolbar icon badge | The number of requests captured on this page (turn it off in **Settings → Appearance and panel → Request count on icon**); turns orange (`‖2`) when calls are paused at a breakpoint and red `OFF` while the tab is offline, even with the count off |
 | Settings → Appearance and panel → Position | Dock right, left, bottom or top, or Floating window |
 | Drag the panel's inner edge | Resize (remembered across sites). Floating: drag the header to move, the bottom-right corner to resize |
 | **Esc** (inside the panel) | Go back one screen, or minimize |
@@ -175,6 +175,7 @@ The dialog is titled **Export N calls**, where N follows the Calls choice (*Expo
 - **slow**: the call took 1 s or more (its time is shown in red). **large**: the response is 1 MB or more.
 - Duplicate, slow and large are in **Filters → Show only**, with counts.
 - **Pause capturing** (a row's ⋯): stops listing new calls to that endpoint (method + path, any query), for health checks, analytics, polling and other noise. The calls still go out as usual, and rules and breakpoints still apply to them; they just aren't listed. Calls already in the list stay, greyed out with an *off* tag (*not captured* in a wide panel). The choice is saved for the site, so it holds after a reload. **Filters → Not captured** shows the stopped endpoints, including ones with no calls left in the list (after a reload or Clear), and their ⋯ has **Resume capturing**. Both actions show a toast with **Undo**.
+- **Select several**: the **select** icon above the list (left of export) puts checkboxes on the rows. Tick calls or whole endpoints, then **Pause N** stops capturing those endpoints and **Resume N** captures paused ones again (both show when the selection has some of each); one Undo reverts the lot. **Export N** exports the ticked calls. With **Not captured** on, endpoints that are paused and have no calls listed can be ticked too. Esc or **Cancel** leaves selection.
 
 ### Testing tools (QA)
 

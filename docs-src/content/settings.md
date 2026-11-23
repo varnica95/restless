@@ -6,7 +6,7 @@ lead: Theme, panel position, shortcut, and sharing your setup.
 
 ## Look and feel
 
-Choose **light**, **dark** or **system**, and dock the panel left, right, top or bottom, or let it float.
+Choose **light**, **dark** or **system**, and dock the panel left, right, top or bottom, or let it float. **Request count on icon** turns the number on the toolbar icon on or off.
 
 ## Shortcut
 
