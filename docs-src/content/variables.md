@@ -17,7 +17,7 @@ Type `{{name}}` in a request's path, query params, headers or body. Typing `{{` 
 - **Global** variables work everywhere.
 - An **environment's** own variables apply while you send there, and win over a global one with the same name.
 
-Manage them under **Rules → Variables**: click one to edit it, or use **⋯** to move, copy or delete it. **Secret** values stay hidden.
+Manage them under **Rules → Variables**: click one to edit it, or use **⋯** to move, copy or delete it.
 
 ## Chain requests
 
@@ -27,4 +27,4 @@ Manage them under **Rules → Variables**: click one to edit it, or use **⋯** 
 
 With **Update from every response** on, the variable follows that endpoint: your runs and the app's own calls keep it current.
 
-> **Good to know:** variables are saved for this site and included in **Settings → Export**. Secret values are only exported with **Include tokens**.
+> **Good to know:** variables are saved for this site and included in **Settings → Export**.

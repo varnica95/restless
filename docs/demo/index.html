@@ -40,7 +40,6 @@
       <li>The <b>Where &amp; as</b> chip in the panel's header lists each environment with its own users. Add an environment and drag a user onto it.</li>
       <li><b>API Docs</b> tab: hover an endpoint and click <b>Mock</b> to answer it without the server (listed under <b>Rules → Mock endpoints</b>).</li>
       <li>Open <b>GET /api/admin/audit</b> → ⋯ → Run &amp; simulate → <b>Run as every user</b>: on Default, Admin gets 200, Viewer 403. Open <b>POST /api/tasks</b> → ⋯ → Testing &amp; debugging → <b>Test edge cases</b>.</li>
-      <li>Closed the panel? Press <b>Ctrl+Y</b> or reload the page to bring it back.</li>
       <li><b>API Docs</b> tab: the demo's API (Projects, Tasks, Users, Reports, Admin) is already loaded. Try an endpoint, or load other docs by URL or JSON.</li>
     </ul>
   </div>
@@ -13043,8 +13042,7 @@
       const isNew = !v;
       const hasEnvs = envState.list.length > 0;
       const nameIn = h('input', { class: 'pf-tok mono var-name', value: v?.name || varsUi.add?.name || '', placeholder: 'orderId', 'aria-label': 'Name', spellcheck: 'false', maxlength: '64' });
-      const valIn = h('input', { class: 'pf-tok mono var-val', value: v?.value ?? '', placeholder: 'Value', 'aria-label': 'Value', spellcheck: 'false', autocomplete: 'off', type: v?.secret ? 'password' : 'text' });
-      const secret = h('input', { type: 'checkbox', checked: !!v?.secret, onchange: () => { valIn.type = secret.checked ? 'password' : 'text'; } });
+      const valIn = h('input', { class: 'pf-tok mono var-val', value: v?.value ?? '', placeholder: 'Value', 'aria-label': 'Value', spellcheck: 'false', autocomplete: 'off' });
       let scope = sc;
       const scopePick = isNew && hasEnvs ? scopeSelect(scope, (x) => { scope = x; }) : null;
       const err = h('div', { class: 'valid bad', hidden: true });
@@ -13054,8 +13052,9 @@
         const name = nameIn.value.trim();
         if (!VAR_NAME.test(name)) { err.hidden = false; err.textContent = 'Use letters, digits, _ . or -, starting with a letter or _.'; nameIn.focus(); return; }
         if ((isNew || name !== v.name) && varsApi.get(scope, name)) { err.hidden = false; err.textContent = `${scopeName(scope)} already has {{${name}}}.`; nameIn.focus(); return; }
-        if (isNew) varsApi.set(scope, name, { value: valIn.value, secret: secret.checked || undefined });
-        else varsApi.set(sc, v.name, { name, value: valIn.value, secret: secret.checked || undefined });
+        // Editing shows the value, so a variable marked secret (e.g. from an imported file) stops being hidden.
+        if (isNew) varsApi.set(scope, name, { value: valIn.value });
+        else varsApi.set(sc, v.name, { name, value: valIn.value, secret: undefined });
         varsUi.editing = null; varsUi.add = null;
         draw(true);
       };
@@ -13065,7 +13064,6 @@
         fld('Name', nameIn),
         fld('Value', valIn),
         scopePick ? fld('Where', scopePick) : null,
-        h('label', { class: 'chk var-secret' }, secret, h('span', {}, 'Secret: hide the value')),
         src ? h('div', { class: 'muted var-srcnote' }, `Updates from every response of ${src.label} · ${pathLabel(src.path)}. `, stopSrc) : null,
         err,
       ].filter(Boolean), save, cancel, { saveLabel: isNew ? 'Add variable' : 'Save', title: isNew ? 'New variable' : `Edit {{${v.name}}}` });
@@ -13368,10 +13366,25 @@
     b.onclick = () => run(c);
     grid.append(b);
   }
-  // Ctrl+Y toggles the panel, like the extension's default shortcut.
-  addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'y') { e.preventDefault(); postMessage({ __apiPeek: 'log' }, '*'); }
-  }, true);
+  // The panel is always shown in the demo, with no button needed: it opens on load, has no minimize
+  // button, and opens again if something hides it (Esc, or the shortcut). This also covers a browser
+  // that has RESTless installed: the installed copy then runs this page, starts hidden, and gets opened
+  // the same way (the toggle message works for both).
+  let lastToggle = 0;
+  const keepOpen = () => {
+    const root = document.querySelector('api-peek-root')?.shadowRoot;
+    if (root && !root.querySelector('style[data-demo]')) {
+      const st = document.createElement('style');
+      st.dataset.demo = '1';
+      st.textContent = '.minbtn { display: none !important; }';
+      root.append(st);
+    }
+    const dock = root?.querySelector('.dock');
+    const shown = dock && !dock.hidden && dock.getBoundingClientRect().width > 0;
+    if (!shown && Date.now() - lastToggle > 1200) { lastToggle = Date.now(); postMessage({ __apiPeek: 'log' }, '*'); }
+  };
+  setTimeout(keepOpen, 300);
+  setInterval(keepOpen, 600);
   // Some traffic to start with, like an app loading, plus a poll.
   (async () => {
     for (const c of [calls[0], calls[1], calls[6], calls[2], calls[7], calls[1], calls[4], calls[8], calls[5], calls[9], calls[0]]) { await run(c); }

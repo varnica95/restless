@@ -11169,8 +11169,7 @@
       const isNew = !v;
       const hasEnvs = envState.list.length > 0;
       const nameIn = h('input', { class: 'pf-tok mono var-name', value: v?.name || varsUi.add?.name || '', placeholder: 'orderId', 'aria-label': 'Name', spellcheck: 'false', maxlength: '64' });
-      const valIn = h('input', { class: 'pf-tok mono var-val', value: v?.value ?? '', placeholder: 'Value', 'aria-label': 'Value', spellcheck: 'false', autocomplete: 'off', type: v?.secret ? 'password' : 'text' });
-      const secret = h('input', { type: 'checkbox', checked: !!v?.secret, onchange: () => { valIn.type = secret.checked ? 'password' : 'text'; } });
+      const valIn = h('input', { class: 'pf-tok mono var-val', value: v?.value ?? '', placeholder: 'Value', 'aria-label': 'Value', spellcheck: 'false', autocomplete: 'off' });
       let scope = sc;
       const scopePick = isNew && hasEnvs ? scopeSelect(scope, (x) => { scope = x; }) : null;
       const err = h('div', { class: 'valid bad', hidden: true });
@@ -11180,8 +11179,9 @@
         const name = nameIn.value.trim();
         if (!VAR_NAME.test(name)) { err.hidden = false; err.textContent = 'Use letters, digits, _ . or -, starting with a letter or _.'; nameIn.focus(); return; }
         if ((isNew || name !== v.name) && varsApi.get(scope, name)) { err.hidden = false; err.textContent = `${scopeName(scope)} already has {{${name}}}.`; nameIn.focus(); return; }
-        if (isNew) varsApi.set(scope, name, { value: valIn.value, secret: secret.checked || undefined });
-        else varsApi.set(sc, v.name, { name, value: valIn.value, secret: secret.checked || undefined });
+        // Editing shows the value, so a variable marked secret (e.g. from an imported file) stops being hidden.
+        if (isNew) varsApi.set(scope, name, { value: valIn.value });
+        else varsApi.set(sc, v.name, { name, value: valIn.value, secret: undefined });
         varsUi.editing = null; varsUi.add = null;
         draw(true);
       };
@@ -11191,7 +11191,6 @@
         fld('Name', nameIn),
         fld('Value', valIn),
         scopePick ? fld('Where', scopePick) : null,
-        h('label', { class: 'chk var-secret' }, secret, h('span', {}, 'Secret: hide the value')),
         src ? h('div', { class: 'muted var-srcnote' }, `Updates from every response of ${src.label} · ${pathLabel(src.path)}. `, stopSrc) : null,
         err,
       ].filter(Boolean), save, cancel, { saveLabel: isNew ? 'Add variable' : 'Save', title: isNew ? 'New variable' : `Edit {{${v.name}}}` });
