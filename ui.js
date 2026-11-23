@@ -3162,6 +3162,26 @@
       .su-view .var-row { grid-template-columns: minmax(56px, max-content) minmax(0, 1fr) 18px 28px; padding-top: 0; padding-bottom: 0; }
       .su-view .var-row .newwrap { grid-column: auto; grid-row: auto; }
     }
+
+    /* ================= 0.94: Send to / Send as chip in words ================= */
+    button.wachip.hbox { max-width: 240px; }
+    .wachip .wa-as { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--dim); font-weight: 400; flex: 0 1 auto; }
+    .wachip .wa-as.bad { color: var(--bad); }
+    button.wachip.hbox:has(.wa-as) { padding-right: 12px; }
+    button.wachip.hbox:has(.wa-as) .wa-av { display: none; }
+    button.wachip.pre .wa-as { display: none; }
+    @container rlhead (max-width: 420px) {
+      button.wachip.hbox { max-width: 170px; }
+      button.wachip.hbox .wa-as { display: none; }
+      button.wachip.hbox:has(.wa-as) .wa-av { display: inline-grid; }
+      button.wachip.hbox:has(.wa-as) { padding-right: 4px; }
+    }
+    /* View ▾ (By endpoint / Every call) */
+    .vpick-wrap { display: inline-flex; flex: none; }
+    .vpick-ic { display: inline-grid; place-items: center; width: 14px; height: 14px; color: var(--dim); }
+    .vpick-ic svg { width: 13px; height: 13px; }
+    button.fchip.vpick .fmore-face { gap: 6px; }
+    @container rlmain (max-width: 360px) { .vpick-l { display: none; } }
   `;
 
   // ---------- helpers
@@ -3721,16 +3741,19 @@
     if (ex?.expired) av.append(h('span', { class: 'wa-badge' }));
     return av;
   }
-  // The chip: environment dot and name, and the avatar of the user requests go out as.
+  // The chip: where requests go and who they go as, in words: "● Staging · as Ana". On a narrow header,
+  // and in the small chip on a request, the user shows as an avatar instead (CSS picks).
   function whereAsChip({ cls = '' } = {}) {
     const env = envApi.active();
     const key = curUserKey();
     const p = userByKey(key);
     const ex = p ? userExpiry(p) : null;
-    const tip = `Where: ${env.name}${env.id == null ? ` (${appHostLabel()})` : ` (${hostOf(env.url)})`} · As: ${userName(key)}.${ex?.expired ? ` ${userName(key)}'s token ${ex.text}.` : ''} Change`;
+    const tip = `Send to: ${env.name}${env.id == null ? ` (${appHostLabel()})` : ` (${hostOf(env.url)})`} · Send as: ${userName(key)}.${ex?.expired ? ` ${userName(key)}'s token ${ex.text}.` : ''} Change`;
     return h('button', { type: 'button', class: `wachip${cls ? ` ${cls}` : ''}${env.id == null ? ' app' : ''}`, style: envStyle(env), title: tip, 'aria-label': tip, 'aria-haspopup': 'dialog',
       onclick: () => openWhereAs() },
-    envDot(env), h('span', { class: 'wa-env' }, env.name), userAvatar(key));
+    envDot(env), h('span', { class: 'wa-env' }, env.name),
+    key ? h('span', { class: `wa-as${ex?.expired ? ' bad' : ''}` }, `· as ${userName(key)}`) : null,
+    userAvatar(key));
   }
   // Pick a user: its environment becomes the active one too (users only go to their own environment).
   function pickUser(key) {
@@ -3828,7 +3851,7 @@
     let adding = add; // 'env', or 'u:<environment key>' (a new user in that environment; '' is Default)
     let reveal = false;
     let dragging = null; // the id of the user being dragged
-    const { card, body, wrap, closeBtn } = dlgShell({ id: 'wa', title: 'Where & as', cls: 'wadlg',
+    const { card, body, wrap, closeBtn } = dlgShell({ id: 'wa', title: 'Send to / Send as', cls: 'wadlg',
       intro: 'Where your requests go, and who they’re sent as.',
       tip: 'Each user belongs to one environment and is only sent there. Run, Bulk and API Docs use this; the app’s own calls keep their server. Another server must allow calls from this page (CORS). Tokens stay in this browser (this site’s localStorage). Drag a user onto another environment to move it.' });
     const listEl = h('div', { class: 'wa-list' });
@@ -6409,7 +6432,7 @@
       entry.dryRun ? h('span', { class: 'tag dry', title: 'Recorded without sending: it was never sent' }, 'not sent') : null,
       entry.netMode ? h('span', { class: `tag netmode ${entry.netMode}`, title: netTagTip(entry) }, 'Offline') : null,
       !entry.netMode && !entry.mocked && (entry.simulated || entry.delayedMs) ? h('span', { class: 'tag simlive', title: simTagTip(entry) }, 'Simulated') : null,
-      entry.asProfile ? h('span', { class: 'tag prof', title: `Sent as the user "${entry.asProfile}" (Where & as)` }, `as ${entry.asProfile}`) : null,
+      entry.asProfile ? h('span', { class: 'tag prof', title: `Sent as the user "${entry.asProfile}" (Send to / Send as)` }, `as ${entry.asProfile}`) : null,
       entry.prev ? h('span', { class: 'tag prev', title: 'Captured before the page reloaded' }, 'before reload') : null,
     ].filter(Boolean);
     const head = h('div', { class: 'rq-head' },
@@ -6550,7 +6573,7 @@
         r ? docsIndicator() : null,
         ...callTagsEl(),
         mockSource(),
-        d.copy && d.copy.asProfile && d.respSource !== 'app' ? h('span', { class: 'tag prof', title: `Your run was sent as the user "${d.copy.asProfile}" (Where & as)` }, `as ${d.copy.asProfile}`) : null,
+        d.copy && d.copy.asProfile && d.respSource !== 'app' ? h('span', { class: 'tag prof', title: `Your run was sent as the user "${d.copy.asProfile}" (Send to / Send as)` }, `as ${d.copy.asProfile}`) : null,
       ].filter(Boolean));
     }
 
@@ -6854,17 +6877,19 @@
         const prev = rs.find((x) => x.at < entry.startedAt) || rs[0];
         const hasA = sources.length > 0;
         const items = [
-          hasA && prev ? { id: 'cmp-prev', label: `${prev.at < entry.startedAt ? 'Previous' : 'Newer'} call · ${prev.label.split(' · ')[1]}`, sub: prev.sub, run: () => startCmp(prev.id) } : null,
+          hasA && prev ? { id: 'cmp-prev', section: 'Another response', label: `${prev.at < entry.startedAt ? 'Previous' : 'Newer'} call · ${prev.label.split(' · ')[1]}`, sub: prev.sub, run: () => startCmp(prev.id) } : null,
           hasA && entry.responseText != null && sources.some((x) => x.id === 'copy') ? { id: 'cmp-run', label: 'Your run', sub: sources.find((x) => x.id === 'copy').sub, run: () => startCmp('copy') } : null,
           entry.responseText != null ? { id: 'cmp-pick', label: 'Another call…', sub: 'Pick it in the list, any endpoint', run: () => startComparePick(entry) } : null,
-          ...(hasA ? others : []).map((e, i) => ({ id: `ce-${e.id ?? 'local'}`, env: e, label: e.name, sub: `Send it to ${hostOf(e.url)} too`, section: i === 0 ? 'Same request, other environment' : null, run: () => runOnEnv(e) })),
+          ...(hasA ? others : []).map((e, i) => ({ id: `ce-${e.id ?? 'local'}`, env: e, label: e.name, sub: `Send it to ${hostOf(e.url)} too`, section: i === 0 ? 'Another environment' : null, run: () => runOnEnv(e) })),
         ].filter(Boolean);
         if (!items.length) return null;
         const face = h('span', { class: 'rvlabel-w' });
         const ic = h('span', { class: 'advico', 'aria-hidden': 'true' }); setHTML(ic, ICONS.compare);
-        face.append(ic, h('span', { class: 'rvlabel' }, 'Compare'));
-        const c = h('span', { class: 'prof-chev', 'aria-hidden': 'true' }); setHTML(c, ICONS.chev); face.append(c);
-        return dropMenu('Compare', items, { icon: face, btnClass: 'rvtool cmpmenu', persistent: cleanups, align: 'right', title: 'Compare this response with another one' });
+        face.append(ic, h('span', { class: 'rvlabel' }, 'Compare…'));
+        // The first item opens the "Another response" group when there's no previous call or run to show.
+        if (items[0] && !items[0].section && items[0].id === 'cmp-pick') items[0] = { ...items[0], section: 'Another response' };
+        if (items[0]?.id === 'cmp-run') items[0] = { ...items[0], section: 'Another response' };
+        return dropMenu('Compare with', items, { icon: face, btnClass: 'rvtool cmpmenu', persistent: cleanups, align: 'right', title: 'Compare this response with another response or another environment' });
       })();
 
       if (src === 'compare') return compareView(sources, group);
@@ -6932,18 +6957,6 @@
         h('div', { class: 'muted dp-foot' }, 'Not sent yet. Press Run to see the real response.'));
     }
 
-    // "Compare with ▾": send the same request to another environment and compare the answers.
-    function cmpEnvBtn() {
-      if (!envState.list.length) return null;
-      const items = envApi.all().map((e) => ({ id: `ce-${e.id ?? 'local'}`, env: e, label: e.name, sub: hostOf(e.url), section: e.id == null ? 'Send it there too and compare' : null,
-        run: () => runOnEnv(e) }));
-      const face = h('span', { class: 'rvlabel-w' });
-      const i = h('span', { class: 'advico', 'aria-hidden': 'true' }); setHTML(i, ICONS.globe);
-      face.append(i, h('span', { class: 'rvlabel' }, 'Compare with'));
-      const c = h('span', { class: 'prof-chev', 'aria-hidden': 'true' }); setHTML(c, ICONS.chev); face.append(c);
-      return dropMenu('Compare with another environment', items, { icon: face, btnClass: 'rvtool cmpenv', persistent: cleanups, align: 'right',
-        title: 'Send the same request to another environment and compare the two responses' });
-    }
     // Send the same request to another environment and compare it (as B) with the app's response or your run.
     // A failed send still opens the comparison, with the error in place of B's response.
     async function runOnEnv(env) {
@@ -7139,7 +7152,7 @@
       }
       return h('div', { class: 'cmpwrap' }, headRow, bar, h('div', { class: 'cmp-body' }, ...body.flat().filter(Boolean)), ignFoot);
     }
-    // ---------- Run as every user: the same request once per user (Where & as), statuses side by side.
+    // ---------- Run as every user: the same request once per user (Send to / Send as), statuses side by side.
     async function runAsEveryUser() {
       if (!routeOk() || !headersOk() || !bodyOk()) { say('Fix the request first.', 'warn'); return; }
       if (!varsReady()) return;
@@ -10579,13 +10592,18 @@
     // ---- filters: Filters ▾ · Errors N · Clear, and the view switch on the right
     const chips = h('div', { class: 'fchips', role: 'group', 'aria-label': 'Filter requests' });
 
-    const seg = h('div', { class: 'vseg', role: 'group', 'aria-label': 'View' });
-    const drawSeg = () => seg.replaceChildren(...[['grouped', 'Group by endpoint', 'grid'], ['timeline', 'Every call', 'list']].map(([id, tip, icon]) => {
-      const b = h('button', { type: 'button', class: reqView.mode === id ? 'on' : '', title: tip, 'aria-label': tip, 'aria-pressed': reqView.mode === id ? 'true' : 'false',
-        onclick: () => { reqView.mode = id; ss.set('__apiPeek.reqView', id); drawSeg(); renderList(); } });
-      setHTML(b, ICONS[icon]);
-      return b;
-    }));
+    // View ▾: By endpoint (grouped) or Every call (timeline), in words rather than two icons.
+    const seg = h('span', { class: 'vpick-wrap' });
+    const VIEWS = [['grouped', 'By endpoint', 'grid', 'One row per endpoint, with its latest call'], ['timeline', 'Every call', 'list', 'Every call in time order']];
+    const drawSeg = () => {
+      const cur = VIEWS.find(([id]) => id === reqView.mode) || VIEWS[0];
+      const ic = h('span', { class: 'vpick-ic', 'aria-hidden': 'true' }); setHTML(ic, ICONS[cur[2]]);
+      const chev = h('span', { class: 'smode-chev', 'aria-hidden': 'true' }); setHTML(chev, ICONS.chev);
+      const face = h('span', { class: 'fmore-face' }, ic, h('span', { class: 'vpick-l' }, cur[1]), chev);
+      seg.replaceChildren(dropMenu('View', VIEWS.map(([id, label, , sub]) => ({ id: `view-${id}`, label, sub, checked: reqView.mode === id,
+        run: () => { reqView.mode = id; ss.set('__apiPeek.reqView', id); drawSeg(); renderList(); } })),
+      { icon: face, btnClass: 'fchip vpick', title: `View: ${cur[1]}`, align: 'right' }));
+    };
     drawSeg();
 
     const stats = h('span', { class: 'rstats-t', 'aria-live': 'polite' });
@@ -10616,7 +10634,7 @@
       dupMap.has(r) ? h('span', { class: 'dupdot', title: dupTitle(dupMap.get(r)), 'aria-label': 'Duplicate call' }) : null,
       isSlow(r) ? h('span', { class: 'tag slow', title: `Took ${fmtDur(r.durationMs)} (1 s or more)` }, 'slow') : null,
       isLarge(r) ? h('span', { class: 'tag slow', title: `The response is ${fmtSize(r.responseSize)} (1 MB or more)` }, 'large') : null,
-      r.asProfile ? h('span', { class: 'tag prof', title: `Sent as the user "${r.asProfile}" (Where & as)` }, `as ${r.asProfile}`) : null,
+      r.asProfile ? h('span', { class: 'tag prof', title: `Sent as the user "${r.asProfile}" (Send to / Send as)` }, `as ${r.asProfile}`) : null,
       reqRewritten(r) ? iconTag('rw', 'pencil', 'rewritten', 'Changed on the way out by a rewrite rule') : null,
       r.dryRun ? h('span', { class: 'tag dry', title: 'Recorded without sending' }, 'not sent') : null,
       r.paused ? h('span', { class: 'tag pz' }, 'paused') : null,
@@ -10730,7 +10748,7 @@
           ? item('mute', 'Show in list', 'eye', () => setStopped(r, false))
           : item('mute', 'Hide from list', 'eyeoff', () => setStopped(r, true), { title: 'Stop listing new calls to this endpoint. They still go out as usual' }),
         r.stub ? null : item('export', many ? `Export ${group.calls.length} calls…` : 'Export…', 'download', () => openExport(many ? group.calls : [r], { onChoose: (ids) => startPicking(ids) })),
-        r.responseText != null ? item('cmp', 'Compare with…', 'compare', () => startComparePick(r), { title: 'Then click the call to compare it with (any endpoint)' }) : null,
+        r.responseText != null ? item('cmp', 'Compare…', 'compare', () => startComparePick(r), { title: 'Then click the call to compare it with (any endpoint)' }) : null,
         copyAs,
       ].filter(Boolean);
       // Hovering another item closes the flyout.
