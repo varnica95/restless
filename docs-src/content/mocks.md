@@ -20,6 +20,6 @@ No docs? Use **Setup → Overrides → +** and type the path.
 
 In **Setup → Overrides**: switch a mock off and on, click it to edit, or use **⋯** to duplicate or delete it.
 
-Calls answered by a mock show a **Mocked** tag. Click it to edit the mock.
+Calls answered by a mock show a **Changed** tag. Click it to edit the mock.
 
 > **Good to know:** mocks work in your browser while RESTless is on. Other browsers, servers and tools like Postman still reach the real API.

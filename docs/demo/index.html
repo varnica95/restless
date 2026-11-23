@@ -1872,10 +1872,8 @@
 </script>
 <script>
 // RESTless — docked side panel (MAIN world, rendered inside a shadow root).
-// Everything lives in one panel docked to the right edge: Inspect, Requests, Rules, Settings,
-// plus a response pane at the bottom. It can be minimized to a small tab or hidden.
-// Inspect gesture (default Ctrl+click, configurable) → inspect an element
-// Right-click → "Inspect API call"                      → same
+// One panel (docked to a side, or floating) with three tabs: Requests, Setup (variables and overrides) and
+// API Docs, plus Settings behind the gear. Requests open in tabs of their own.
 // Toolbar icon or the toggle shortcut (default Ctrl+Y, also Control+Y on Mac; editable at chrome://extensions/shortcuts) → show / hide
 (() => {
   const core = window.__apiPeekCore;
@@ -5055,6 +5053,10 @@
     .vpick-ic svg { width: 13px; height: 13px; }
     button.fchip.vpick .fmore-face { gap: 6px; }
     @container rlmain (max-width: 360px) { .vpick-l { display: none; } }
+    /* 0.95: From: App | Your run */
+    .srcseg .srcseg-l { align-self: center; padding: 0 4px 0 6px; font-size: 11px; color: var(--dim); }
+    .tag.changed.tagbtn { cursor: pointer; }
+    .lrow .tag.changed, .lrow .tag.simlive { flex: none; }
   `;
 
   // ---------- helpers
@@ -8301,10 +8303,10 @@
     };
     // Tags about the call itself; shown in the Response header after status, time, size and age.
     const callTagsEl = () => [
-      reqRewritten(entry) ? h('button', { type: 'button', class: 'tag rw tagbtn', title: 'A rewrite rule changed this call. Click to see the original.', onclick: () => { original.hidden = !original.hidden; } }, 'rewritten') : null,
+      changedTag(entry, reqRewritten(entry) ? { onClick: () => { original.hidden = !original.hidden; }, clickHint: 'Click to see the original request.' }
+        : entry.mocked ? { onClick: () => editMockFor(entry), clickHint: 'Click to edit the mock.' } : {}),
       entry.dryRun ? h('span', { class: 'tag dry', title: 'Recorded without sending: it was never sent' }, 'not sent') : null,
       entry.netMode ? h('span', { class: `tag netmode ${entry.netMode}`, title: netTagTip(entry) }, 'Offline') : null,
-      !entry.netMode && !entry.mocked && (entry.simulated || entry.delayedMs) ? h('span', { class: 'tag simlive', title: simTagTip(entry) }, 'Simulated') : null,
       entry.asProfile ? h('span', { class: 'tag prof', title: `Sent as the user "${entry.asProfile}" (Send to / Send as)` }, `as ${entry.asProfile}`) : null,
       entry.prev ? h('span', { class: 'tag prev', title: 'Captured before the page reloaded' }, 'before reload') : null,
     ].filter(Boolean);
@@ -8736,7 +8738,8 @@
         entry.responseText != null ? ['app', 'App', entry.status, `Response the app received${envState.list.length && envOfUrl(entry.url)?.id != null ? ` (${envOfUrl(entry.url).name})` : ''}`] : null,
         d.copy && !d.copy.preview ? (['copy', `${entry.manual ? 'Response' : 'Your run'}${d.copy.env && envState.list.length ? ` · ${d.copy.env}` : ''}`, d.copy.status, `Response to your Run${d.copy.sentTo ? ` (${d.copy.sentTo})` : ''}. The app didn't see it.`]) : null,
       ].filter(Boolean);
-      const srcSeg = srcDef.length > 1 ? h('div', { class: 'srcseg', role: 'group', 'aria-label': 'Which response' }, srcDef.map(([id, label, st, title]) => h('button', {
+      // "From: App | Your run": which response you're looking at, labelled so it's not mistaken for a toolbar icon.
+      const srcSeg = srcDef.length > 1 ? h('div', { class: 'srcseg', role: 'group', 'aria-label': 'Response from' }, h('span', { class: 'srcseg-l', 'aria-hidden': 'true' }, 'From'), ...srcDef.map(([id, label, st, title]) => h('button', {
         type: 'button', class: src === id ? 'on' : '', 'aria-pressed': String(src === id), title,
         onclick: () => { d.respSource = id; drawLower(); drawLowerHead(); },
       }, label, h('span', { class: `sdot2 ${statusTone(st)}`, 'aria-hidden': 'true' })))) : null;
@@ -10573,7 +10576,7 @@
         ? { id: 'mute', label: 'Show in list', icon: ICONS.eye, run: () => { setCapturePaused(entry, false); buildMenu(); } }
         : { id: 'mute', label: 'Hide from list', icon: ICONS.eyeoff, title: 'Stop listing new calls to this endpoint. They still go out as usual', run: () => { setCapturePaused(entry, true); buildMenu(); } };
       const openTool = (id) => { d.lower = d.lower === id && !(id === 'simulate' && simState() !== 'off') ? 'response' : id; drawLower(); drawLowerHead(); drawBar(); requestAnimationFrame(() => toolCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' })); buildMenu(); };
-      // Compact menu: a few direct actions, then three submenus (Copy as, Run & simulate, Testing & debugging),
+      // Compact menu: a few direct actions, then three submenus (Copy as, Send copies, Change the app's call),
       // then Apply / Reload. Second lines only show state (Open, On); the rest is in tooltips.
       const simItem = entry.manual
         ? { id: 'simulate', label: 'Simulate response…', icon: ICONS.flask, disabled: true, sub: 'Only for the app\'s own calls',
@@ -10587,14 +10590,17 @@
       const pinItem = { id: 'pin', label: core.pins.has(pkey) ? 'Unpin endpoint' : 'Pin endpoint', title: core.pins.has(pkey) ? 'Remove it from the top of Requests' : 'Keep it at the top of Requests', icon: ICONS.pin,
         run: () => { const on = !core.pins.has(pkey); core.pins.set(pkey, on); toast(on ? 'Pinned to the top of Requests' : 'Unpinned', '', 2500, { label: 'Undo', run: () => core.pins.set(pkey, !on) }); } };
       const dupItem = { id: 'dup', label: 'Duplicate request', title: 'A copy you can edit and run on its own', icon: ICONS.dup, run: duplicate };
-      const runMenu = { id: 'run-sub', label: 'Run & simulate', icon: ICONS.play, sepBefore: true, children: [simItem, bulkItem, runAllItem],
-        sub: ['simulate', 'mock'].includes(d.lower) ? 'Open below' : null };
-      const testKids = [edgeItem, ...(entry.manual ? [] : [
+      // Two submenus by intent: send copies of this request yourself, or change what the app's own call does.
+      const bpKids = entry.manual ? [] : [
         { id: 'bp-next', label: 'Break on next call', sub: bp?.once ? 'On · click to turn off' : null, title: 'Pause the app\'s next call to this endpoint so you can edit, continue or drop it', icon: ICONS.pause, checked: bp?.once === true, run: () => setBreak(true) },
         { id: 'bp-every', label: 'Break on every call', sub: bp && !bp.once ? 'On · click to turn off' : null, title: 'Pause every call to this endpoint until you remove the breakpoint (also in Setup)', icon: ICONS.pause, checked: !!bp && !bp.once, run: () => setBreak(false) },
-      ])];
-      const testMenu = { id: 'test-sub', label: 'Testing & debugging', icon: ICONS.spark, children: testKids,
-        sub: bp ? `Breakpoint on: ${bp.once ? 'next call' : 'every call'}` : d.lower === 'edge' ? 'Open below' : null };
+      ];
+      const runMenu = { id: 'run-sub', label: 'Send copies', icon: ICONS.play, sepBefore: true, title: 'Send this request yourself, several times or several ways; the app doesn\'t see these',
+        children: [bulkItem, runAllItem, edgeItem].filter(Boolean),
+        sub: d.lower === 'edge' ? 'Open below' : null };
+      const testMenu = entry.manual ? null : { id: 'test-sub', label: 'Change the app\'s call', icon: ICONS.spark, title: 'Fake the response the app gets, or pause its call before it goes out',
+        children: [simItem, ...bpKids].filter(Boolean),
+        sub: bp ? `Breakpoint on: ${bp.once ? 'next call' : 'every call'}` : ['simulate', 'mock'].includes(d.lower) ? 'Open below' : null };
       const mockItem = (entry.mocked || d.copy?.mocked) && mockOf(d.copy?.mocked ? d.copy : entry)
         ? { id: 'editmock', label: 'Edit mock', icon: ICONS.cube, title: 'The response came from a mock endpoint', run: () => editMockFor(d.copy?.mocked ? d.copy : entry) } : null;
       applyWas = canApply();
@@ -10976,6 +10982,21 @@
   const reqRewritten = (r) => !!(r.rewrittenBy && ((r.originalUrl && absUrl(r.originalUrl) !== absUrl(r.url)) || r.originalMethod || ('originalBody' in r && String(r.originalBody ?? '') !== String(r.body ?? '')) || (r.originalHeaders && hdrKey(r.originalHeaders) !== hdrKey(r.headers))));
   const netTagTip = () => 'Offline: this call failed as if there’s no internet (this tab is offline).';
   // Tooltip of the one "Simulated" tag on a call: what the app got instead of the server's answer.
+  // One "Changed" tag for any change RESTless made to a call: rewritten on the way out, answered by a mock,
+  // or a simulated / delayed response. The tooltip lists which. onClick makes it a button (e.g. edit the mock).
+  function changedTag(r, { noSim = false, onClick = null, clickHint = '' } = {}) {
+    if (r.netMode) return null; // Offline has its own tag
+    const parts = [
+      reqRewritten(r) ? 'Rewritten on the way out by a rule' : null,
+      r.mocked ? `Answered by the mock endpoint ${r.mocked}, not the server` : null,
+      !noSim && !r.mocked && (r.simulated || r.delayedMs) ? simTagTip(r) : null,
+    ].filter(Boolean);
+    if (!parts.length) return null;
+    const title = `Changed by RESTless:\n• ${parts.join('\n• ')}${clickHint ? `\n${clickHint}` : ''}`;
+    if (!onClick) return h('span', { class: 'tag simlive changed', title }, 'Changed');
+    return h('button', { type: 'button', class: 'tag simlive changed tagbtn', title,
+      onclick: (e) => { e.stopPropagation(); onClick(); }, onkeydown: (e) => e.stopPropagation() }, 'Changed');
+  }
   function simTagTip(r) {
     const what = r.simulated ? ({ 'network error': 'a network failure', 'no response': 'no response' })[r.simulated] || (String(r.simulated).startsWith('mock ') ? `a simulated ${String(r.simulated).slice(5)} response` : 'a simulated response') : 'the real response';
     return `Simulated: the app got ${what}${r.delayedMs ? `, ${fmtDur(r.delayedMs)} late` : ''}, not the server's answer.`;
@@ -11448,12 +11469,10 @@
       (id) => { set({ position: id }); syncDocked(); }, 'Position');
     syncDocked();
     const badgeSw = sw(prefs.badgeCount !== false, 'Request count on the toolbar icon', (on) => set({ badgeCount: on }));
-    const look = h('section', { class: 'st-sec' }, head('Appearance and panel'),
+    const look = h('section', { class: 'st-sec' }, head('Appearance'),
       row('Theme', null, theme),
       row('Position', null, position),
-      dockedRow,
-      row('Request count on icon', 'Show how many requests were captured on the RESTless toolbar icon.', badgeSw,
-        { tip: 'Applies to every site. Paused calls (‖2) and Offline (OFF) still show on the icon when this is off.' }));
+      dockedRow);
 
     // Shortcut: comes from Chrome (chrome://extensions/shortcuts).
     const k = h('span', { class: 'kbd' });
@@ -11492,13 +11511,18 @@
       if (confirming) resetBox.querySelector('.sbtn2')?.focus();
     };
     drawReset(false);
+    // This site: everything that's saved for just this site.
+    const recSw = sw(core.capture.on(), 'Record this site', (on) => { setCapture(on); saved(on ? 'Recording this site' : 'Recording off'); });
+    const site = h('section', { class: 'st-sec' }, head(`This site · ${location.host}`),
+      row('Record this site', 'Off: nothing here is recorded or changed. Same as the Recording switch above the request list.', recSw),
+      row('Keep after reload', 'Keep the request list across reloads and navigation (like Preserve log in DevTools).', keepSw,
+        { tip: 'Older calls get a history icon. Saved for this site; the log itself stays in this browser tab, up to 300 calls.' }),
+      row('Recorded clicks', 'Which element made which call.', forgetBtn));
     const adv = h('details', { class: 'st-sec sadv' },
       h('summary', {}, h('span', { class: 'st-head' }, 'Advanced')),
-      row('Keep after reload', 'Keep the request list across reloads and navigation (like Preserve log in DevTools).', keepSw,
-        { tip: 'Like DevTools. Older calls get a history icon. Saved for this site; the log itself stays in this browser tab, up to 300 calls.' }),
       row('Max open tabs (1–20)', 'The least recently used tab closes past the limit.', tabsIn),
-      h('div', { class: 'st-head sub' }, 'Stored data'),
-      row('Recorded clicks', 'Which element made which call, kept for this site.', forgetBtn),
+      row('Request count on icon', 'Show how many requests were captured on the RESTless toolbar icon.', badgeSw,
+        { tip: 'Applies to every site. Paused calls (‖2) and Offline (OFF) still show on the icon when this is off.' }),
       resetBox);
     adv.open = ss.get('__apiPeek.advOpen', '') === '1';
     adv.addEventListener('toggle', () => ss.set('__apiPeek.advOpen', adv.open ? '1' : ''));
@@ -11510,7 +11534,7 @@
       row('Import', 'From a RESTless settings file. You choose what to bring in.',
         h('button', { type: 'button', class: 'sbtn2 io-imp', onclick: importSettingsFile }, 'Import…')));
 
-    mainEl.append(h('div', { class: 'settings2' }, h('div', { class: 'st-title' }, h('h2', {}, 'Settings'), savedEl), look, keys, io, adv));
+    mainEl.append(h('div', { class: 'settings2' }, h('div', { class: 'st-title' }, h('h2', {}, 'Settings'), savedEl), look, keys, site, io, adv));
     if (flashOnRender) { saved(flashOnRender); flashOnRender = null; }
   }
   let flashOnRender = null;
@@ -12508,13 +12532,11 @@
       isSlow(r) ? h('span', { class: 'tag slow', title: `Took ${fmtDur(r.durationMs)} (1 s or more)` }, 'slow') : null,
       isLarge(r) ? h('span', { class: 'tag slow', title: `The response is ${fmtSize(r.responseSize)} (1 MB or more)` }, 'large') : null,
       r.asProfile ? h('span', { class: 'tag prof', title: `Sent as the user "${r.asProfile}" (Send to / Send as)` }, `as ${r.asProfile}`) : null,
-      reqRewritten(r) ? iconTag('rw', 'pencil', 'rewritten', 'Changed on the way out by a rewrite rule') : null,
       r.dryRun ? h('span', { class: 'tag dry', title: 'Recorded without sending' }, 'not sent') : null,
       r.paused ? h('span', { class: 'tag pz' }, 'paused') : null,
       r.manual ? iconTag('', 'user', 'yours', 'A request you made') : null,
       r.netMode ? h('span', { class: `tag netmode ${r.netMode}`, title: netTagTip(r) }, 'Offline') : null,
-      !r.netMode && r.mocked ? h('button', { type: 'button', class: 'tag mocked tagbtn', title: `Answered by the mock endpoint ${r.mocked}, not the server. Click to edit the mock.`, onclick: (e) => { e.stopPropagation(); editMockFor(r); }, onkeydown: (e) => e.stopPropagation() }, 'Mocked') : null,
-      !noSim && !r.netMode && !r.mocked && (r.simulated || r.delayedMs) ? h('span', { class: 'tag simlive', title: simTagTip(r) }, 'Simulated') : null,
+      changedTag(r, { noSim, onClick: r.mocked ? () => editMockFor(r) : null, clickHint: r.mocked ? 'Click to edit the mock.' : '' }),
       schemaTag(r),
     ];
     const isChanged = (r) => !!(r.rewrittenBy || r.simulated || r.delayedMs);
@@ -12538,7 +12560,7 @@
       const rule = core.rules.list().find((x) => x.enabled !== false && (x.respond || x.delayMs) && `${x.method} ${x.match}` === k);
       if (!rule) return null;
       const what = rule.respond ? ({ mock: `a ${rule.respond.status} response`, 'network-error': 'a network failure', hang: 'no response' })[rule.respond.mode] || 'a simulated response' : 'the real response';
-      return h('span', { class: 'tag simlive', title: `Simulated: the app gets ${what}${rule.delayMs ? `, ${fmtDur(rule.delayMs)} late` : ''}${rule.once ? ' (next call only)' : ' on every call'}. Turn it off in the call's Simulation card or in Setup.` }, 'Simulated');
+      return h('span', { class: 'tag simlive', title: `Simulated: the app gets ${what}${rule.delayMs ? `, ${fmtDur(rule.delayMs)} late` : ''}${rule.once ? ' (next call only)' : ' on every call'}. Turn it off in the call's Simulation card or in Setup.` }, 'Changed');
     };
     const stoppedTag = () => h('span', { class: 'tag stoptag', title: 'Hidden from the list: new calls to this endpoint go out as usual but aren\'t listed. Show it again from ⋯.' }, h('span', { class: 'st-l' }, 'hidden'), h('span', { class: 'st-s' }, 'hidden'));
     const setStopped = (r, on) => {
@@ -12871,7 +12893,8 @@
           h('span', { class: 'cnt-s' }, narrowed ? `${items.length}/${all.length}` : String(items.length))),
         h('span', { class: 'sdot' }, '·'),
         h('span', {}, part(groups.length, 'endpoint', 'endpoints')),
-        hidden ? [h('span', { class: 'sdot' }, '·'), h('button', { type: 'button', class: 'cap-note', title: 'Filtered out by the capture settings for this site. Open Settings to change them.', onclick: () => showTab('settings') }, `${hidden} hidden`)] : null,
+        hidden ? [h('span', { class: 'sdot' }, '·'), h('button', { type: 'button', class: 'cap-note', title: 'Left out by a capture filter saved by an older RESTless version. Click to remove the filter and list these calls from now on.',
+          onclick: () => { core.settings.set({}); toast('Old capture filter removed. New calls are listed again', '', 4000); } }, `${hidden} filtered out`)] : null,
       ].flat().filter(Boolean));
       const scroll = listBox.scrollTop;
 
@@ -13276,7 +13299,7 @@
       }
       const onN = items.filter((i) => i.x.enabled !== false).length;
       const info = h('span', { class: 'su-info', tabindex: '0', role: 'img', 'aria-label': 'Order: Offline, then rules and breakpoints, then mocks',
-        title: 'Order they apply in: Offline → rules and breakpoints (real calls) → mocks.\nRules and breakpoints are made from a request: ⋯ → Run & simulate, or Testing & debugging.' });
+        title: 'Order they apply in: Offline → rules and breakpoints (real calls) → mocks.\nRules and breakpoints are made from a request: ⋯ → Change the app\'s call.' });
       setHTML(info, ICONS.info);
       const plusBtn = h('button', { type: 'button', class: 'ibtn su-plus', 'aria-label': 'New mock endpoint', title: 'New mock endpoint', onclick: () => openMockEditor() });
       setHTML(plusBtn, ICONS.plus);

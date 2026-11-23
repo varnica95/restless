@@ -22,7 +22,6 @@ lead: Every API call your app makes, grouped by endpoint.
 
 | Tag | Means |
 |---|---|
-| **Simulated** | You changed what the app got back. |
-| **Mocked** | A mock endpoint answered. No server was called. |
+| **Changed** | RESTless changed this call: a rule rewrote it, a mock answered, or you simulated the response. Hover to see which. |
 | **Offline** | The call failed because the tab is offline. |
 | **yours** | A request you made, not the app. |

@@ -26,7 +26,7 @@ Give the app a different answer without touching the server: an **edited respons
 
 ## Pause a call
 
-**⋯ → Testing & debugging → Break on next call.** When the app makes it, the call waits for you: **Continue** (with your edits), **Send unchanged** or **Drop**.
+**⋯ → Change the app's call → Break on next call.** When the app makes it, the call waits for you: **Continue** (with your edits), **Send unchanged** or **Drop**.
 
 ## Also in ⋯
 
