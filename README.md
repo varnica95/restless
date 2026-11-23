@@ -222,11 +222,11 @@ Click any request to open it; it opens in a request tab. Esc (or the **Requests*
   - **Copy as ›**: *Request* (**URL**, **cURL**, **Fetch**, **Request body**, **Body as TypeScript**) and *Response* (**Response body**, **TypeScript**), copied as you see them here (with your edits, and the response that's showing).
   - **Run & simulate ›**: **Simulate response…**, **Run in bulk…**, **Run as every user…**.
   - **Testing & debugging ›**: **Test edge cases…**, **Break on next call**, **Break on every call** (ticked when set; click again to turn off). While a breakpoint is on, the item's second line says so (*Breakpoint on: next call*) and the ⋯ button turns purple.
-  - **Apply to application** (see below) and **Reload application** (save the change and reload, for calls the app only makes on page load).
+  - **Apply to app** (see below): one action; its subtitle says what it will do, e.g. *Re-runs “Search” on the page · keeps applying* or *Reloads the page · just once*.
   - Second lines only show state (*Open*, *Breakpoint on*); explanations are in the tooltips. Arrow keys move through the menu, → opens a submenu, ← or Esc goes back.
   - Your own requests have **Import cURL…** and **Delete request** instead of Pause capturing, the breakpoints and the app items; Simulate response is greyed out for them.
 
-**Edited bar**: when the request differs from the app's original call, one bar appears under the URL row: **● Edited** (hover for the list), **Reset** (back to the request as the app made it; a simulation keeps its own state in its card), the **Every call** switch and **Save rewrite rule**; once saved, **Saved as rewrite rule · View in Rules**. Messages (Copied, Applied, a failed request…) appear as one compact line below it. There is no separate status row: status, time, size and age are in the Response header.
+**Edited bar**: when the request differs from the app's original call, one bar appears under the URL row: **● Edited** (hover for the list), **Reset** (back to the request as the app made it; a simulation keeps its own state in its card), the **Keep applying** / **Just once** switch and **Save rewrite rule**; once saved, **Saved as rewrite rule · View in Setup**. Messages (Copied, Applied, a failed request…) appear as one compact line below it. There is no separate status row: status, time, size and age are in the Response header.
 
 **Request**: **Query (n)**, **Headers (n)** and **Body** tabs. Query and Headers are editable tables: a checkbox per row (untick to leave it out of Run, rules and Bulk without deleting it), no header row, inline editing, and small icons on hover: edit, delete and, per row, duplicate-with-next-index, show/hide secret, decode JWT, copy. **Edit as text** keeps disabled rows as `// key:value` lines.
 
@@ -263,7 +263,7 @@ Details:
 
 - **Simulate response** (**Simulate** in the Response header, or ⋯ → Run & simulate → Simulate response…; for the app's own calls) changes what the app gets back from this endpoint. It opens as a card above the Response. The card is the one place that shows the simulation's state, as a chip next to its title:
   - **Off**: the app gets the real response. The card is one row: the picker (*Pick what the app should get*). Only now can the card be closed (✕).
-  - **Draft**: a fake answer is picked but not live; *Not live. The app still gets the real response.* Below the picker: **Delay**, the options of the chosen answer, **Every call | Next call**, and one button: **Apply** (every call: makes it live and has the app repeat the call now, so the Response shows what it got) or **Arm** (next call: waits for the app's next call).
+  - **Draft**: a fake answer is picked but not live; *Not live. The app still gets the real response.* Below the picker: **Delay**, the options of the chosen answer, **Keep applying | Just once**, and one button: **Apply** (every call: makes it live and has the app repeat the call now, so the Response shows what it got) or **Arm** (next call: waits for the app's next call).
   - **Live · every call**: *The app gets this on every call. Changes apply right away.* Editing the answer, status, body or delay updates it at once. **Turn off**.
   - **Armed · next call**: *Waiting for the app's next call. Used once, then off.* **Turn off**.
   - **Used**: the next call got it; the Response shows that call. *Used on the app's 16:24 call. The app gets the real response again.* **Arm again**.
@@ -293,9 +293,9 @@ Edits are kept while you switch tabs.
 
 **The Edited bar under the URL row** is the one place for anything contextual, so nothing else stacks up above the tabs:
 
-- When something differs from the app's original call it shows what changed (e.g. "✎ Changed: params, delay"), an **Every call** switch and a save button. **Every call** on (the default): **Save as rewrite rule** keeps rewriting every matching call until you remove the rule in Rules. Off: the button reads **Save for next call** and only the next matching call is rewritten. **Apply to app** follows the same switch. Rules replace the whole query string, so a lasting rule also overrides filters you later change in the app.
+- When something differs from the app's original call it shows what changed (e.g. "✎ Changed: params, delay"), a switch and a save button. **Keep applying** (on, the default): **Save as rewrite rule** keeps rewriting every matching call until you remove the rule in Setup. **Just once** (off): the button reads **Save for next call** and only the next matching call is rewritten. **Apply to app** follows the same switch, and so does the Simulate card (**Keep applying** / **Just once**). Rules replace the whole query string, so a lasting rule also overrides filters you later change in the app.
 - After saving it shows "✓ Saved as a rewrite rule" (or "for the next call") with **View in Setup**; it shows that too when you open a call a lasting rule already rewrote.
-- Messages (Applied, Copied, a failed request…) appear in the same bar with their action on the right, such as **Reload page** when the app didn't repeat the call, and an **✕** to dismiss.
+- Messages (Applied, Copied, a failed request…) appear in the same bar with their action on the right, and an **✕** to dismiss.
 
 **Breakpoints (pause before send)**: in ⋯, **Pause the next call** or **Pause every call** to this endpoint. When the app makes that call, it's held: the panel opens on it (even if minimized) with a "Paused" banner, and the app keeps waiting. Edit anything (route, params, headers, body, Simulate), then use the buttons in the header:
 
@@ -307,7 +307,10 @@ If several calls are paused, deciding one opens the next. If the app gives up on
 
 Actions, in the request screen's header next to **‹ All requests**:
 
-- **Apply to app**: gets the app to repeat the call with your changes, so the page shows the result. It re-runs what made the call (clicking the button, or replaying the search input or dropdown change), or else sends focus/visibility events that make React Query, SWR and similar libraries refetch. If neither works, the bar offers **Reload page**; the change is saved, so the reload uses it.
+- **Apply to app**: saves the change and gets the app to repeat the call, so the page shows the result. It picks how by itself, and the menu says which before you click:
+  - **The call came from a button or field** (*Re-runs “Search” on the page*): it re-runs that (clicking the button, or replaying the search input or dropdown change), or else sends focus/visibility events that make React Query, SWR and similar libraries refetch. The page keeps its state. If the app still doesn't repeat the call, a toast counts down *Reloading in 3 s* with **Cancel** (the change stays saved either way).
+  - **The call happened while the page loaded** (or on a timer; *Reloads the page*): a quick refetch nudge, then the page reloads. Rules apply before the app's first call, so the reloaded page gets the change; your open request tabs come back.
+  - Afterwards one line says what happened: *Applied: re-ran “Search”*, *Applied: the app refetched*, or the reload.
 - **Send copy**: sends the edited request yourself and shows the response in the Response tab. The app doesn't see it.
 - **⋯**: **Pause the next call** / **Pause every call** (breakpoints), and **Save and reload page** for calls the app only makes on page load.
 - The **copy icon** at the end of the route row: **Copy as cURL** or **Copy as fetch**.
@@ -352,7 +355,7 @@ Use `{{name}}` in a request's path, query params, headers or body, and RESTless 
 - Requests from service workers, WebSockets, `navigator.sendBeacon`, and cross-origin iframes the extension can't access aren't captured.
 - Rules don't rewrite native (non-JS) form submissions.
 - Clearing site data removes the rules, capture settings and recorded clicks.
-- Apply to app doesn't re-run checkboxes or radio buttons, because clicking them would toggle your filter off. Those fall through to the focus events, then reload.
+- Apply to app doesn't re-run checkboxes or radio buttons, because clicking them would toggle your filter off. Those fall through to the focus events, then the reload countdown.
 
 ## Demo
 

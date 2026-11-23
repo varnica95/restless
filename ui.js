@@ -8305,10 +8305,10 @@
       renderTab();
     }
     function keepSwitch() {
-      const input = h('input', { type: 'checkbox', role: 'switch', checked: keepRule, 'aria-label': 'Keep the change for every call' });
+      const input = h('input', { type: 'checkbox', role: 'switch', checked: keepRule, 'aria-label': 'Keep applying the change to every call' });
       input.addEventListener('change', () => { keepRule = input.checked; ss.set('__apiPeek.keepRule', keepRule ? '1' : '0'); drawBar(); });
-      return h('label', { class: 'switch', title: 'On: Save and Apply to app keep rewriting every matching call until you remove the rule in Setup. Off: only the next matching call.' },
-        input, h('span', { class: 'sw', 'aria-hidden': 'true' }), h('span', {}, 'Every call'));
+      return h('label', { class: 'switch', title: 'On (keep applying): Save and Apply to app change every matching call until you remove it in Setup.\nOff (just once): only the next matching call.' },
+        input, h('span', { class: 'sw', 'aria-hidden': 'true' }), h('span', {}, keepRule ? 'Keep applying' : 'Just once'));
     }
     function saveRuleBtn() {
       return h('button', {
@@ -8440,7 +8440,7 @@
       simSaveBox.hidden = false;
       if (st === 'draft') {
         const scope = h('div', { class: 'seg sim-scope', role: 'radiogroup', 'aria-label': 'For which calls' },
-          [[true, 'Every call'], [false, 'Next call']].map(([v, label]) => h('button', { type: 'button', role: 'radio', 'aria-checked': String(keepRule === v), class: keepRule === v ? 'on' : '',
+          [[true, 'Keep applying'], [false, 'Just once']].map(([v, label]) => h('button', { type: 'button', role: 'radio', 'aria-checked': String(keepRule === v), class: keepRule === v ? 'on' : '',
             title: v ? 'Every call to this endpoint, until you turn it off' : 'Only the app\'s next call, then it switches off',
             onclick: () => { keepRule = v; ss.set('__apiPeek.keepRule', v ? '1' : '0'); drawSimFoot(); } }, label)));
         const primary = h('button', { type: 'button', class: 'btn-sm primary sim-go',
@@ -8504,18 +8504,48 @@
     for (const ev of ['input', 'change', 'click']) mainEl.addEventListener(ev, queueRuleBar);
     cleanups.push(() => { for (const ev of ['input', 'change', 'click']) mainEl.removeEventListener(ev, queueRuleBar); });
 
+    // Apply to app: one action that saves the change (a rule: kept, or just once) and gets the app to make
+    // the call again, choosing how by itself:
+    //  - the call came from a button or field on the page → re-run it (or, failing that, nudge the app to
+    //    refetch). Page state stays. If the app still doesn't repeat the call: reload in 3 s, with Cancel.
+    //  - no trigger (the call happened while the page loaded, or on a timer) → a quick refetch nudge, then reload.
+    const applyTrigger = () => (entry.manual || !entry.triggerKey ? null : core.findByKey(entry.triggerKey));
+    // “Search” for a button or field with a visible name; else how describeEl says it (<select> status…).
+    const elName = (el) => {
+      const t = (el.getAttribute?.('aria-label') || el.innerText || el.value || el.placeholder || '').trim().replace(/\s+/g, ' ');
+      return t && t.length <= 40 ? `“${t}”` : describeEl(el);
+    };
+    const applyPlan = () => {
+      const el = applyTrigger();
+      return `${el ? `Re-runs ${elName(el)} on the page` : 'Reloads the page'} · ${keepRule ? 'keeps applying' : 'just once'}`;
+    };
+    const applied = () => { d.savedSig = sig(); d.savedLasting = keepRule; drawBar(); };
+    const reloadSoon = (why) => {
+      let n = 3; let cancelled = false;
+      const cancel = () => {
+        cancelled = true;
+        say(`Not reloaded. Your change is saved and applies to ${keepRule ? 'every matching call' : 'the next matching call'}.`, 'info');
+      };
+      const tick = () => {
+        if (cancelled) return;
+        if (n === 0) { location.reload(); return; }
+        toast(`${why} Reloading in ${n} s`, '', 1300, { label: 'Cancel', run: cancel });
+        n--; setTimeout(tick, 1000);
+      };
+      tick();
+    };
     const applyToApp = async () => {
       if (!saveRule()) return;
-      say('Applying…');
+      const el = applyTrigger();
+      say(el ? `Re-running ${elName(el)}…` : 'Applying…');
       const res = await core.applyToApp(entry, {
-        onStep: (step, el) => say(step === 'rerun' ? `Re-running ${describeEl(el)}…` : 'Asking the app to refetch…'),
+        onStep: (step, e) => say(step === 'rerun' ? `Re-running ${elName(e)}…` : 'Asking the app to refetch…'),
       });
-      if (res.how === 'rerun') say(`Applied. Re-ran ${describeEl(res.el)} and the app used your changes.`, 'info');
-      else if (res.how === 'refocus') say('Applied. The app refetched and used your changes.', 'info');
-      else say(`The app didn't repeat this call by itself. Your change is saved and applies on reload${keepRule ? '' : ' (next call only)'}.`, 'warn',
-        h('button', { type: 'button', class: 'btn-sm', onclick: () => location.reload() }, 'Reload application'));
-      if (res.how === 'rerun' || res.how === 'refocus') { d.savedSig = sig(); d.savedLasting = keepRule; }
-      drawBar();
+      if (res.how === 'rerun') { say(`Applied: re-ran ${elName(res.el)}.`, 'info'); applied(); return; }
+      if (res.how === 'refocus') { say('Applied: the app refetched.', 'info'); applied(); return; }
+      if (!el) { say('Applied after reload…', 'info'); location.reload(); return; }
+      say('');
+      reloadSoon('The app didn’t repeat the call.');
     };
 
     // Run: send the edited request yourself and show the response below (the app doesn't see it).
@@ -8585,7 +8615,7 @@
             ? `${env.name} (${hostOf(env.url)}) didn't answer: ${err.message}. If it's up, it must allow calls from ${location.origin} (CORS), or pick another environment.`
             : entry.manual
             ? `Request failed: ${err.message}. If the API is on another host, it has to allow calls from this page (CORS).`
-            : `Request failed: ${err.message}. Some APIs only accept calls from the app itself; use Apply to application instead.`, 'warn');
+            : `Request failed: ${err.message}. Some APIs only accept calls from the app itself; use Apply to app instead.`, 'warn');
         } finally { runBtn.disabled = false; runBtn.classList.remove('busy'); }
       },
     });
@@ -8679,8 +8709,7 @@
         dupItem,
         { ...copyMenu, sepBefore: true },
         { ...runMenu, sepBefore: false }, testMenu,
-        { id: 'apply', label: 'Apply to application', title: 'Save the change and make the app repeat this call, so the page shows the result', icon: ICONS.upload, sepBefore: true, run: applyToApp },
-        { id: 'reload', label: 'Reload application', title: 'Save the change and reload the page (for calls the app only makes on load)', icon: ICONS.reload, run: () => { if (saveRule()) location.reload(); } },
+        { id: 'apply', label: 'Apply to app', sub: applyPlan(), title: 'Save the change and make the app repeat this call, so the page shows the result.\nCalls from a button or field are re-run on the page; calls made while the page loads need a reload.', icon: ICONS.upload, sepBefore: true, run: applyToApp },
       ];
       const m = dropMenu('Request actions', items.filter(Boolean), { icon: ICONS.more, menuClass: 'compactmenu', btnClass: `hbox sq${bp ? ' on' : ''}`, title: bp ? `More actions (breakpoint on: ${bp.once ? 'next call' : 'every call'})` : 'More actions' });
       menuSlot.replaceChildren(m);

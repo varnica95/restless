@@ -13,6 +13,6 @@ Your rules, mocks, environments and users are saved in this browser, per site. C
 ## Limits
 
 - Only calls made by the page itself: not server-side rendering, service workers, WebSockets, `sendBeacon` or cross-origin iframes.
-- **Apply to application** repeats the click that made the call, so that button must have been clicked once on the page.
+- **Apply to app** repeats the click that made the call, so that button must have been clicked once on the page. Otherwise it reloads the page.
 - Another server must allow calls from your app’s page (CORS).
 - Mocks and simulations only apply in your browser while RESTless is on.
