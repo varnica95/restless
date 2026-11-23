@@ -2,7 +2,7 @@
 title: Variables
 lead: Reuse values like IDs and tokens with {{name}}, and chain requests.
 ---
-[[shots: variables | Variables on the Rules tab]]
+[[shots: variables | Setup → Variables]]
 
 ## Use a variable
 
@@ -12,12 +12,9 @@ Type `{{name}}` in a request's path, query params, headers or body. Typing `{{` 
 - In a JSON body, `"id": {{taskId}}` and `"note": "Task {{taskId}}"` both work.
 - Built-ins need no setup: `{{$uuid}}`, `{{$timestamp}}`, `{{$now}}`, `{{$randomInt}}`.
 
-## Global or per environment
+## Manage them
 
-- **Global** variables work everywhere.
-- An **environment's** own variables apply while you send there, and win over a global one with the same name.
-
-Manage them under **Rules → Variables**: click one to edit it, or use **⋯** to move, copy or delete it.
+Under **Setup → Variables**: click one to edit it, or use **⋯** to duplicate or delete it. One list, the same in every environment.
 
 ## Chain requests
 

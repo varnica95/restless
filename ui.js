@@ -3102,6 +3102,66 @@
     .cv-pop .btn-sm.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
     .var-row .var-note:empty { display: none; }
     @container rlmain (min-width: 401px) { .var-row .var-note:empty { display: block; } }
+
+    /* ================= 0.91: Setup tab (Variables | Overrides) ================= */
+    .rl > .seg { display: flex; gap: 2px; margin: 0 0 12px; padding: 2px; border-radius: 9px; background: var(--bg3); }
+    .rl > .seg button.seg-b { flex: 1 1 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: var(--dim); font: 500 12.5px var(--font); cursor: pointer; }
+    .rl > .seg button.seg-b:hover { color: var(--fg); }
+    .rl > .seg button.seg-b.on { background: var(--bg); color: var(--fg); border-color: var(--line); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+    .rl > .seg button.seg-b:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .rl > .seg .seg-n { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
+    .su-view { display: flex; flex-direction: column; gap: 8px; }
+    .su-head { display: flex; align-items: center; gap: 6px; min-height: 28px; font-size: 12px; }
+    .su-head .su-info { display: inline-grid; place-items: center; width: 16px; height: 16px; color: var(--dim); cursor: help; border-radius: 50%; }
+    .su-head .su-info svg { width: 14px; height: 14px; }
+    .su-head .su-info:focus-visible { outline: 2px solid var(--accent); }
+    .su-head button.su-plus, .su-head button.mk-more { width: 28px; height: 28px; }
+    .su-head button.su-plus svg { width: 14px; height: 14px; }
+    .su-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 22px 14px; border: 1px dashed var(--line2); border-radius: 10px; text-align: center; font-size: 12.5px; }
+    .su-empty .accent { color: var(--accent); }
+    #overrides.flash .ov-list { animation: rtflash 1s ease-out; }
+    /* variables */
+    .su-view .var-row { grid-template-columns: minmax(64px, max-content) minmax(0, 1fr) 18px 28px; }
+    .su-view .var-row .var-auto { display: inline-grid; place-items: center; width: 16px; height: 16px; color: var(--accent); cursor: help; }
+    .su-view .var-row .var-auto svg { width: 13px; height: 13px; }
+    .su-view .pf-edit.var-edit { margin: 0; padding: 10px 12px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); display: flex; flex-direction: column; gap: 8px; }
+    .var-list > .pf-edit.var-edit { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+    .var-list > .pf-edit.var-edit:last-child { border-bottom: 0; }
+    /* overrides */
+    .ov-list { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 8px; }
+    .ov-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto 28px; align-items: center; gap: 8px; min-height: 38px; padding: 0 4px 0 10px; border-bottom: 1px solid var(--line); font-size: 12px; position: relative; }
+    .ov-row:first-child { border-radius: 7px 7px 0 0; }
+    .ov-row:last-child { border-bottom: 0; border-radius: 0 0 7px 7px; }
+    .ov-row:only-child { border-radius: 7px; }
+    .ov-row.link { cursor: pointer; }
+    .ov-row.link:hover { background: var(--hover); }
+    .ov-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .ov-row.off > .m, .ov-row.off > .ov-path, .ov-row.off > .ov-tags { opacity: .45; }
+    .ov-row > .m { justify-self: start; }
+    .ov-path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fg); }
+    .ov-tags { display: inline-flex; gap: 4px; flex-wrap: nowrap; }
+    .ov-tag { font-size: 10.5px; font-weight: 500; line-height: 1; padding: 3px 6px; border-radius: 4px; white-space: nowrap; background: var(--bg3); color: var(--dim); }
+    .ov-tag.mock { background: var(--accent-soft); color: var(--accent); }
+    .ov-tag.err { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+    .ov-tag.slow { background: var(--warn-soft); color: var(--warn); }
+    .ov-tag.brk { background: var(--bg3); color: var(--fg); }
+    .ov-tag.rw { background: var(--bg3); color: var(--fg); }
+    .ov-row button.rl-x { position: static; transform: none; opacity: 0; justify-self: center; }
+    .ov-row:hover button.rl-x, .ov-row:focus-within button.rl-x, .ov-row button.rl-x:focus-visible { opacity: 1; }
+    @media (hover: none) { .ov-row button.rl-x { opacity: 1; } }
+    /* narrow: tags go under the path */
+    @container rlmain (max-width: 400px) {
+      .ov-row { grid-template-columns: auto minmax(0, 1fr) auto 28px; row-gap: 3px; padding-top: 6px; padding-bottom: 6px; }
+      .ov-row > .ov-tags { grid-column: 2; grid-row: 2; }
+      .ov-row > .ov-sw { grid-column: 3; grid-row: 1 / span 2; }
+      .ov-row > .newwrap, .ov-row > .rl-x { grid-column: 4; grid-row: 1 / span 2; }
+      .ov-row > .m { grid-row: 1 / span 2; align-self: start; margin-top: 1px; }
+    }
+    .ov-tags { justify-self: start; }
+    @container rlmain (max-width: 400px) {
+      .su-view .var-row { grid-template-columns: minmax(56px, max-content) minmax(0, 1fr) 18px 28px; padding-top: 0; padding-bottom: 0; }
+      .su-view .var-row .newwrap { grid-column: auto; grid-row: auto; }
+    }
   `;
 
   // ---------- helpers
@@ -3351,7 +3411,7 @@
     if (state === 'open') renderTab();
   }
 
-  const TABS = [['requests', 'Requests'], ['rules', 'Rules'], ['docs', 'API Docs']];
+  const TABS = [['requests', 'Requests'], ['rules', 'Setup'], ['docs', 'API Docs']]; // 'rules' stays the id (saved state)
   const MORE_TABS = [['settings', 'Settings', 'Theme, docking, shortcuts, capture']];
   function newRequest() {
     const entry = core.addManual({ method: 'GET', url: `${appOrigins()[0]}/api/` });
@@ -3365,9 +3425,12 @@
   // here (on layout / count changes) rather than by renderTab, and clean up their own listeners.
   let headMenuKey = '';
   const THEMES = [['dark', 'Dark mode', 'moon'], ['light', 'Light mode', 'sun'], ['system', 'Match system', 'monitor']];
+  // Open Setup → Overrides (mocks, rules and breakpoints).
   function goToMocks() {
+    varsUi.view = 'overrides';
+    try { localStorage.setItem('__apiPeek.setupView', 'overrides'); } catch { /* storage blocked */ }
     showTab('rules');
-    requestAnimationFrame(() => { const sec = dockEl?.querySelector('#mock-endpoints'); if (!sec) return; sec.scrollIntoView({ block: 'start' }); sec.classList.add('flash'); setTimeout(() => sec.classList.remove('flash'), 900); });
+    requestAnimationFrame(() => { const sec = dockEl?.querySelector('#overrides'); if (!sec) return; sec.classList.add('flash'); setTimeout(() => sec.classList.remove('flash'), 900); });
   }
   function renderHeadMenus(p = prefs.position) {
     if (!headMenus) return;
@@ -3429,7 +3492,7 @@
     if (rt) {
       const on = core.rules.list().some((r) => r.enabled !== false) || core.breaks.list().some((b) => b.enabled !== false);
       rt.classList.toggle('live', on);
-      rt.title = on ? 'Rules: a rule or breakpoint is on and changes the app\'s calls' : 'Rules: breakpoints and rewrite rules';
+      rt.title = on ? 'Setup: an override is on and changes the app\'s calls' : 'Setup: variables, mocks, rules and breakpoints';
     }
   }
 
@@ -4049,8 +4112,7 @@
     // Default). Secret values only with tokens; where they updated from is kept.
     if (envs) {
       const vs = (list) => list.map((v) => ({ name: v.name, ...(v.secret ? { secret: true } : {}), ...(!v.secret || tokens ? { value: v.value ?? '' } : {}), ...(v.src ? { src: v.src } : {}) }));
-      const snap = varsApi.snapshot();
-      out.variables = { global: vs(snap.global), environments: Object.fromEntries(Object.entries(snap.env).map(([k, l]) => [k, vs(l)])) };
+      out.variables = vs(varsApi.list());
     }
     return out;
   }
@@ -4118,20 +4180,19 @@
       envApi.set({ list, ...(mode === 'replace' ? { active: null, picked: {} } : {}) });
       core.auth.set({ profiles });
       done.push(plural(fileEnvs.length, 'environment'), plural(nUsers, 'user'));
-      // Variables: global, and each environment's (file ids mapped to the environments made above).
+      // Variables: one list (files from 0.90 may split them into global and per environment: all go in).
       if (f.vars) {
-        const snap = mode === 'replace' ? { global: [], env: {} } : varsApi.snapshot();
         const clean = (l) => (Array.isArray(l) ? l : []).filter((v) => v && VAR_NAME.test(String(v.name || ''))).map((v) => ({ name: String(v.name), value: v.value == null ? '' : String(v.value), ...(v.secret ? { secret: true } : {}), ...(v.src && Array.isArray(v.src.path) ? { src: v.src } : {}) }));
-        const mergeIn = (cur, inc) => { const out = (cur || []).slice(); for (const v of inc) { const i = out.findIndex((x) => x.name === v.name); if (i >= 0) out[i] = { ...out[i], ...v, ...(v.secret && !('value' in v) ? { value: out[i].value } : {}) }; else out.push(v); } return out; };
+        const seen = new Set();
+        const inc = (Array.isArray(f.vars) ? clean(f.vars) : [...clean(f.vars.global), ...Object.values(f.vars.environments || {}).flatMap(clean)]).filter((v) => !seen.has(v.name) && seen.add(v.name));
+        const list = mode === 'replace' ? [] : varsApi.list().slice();
         let nVars = 0;
-        const g = clean(f.vars.global); snap.global = mergeIn(snap.global, g); nVars += g.length;
-        for (const [k, l] of Object.entries(f.vars.environments || {})) {
-          const envId = k === 'default' ? null : map.get(k);
-          if (envId === undefined) continue;
-          const key = envId == null ? 'default' : String(envId);
-          const inc = clean(l); snap.env[key] = mergeIn(snap.env[key], inc); nVars += inc.length;
+        for (const v of inc) {
+          const i = list.findIndex((x) => x.name === v.name);
+          if (i >= 0) list[i] = { ...list[i], ...v, ...(v.secret && !('value' in v) ? { value: list[i].value } : {}) }; else list.push(v);
+          nVars++;
         }
-        varsApi.restore(snap);
+        varsApi.put('global', list);
         if (nVars) done.push(plural(nVars, 'variable'));
       }
     }
@@ -4191,7 +4252,7 @@
     const warn = h('span', { class: 'io-warn' }, 'Anyone with the file can send requests as these users.');
     const hasSecretVars = [...varsApi.snapshot().global, ...Object.values(varsApi.snapshot().env).flat()].some((v) => v.secret);
     const tokens = ioOpt('Include tokens', hasSecretVars ? 'and secret variable values' : null, { sub: true, disabled: !n.users && !hasSecretVars, note: n.users || hasSecretVars ? warn : null });
-    const rules = ioOpt('Rules', n.rules || n.breaks ? [plural(n.rules, 'rule'), n.breaks ? plural(n.breaks, 'breakpoint') : ''].filter(Boolean).join(' · ') : 'None', { disabled: !n.rules && !n.breaks });
+    const rules = ioOpt('Rules and breakpoints', n.rules || n.breaks ? [plural(n.rules, 'rule'), n.breaks ? plural(n.breaks, 'breakpoint') : ''].filter(Boolean).join(' · ') : 'None', { disabled: !n.rules && !n.breaks });
     const docs = ioOpt('API docs', n.docs ? `${docsTitle(n.docs)}${n.docs.text ? '' : ' (link only)'}` : 'Not loaded', { disabled: !n.docs });
     const muted = ioOpt('Stopped endpoints', n.muted ? plural(n.muted, 'endpoint') : 'None', { disabled: !n.muted });
     const pins = ioOpt('Pinned endpoints', n.pins ? plural(n.pins, 'endpoint') : 'None', { disabled: !n.pins });
@@ -4234,12 +4295,12 @@
       const users = f.envs.flatMap((e) => (Array.isArray(e.users) ? e.users : []));
       const noTok = users.filter((u) => !u.token).length;
       const named = f.envs.filter((e) => e.id != null).map((e) => e.name).filter(Boolean);
-      const fv = f.vars ? (f.vars.global || []).length + Object.values(f.vars.environments || {}).reduce((a, l) => a + (Array.isArray(l) ? l.length : 0), 0) : 0;
+      const fv = f.vars ? (Array.isArray(f.vars) ? f.vars.length : (f.vars.global || []).length + Object.values(f.vars.environments || {}).reduce((a, l) => a + (Array.isArray(l) ? l.length : 0), 0)) : 0;
       opts.envs = ioOpt('Environments, users and variables', `${named.length ? named.join(', ') : 'Default only'} · ${plural(users.length, 'user')}${fv ? ` · ${plural(fv, 'variable')}` : ''}`,
         { note: noTok ? h('span', { class: 'io-warn' }, `${plural(noTok, 'user')} without a token: add it with Edit after importing.`) : null });
       rows.push(opts.envs.row);
     }
-    if (f.rules || f.breaks) { opts.rules = ioOpt('Rules', [plural((f.rules || []).length, 'rule'), (f.breaks || []).length ? plural(f.breaks.length, 'breakpoint') : ''].filter(Boolean).join(' · ')); rows.push(opts.rules.row); }
+    if (f.rules || f.breaks) { opts.rules = ioOpt('Rules and breakpoints', [plural((f.rules || []).length, 'rule'), (f.breaks || []).length ? plural(f.breaks.length, 'breakpoint') : ''].filter(Boolean).join(' · ')); rows.push(opts.rules.row); }
     if (f.docs) { opts.docs = ioOpt('API docs', `${docsTitle(f.docs)}${f.docs.text ? '' : ' (link only, downloaded when opened)'} · replaces the current docs`); rows.push(opts.docs.row); }
     if (f.muted) { opts.muted = ioOpt('Stopped endpoints', plural(f.muted.length, 'endpoint')); rows.push(opts.muted.row); }
     if (f.pins) { opts.pins = ioOpt('Pinned endpoints', plural(f.pins.length, 'endpoint')); rows.push(opts.pins.row); }
@@ -4550,7 +4611,7 @@
       if (!v.includes('{{')) { el.classList.remove('var-bad'); if (el.dataset.vtip) { el.title = ''; delete el.dataset.vtip; } return; }
       const miss = varsApi.unknown(v);
       el.classList.toggle('var-bad', miss.length > 0);
-      el.title = miss.length ? `No variable ${miss.map((x) => `{{${x}}}`).join(', ')} in ${envApi.active().name}` : `Sent as: ${varsApi.fill(v)}`;
+      el.title = miss.length ? `No variable ${miss.map((x) => `{{${x}}}`).join(', ')}` : `Sent as: ${varsApi.fill(v)}`;
       el.dataset.vtip = '1';
     };
     const place = () => {
@@ -4577,7 +4638,7 @@
         onmousedown: (e) => { e.preventDefault(); at = i; pick(); } },
       h('span', { class: 'mono var-ac-n' }, v.name),
       h('span', { class: `var-ac-v${v.builtin ? ' muted' : ''}` }, v.secret ? '••••••' : v.builtin ? v.value : (String(v.value).slice(0, 40) || '(empty)')))));
-      if (varsApi.count() === 0) varAcEl.append(h('div', { class: 'var-ac-foot muted' }, 'Add your own under Rules → Variables'));
+      if (varsApi.count() === 0) varAcEl.append(h('div', { class: 'var-ac-foot muted' }, 'Add your own under Setup → Variables'));
       place();
     };
     const update = () => {
@@ -5663,11 +5724,12 @@
   })();
   syncAuth();
 
-  // ---------- Variables: {{name}} in a request's path, params, headers and body.
-  // Global ones apply everywhere; an environment's own ones apply while you send to it and win over a
-  // global one with the same name. Saved for this site, like environments and users. A variable can
-  // keep itself up to date from a response (src: which request and which JSON path; see "Save as…").
+  // ---------- Variables: {{name}} in a request's path, params, headers and body. One list for this site
+  // (saved like environments and users), the same whichever environment you send to. A variable can keep
+  // itself up to date from a response (src: which request and which JSON path; see "Save as…").
   // Built-ins need no setup: {{$uuid}}, {{$timestamp}} (Unix seconds), {{$now}} (ISO time), {{$randomInt}}.
+  // (0.90 had per-environment variables too; they're merged into the list on load, unless the name exists.)
+  // The scope arguments below are kept for older callers and ignored.
   const VARS_KEY = '__apiPeek.vars';
   const VAR_NAME = /^[A-Za-z_][\w.-]{0,63}$/;
   const VAR_RE = /\{\{\s*(\$?[A-Za-z_][\w.-]*)\s*\}\}/g;
@@ -5677,48 +5739,50 @@
     $now: { d: 'Now, as an ISO date and time', v: () => new Date().toISOString() },
     $randomInt: { d: 'A random number from 0 to 1000', v: () => String(Math.floor(Math.random() * 1001)) },
   };
-  let varState = (() => { try { const v = JSON.parse(localStorage.getItem(VARS_KEY) || '{}'); return { global: Array.isArray(v.global) ? v.global : [], env: v.env && typeof v.env === 'object' ? v.env : {} }; } catch { return { global: [], env: {} }; } })();
-  const scopeKey = (envId) => (envId == null ? 'default' : String(envId));
+  const flatVars = (v) => {
+    const list = Array.isArray(v?.global) ? v.global.slice() : [];
+    for (const l of Object.values(v?.env && typeof v.env === 'object' ? v.env : {})) {
+      for (const x of Array.isArray(l) ? l : []) if (x && !list.some((y) => y.name === x.name)) list.push(x);
+    }
+    return { global: list, env: {} };
+  };
+  let varState = (() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem(VARS_KEY) || '{}');
+      const st = flatVars(raw);
+      if (raw.env && Object.keys(raw.env).length) localStorage.setItem(VARS_KEY, JSON.stringify(st));
+      return st;
+    } catch { return { global: [], env: {} }; }
+  })();
   const varsApi = {
-    // scope: 'global', or an environment id (null = Default)
-    list(scope) { return scope === 'global' ? varState.global : varState.env[scopeKey(scope)] || []; },
-    count() { return varState.global.length + Object.values(varState.env).reduce((n, l) => n + l.length, 0); },
+    list() { return varState.global; },
+    count() { return varState.global.length; },
     save() { try { localStorage.setItem(VARS_KEY, JSON.stringify(varState)); } catch { /* storage blocked */ } },
-    put(scope, list) {
-      if (scope === 'global') varState = { ...varState, global: list };
-      else { const env = { ...varState.env }; if (list.length) env[scopeKey(scope)] = list; else delete env[scopeKey(scope)]; varState = { ...varState, env }; }
-      varsApi.save(); varsChanged();
-    },
-    get(scope, name) { return varsApi.list(scope).find((v) => v.name === name) || null; },
+    put(_scope, list) { varState = { global: list, env: {} }; varsApi.save(); varsChanged(); },
+    get(_scope, name) { return varState.global.find((v) => v.name === name) || null; },
     // Add or change one (by name). patch.name renames it.
-    set(scope, name, patch) {
-      const list = varsApi.list(scope).slice();
+    set(_scope, name, patch) {
+      const list = varState.global.slice();
       const i = list.findIndex((v) => v.name === name);
       const next = { ...(i >= 0 ? list[i] : { name, value: '' }), ...patch };
       if (i >= 0) list[i] = next; else list.push(next);
-      varsApi.put(scope, list);
+      varsApi.put('global', list);
       return next;
     },
-    remove(scope, name) { varsApi.put(scope, varsApi.list(scope).filter((v) => v.name !== name)); },
+    remove(_scope, name) { varsApi.put('global', varState.global.filter((v) => v.name !== name)); },
     snapshot() { return JSON.parse(JSON.stringify(varState)); },
-    restore(snap) { varState = JSON.parse(JSON.stringify(snap)); varsApi.save(); varsChanged(); },
-    // What {{name}} is when sending to env: { value, scope, secret } or null.
-    lookup(name, env = envApi.active()) {
-      if (BUILTINS[name]) return { value: null, scope: 'builtin', builtin: true };
-      const own = varsApi.get(env?.id ?? null, name);
-      if (own) return { value: own.value ?? '', scope: env?.id ?? null, secret: !!own.secret, v: own };
-      const g = varsApi.get('global', name);
-      return g ? { value: g.value ?? '', scope: 'global', secret: !!g.secret, v: g } : null;
+    restore(snap) { varState = flatVars(JSON.parse(JSON.stringify(snap))); varsApi.save(); varsChanged(); },
+    // What {{name}} is: { value, secret } or null (built-ins: { builtin: true }).
+    lookup(name) {
+      if (BUILTINS[name]) return { value: null, builtin: true };
+      const v = varsApi.get('global', name);
+      return v ? { value: v.value ?? '', secret: !!v.secret, v } : null;
     },
     value(name, env) { return BUILTINS[name] ? BUILTINS[name].v() : varsApi.lookup(name, env)?.value ?? null; },
-    // Names usable while sending to env, for autocomplete: environment ones first, then global, then built-ins.
-    names(env = envApi.active()) {
-      const seen = new Set(); const out = [];
-      for (const [list, scope] of [[varsApi.list(env?.id ?? null), env?.id ?? null], [varState.global, 'global']]) {
-        for (const v of list) if (!seen.has(v.name)) { seen.add(v.name); out.push({ name: v.name, value: v.value ?? '', secret: !!v.secret, scope }); }
-      }
-      for (const [k, b] of Object.entries(BUILTINS)) out.push({ name: k, value: b.d, builtin: true, scope: 'builtin' });
-      return out;
+    // For autocomplete: your variables, then the built-ins.
+    names() {
+      return [...varState.global.map((v) => ({ name: v.name, value: v.value ?? '', secret: !!v.secret })),
+        ...Object.entries(BUILTINS).map(([k, b]) => ({ name: k, value: b.d, builtin: true }))];
     },
     // Unknown {{names}} in a text (built-ins and known variables don't count).
     unknown(text, env) {
@@ -5770,24 +5834,23 @@
     return v;
   }
   // The Variables section's state (Rules tab): which row is being edited, or a new one being added.
-  const varsUi = { editing: null, add: null, scrollTo: false };
+  const varsUi = { editing: null, add: null, scrollTo: false, view: null };
   // Open Rules → Variables, optionally with a new one started (add: { name, scope }).
   function openVariables({ add = null } = {}) {
-    varsUi.add = add; varsUi.editing = null; varsUi.scrollTo = true;
+    varsUi.add = add; varsUi.editing = null; varsUi.view = 'variables';
+    try { localStorage.setItem('__apiPeek.setupView', 'variables'); } catch { /* storage blocked */ }
     dock.tab = 'rules'; ss.set('__apiPeek.tab', 'rules');
     renderTab();
   }
-  // "Save as…" on a response line: a small card under the line. Name (from the key), where (Global or an
-  // environment; the one you send to when there are environments), and "Update from every response" (on),
+  // "Save as…" on a response line: a small card under the line. Name (from the key) and "Update from every
+  // response" (on),
   // which keeps the variable in step with this endpoint (see varsFromResponse).
   function openSaveVar({ path, value, key, anchor, top, method, url }) {
     anchor.querySelector('.cv-pop')?.remove();
     const guess = String(typeof key === 'string' ? key : [...(path || [])].reverse().find((k) => typeof k === 'string') || 'value')
       .replace(/[^\w.-]/g, '_').replace(/^[^A-Za-z_]+/, '') || 'value';
-    const cur = envApi.active();
-    let scope = envState.list.length ? cur.id ?? null : 'global';
+    const scope = 'global';
     const nameIn = h('input', { class: 'pf-tok mono', value: guess, 'aria-label': 'Variable name', spellcheck: 'false', maxlength: '64' });
-    const pick = envState.list.length ? scopeSelect(scope, (x) => { scope = x; note(); }) : null;
     let pathname = url; try { pathname = new URL(url, location.href).pathname; } catch { /* keep */ }
     const label = `${method} ${pathname}`;
     const auto = h('input', { type: 'checkbox', checked: true });
@@ -5806,13 +5869,12 @@
       let k; try { k = core.matchKey(url); } catch { k = null; }
       varsApi.set(scope, name, { value: varText(value), src: auto.checked && k ? { method, key: k, path, label } : undefined });
       close();
-      toast(`Saved {{${name}}}${scope === 'global' ? '' : ` in ${envApi.byId(scope).name}`}`, '', 4000, { label: 'Show', run: () => openVariables() });
+      toast(`Saved {{${name}}}`, '', 4000, { label: 'Show', run: () => openVariables() });
     };
     const pop = h('div', { class: 'cv-pop', role: 'dialog', 'aria-label': 'Save as variable',
       onkeydown: (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { e.preventDefault(); save(); } } },
     h('div', { class: 'cv-pop-t' }, 'Save ', h('span', { class: 'mono' }, pathLabel(path || [])), ' as'),
     nameIn,
-    pick,
     h('label', { class: 'chk' }, auto, h('span', {}, `Update from every response of ${label}`)),
     hint,
     h('div', { class: 'cv-pop-acts' }, h('button', { type: 'button', class: 'btn-sm primary', onclick: save }, 'Save'), h('button', { type: 'button', class: 'linkbtn', onclick: close }, 'Cancel')));
@@ -5821,23 +5883,18 @@
     note();
     requestAnimationFrame(() => { nameIn.focus(); nameIn.select(); pop.scrollIntoView({ block: 'nearest' }); });
   }
-  // Variables that keep themselves updated (v.src): when a response comes from their endpoint (your Run or
-  // the app's own call), read the value at their JSON path. An environment's variable only takes
-  // responses from that environment; a global one from anywhere. Returns the names that changed.
-  function varsFromResponse(method, url, text, envId) {
+  // Variables that keep themselves updated (v.src): when a successful response comes from their endpoint
+  // (your Run or the app's own call), read the value at their JSON path. Returns the names that changed.
+  function varsFromResponse(method, url, text) {
     if (!text || !varsApi.count()) return [];
     let key; try { key = core.matchKey(url); } catch { return []; }
     const changed = [];
-    const scopes = ['global', ...envApi.all().map((e) => e.id ?? null)];
-    for (const sc of scopes) {
-      if (sc !== 'global' && (sc ?? null) !== (envId ?? null)) continue;
-      for (const v of varsApi.list(sc)) {
-        if (!v.src || v.src.method !== method || v.src.key !== key) continue;
-        const got = valueAtPath(text, v.src.path);
-        if (got === undefined) continue;
-        const val = varText(got);
-        if (val !== v.value) { varsApi.set(sc, v.name, { value: val }); changed.push(v.name); }
-      }
+    for (const v of varsApi.list()) {
+      if (!v.src || v.src.method !== method || v.src.key !== key) continue;
+      const got = valueAtPath(text, v.src.path);
+      if (got === undefined) continue;
+      const val = varText(got);
+      if (val !== v.value) { varsApi.set('global', v.name, { value: val }); changed.push(v.name); }
     }
     return changed;
   }
@@ -5849,19 +5906,10 @@
       const r = core.state.requests[i];
       if (varsSeen.has(r) || r.manual || r.dryRun || r.responseText == null || typeof r.status !== 'number') continue;
       varsSeen.add(r);
-      if (r.status < 400) varsFromResponse(r.method, r.url, r.responseText, envOfUrl(r.url)?.id ?? null);
+      if (r.status < 400) varsFromResponse(r.method, r.url, r.responseText);
     }
   });
   const pathLabel = (path) => path.reduce((s, k) => (typeof k === 'number' ? `${s}[${k}]` : s ? `${s}.${k}` : String(k)), '') || '(whole response)';
-  // A <select> of where a variable lives: Global, then each environment. onPick gets 'global' or an env id (null = Default).
-  function scopeSelect(scope, onPick) {
-    const val = (sc) => (sc === 'global' ? 'global' : `e:${sc ?? ''}`);
-    const sel = h('select', { class: 'var-scope', 'aria-label': 'Where',
-      onchange: () => { const x = sel.value; onPick(x === 'global' ? 'global' : x.slice(2) === '' ? null : x.slice(2)); } },
-    h('option', { value: 'global', selected: scope === 'global' }, 'Global: every environment'),
-    ...envApi.all().map((e) => h('option', { value: val(e.id ?? null), selected: scope !== 'global' && (scope ?? null) === (e.id ?? null) }, e.name)));
-    return sel;
-  }
   const varText = (v) => (v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v));
 
   // Production in red, staging in amber, the rest in blue; App stays neutral.
@@ -6294,7 +6342,7 @@
       const miss = varsApi.unknown(p);
       pathVars.hidden = false;
       pathVars.classList.toggle('bad', miss.length > 0);
-      if (miss.length) { pathVars.textContent = `No variable ${miss.map((x) => `{{${x}}}`).join(', ')} in ${envApi.active().name}`; return; }
+      if (miss.length) { pathVars.textContent = `No variable ${miss.map((x) => `{{${x}}}`).join(', ')}`; return; }
       let shown = varsApi.fill(p); try { const t = target(); shown = t.origin === u.origin && !/^https?:/i.test(varsApi.fill(p)) ? t.pathname : t.href; } catch { /* keep */ }
       pathVars.textContent = `→ ${keepBraces(shown)}`;
     }
@@ -8166,8 +8214,7 @@
       if (!miss.length) return true;
       const sig = `${env?.id ?? ''}|${miss.join()}`;
       if (d.varsAnyway === sig) { d.varsAnyway = null; return true; }
-      const where = envState.list.length ? ` in ${env?.name || 'Default'}` : '';
-      say(`${miss.length === 1 ? 'No variable' : 'No variables'} ${miss.map((x) => `{{${x}}}`).join(', ')}${where}.`, 'warn',
+      say(`${miss.length === 1 ? 'No variable' : 'No variables'} ${miss.map((x) => `{{${x}}}`).join(', ')}.`, 'warn',
         h('button', { type: 'button', class: 'linkbtn', onclick: () => openVariables({ add: { name: miss[0], scope: 'global' } }) }, 'Add variable'),
         h('button', { type: 'button', class: 'linkbtn', onclick: () => { d.varsAnyway = sig; runBtn.click(); } }, 'Send anyway'));
       return false;
@@ -8260,13 +8307,13 @@
     function keepSwitch() {
       const input = h('input', { type: 'checkbox', role: 'switch', checked: keepRule, 'aria-label': 'Keep the change for every call' });
       input.addEventListener('change', () => { keepRule = input.checked; ss.set('__apiPeek.keepRule', keepRule ? '1' : '0'); drawBar(); });
-      return h('label', { class: 'switch', title: 'On: Save and Apply to app keep rewriting every matching call until you remove the rule in Rules. Off: only the next matching call.' },
+      return h('label', { class: 'switch', title: 'On: Save and Apply to app keep rewriting every matching call until you remove the rule in Setup. Off: only the next matching call.' },
         input, h('span', { class: 'sw', 'aria-hidden': 'true' }), h('span', {}, 'Every call'));
     }
     function saveRuleBtn() {
       return h('button', {
         type: 'button', class: 'btn-sm save-rule',
-        title: keepRule ? 'Keep these changes for every matching call until you remove the rule in Rules' : 'Apply these changes to the next matching call only',
+        title: keepRule ? 'Keep these changes for every matching call until you remove the rule in Setup' : 'Apply these changes to the next matching call only',
         onclick: () => {
           const rule = saveRule();
           if (!rule) return;
@@ -8431,7 +8478,7 @@
           h('span', { class: 'chg saved', title: d.savedLasting ? 'Every matching call is rewritten until you remove the rule' : 'The next matching call is rewritten' },
             h('span', { class: 'chgdot', 'aria-hidden': 'true' }), d.savedLasting ? 'Saved as rewrite rule' : 'Saved for next call'),
           h('span', { class: 'hspace' }),
-          h('button', { type: 'button', class: 'linkbtn', onclick: () => showTab('rules') }, 'View in Rules'));
+          h('button', { type: 'button', class: 'linkbtn', onclick: () => goToMocks() }, 'View in Setup'));
       } else {
         metaRight.replaceChildren(
           h('span', { class: 'chg', title: `Edited: ${c.list.join(', ')}` }, h('span', { class: 'chgdot', 'aria-hidden': 'true' }), 'Edited'),
@@ -8528,7 +8575,7 @@
           d.copyAt = Date.now();
           if (d.respSource === 'compare' && !entry.manual) d.cmp = { ...(d.cmp || {}), a: d.cmp?.a && d.cmp.a !== 'copy' ? d.cmp.a : 'app', b: 'copy' };
           else d.respSource = 'copy';
-          const updated = typeof r.status === 'number' && r.status < 400 ? varsFromResponse(req.method, sendUrl, r.text, env.id ?? null) : [];
+          const updated = typeof r.status === 'number' && r.status < 400 ? varsFromResponse(req.method, sendUrl, r.text) : [];
           say(updated.length ? `Updated ${updated.map((x) => `{{${x}}}`).join(', ')}` : '', updated.length ? 'info' : '');
           if (entry.manual) renderTab(); // header shows the new status and time
           else { drawTabs(); drawLower(); drawLowerHead(); }
@@ -8611,7 +8658,7 @@
         sub: ['simulate', 'mock'].includes(d.lower) ? 'Open below' : null };
       const testKids = [edgeItem, ...(entry.manual ? [] : [
         { id: 'bp-next', label: 'Break on next call', sub: bp?.once ? 'On · click to turn off' : null, title: 'Pause the app\'s next call to this endpoint so you can edit, continue or drop it', icon: ICONS.pause, checked: bp?.once === true, run: () => setBreak(true) },
-        { id: 'bp-every', label: 'Break on every call', sub: bp && !bp.once ? 'On · click to turn off' : null, title: 'Pause every call to this endpoint until you remove the breakpoint (also in Rules)', icon: ICONS.pause, checked: !!bp && !bp.once, run: () => setBreak(false) },
+        { id: 'bp-every', label: 'Break on every call', sub: bp && !bp.once ? 'On · click to turn off' : null, title: 'Pause every call to this endpoint until you remove the breakpoint (also in Setup)', icon: ICONS.pause, checked: !!bp && !bp.once, run: () => setBreak(false) },
       ])];
       const testMenu = { id: 'test-sub', label: 'Testing & debugging', icon: ICONS.spark, children: testKids,
         sub: bp ? `Breakpoint on: ${bp.once ? 'next call' : 'every call'}` : d.lower === 'edge' ? 'Open below' : null };
@@ -8885,6 +8932,7 @@
     eyeoff: svg('<path d="M2 2l12 12M6.6 3.7A6.6 6.6 0 0 1 8 3.5c4.1 0 6.5 4.5 6.5 4.5a11 11 0 0 1-1.8 2.4M10.1 10.6A2.5 2.5 0 0 1 6.3 7.1M4 5.2A10.8 10.8 0 0 0 1.5 8s2.4 4.5 6.5 4.5a6.3 6.3 0 0 0 2.3-.4"/>'),
     dup: svg('<rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M9.5 8v3M8 9.5h3M10.5 5.5V3.8A1.3 1.3 0 0 0 9.2 2.5H3.8A1.3 1.3 0 0 0 2.5 3.8v5.4a1.3 1.3 0 0 0 1.3 1.3h1.7"/>'),
     x: svg('<path d="M4 4l8 8M12 4l-8 8"/>'),
+    info: svg('<circle cx="8" cy="8" r="6"/><path d="M8 7.3V11"/><path d="M8 5h.01"/>'),
     select: svg('<rect x="2.5" y="2.5" width="11" height="11" rx="2.5"/><path d="M5.3 8.2 7.2 10l3.5-4"/>'),
     check: svg('<path d="M3 8.5 6.5 12 13 4.5"/>'),
     spark: svg('<path d="M8 1.8l1.3 3.6 3.7 1.3-3.7 1.3L8 11.6 6.7 8 3 6.7l3.7-1.3Z"/><path d="M12.6 10.6l.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6Z"/>'),
@@ -10552,7 +10600,7 @@
       const rule = core.rules.list().find((x) => x.enabled !== false && (x.respond || x.delayMs) && `${x.method} ${x.match}` === k);
       if (!rule) return null;
       const what = rule.respond ? ({ mock: `a ${rule.respond.status} response`, 'network-error': 'a network failure', hang: 'no response' })[rule.respond.mode] || 'a simulated response' : 'the real response';
-      return h('span', { class: 'tag simlive', title: `Simulated: the app gets ${what}${rule.delayMs ? `, ${fmtDur(rule.delayMs)} late` : ''}${rule.once ? ' (next call only)' : ' on every call'}. Turn it off in the call's Simulation card or in Rules.` }, 'Simulated');
+      return h('span', { class: 'tag simlive', title: `Simulated: the app gets ${what}${rule.delayMs ? `, ${fmtDur(rule.delayMs)} late` : ''}${rule.once ? ' (next call only)' : ' on every call'}. Turn it off in the call's Simulation card or in Setup.` }, 'Simulated');
     };
     const stoppedTag = () => h('span', { class: 'tag stoptag', title: 'Capturing paused: new calls to this endpoint go out as usual but aren\'t listed. Resume it from ⋯.' }, h('span', { class: 'st-l' }, 'not captured'), h('span', { class: 'st-s' }, 'off'));
     const setStopped = (r, on) => {
@@ -11124,202 +11172,200 @@
         { label: 'Undo', run: () => { if (bl.length) core.breaks.restore(bl); if (rl.length) core.rules.restore(rl); } });
     }
 
-    function row(kind, x) {
-      const isBreak = kind === 'break';
-      const call = callFor(x);
-      const tip = isBreak ? breakTip(x) : ruleTip(x);
-      const ico = h('span', { class: `rl-ico ${isBreak ? 'brk' : 'rw'}`, role: 'img', 'aria-label': isBreak ? 'Breakpoint' : 'Rewrite rule', title: isBreak ? 'Breakpoint: pauses the call before it\'s sent' : 'Rewrite rule: changes the call before it\'s sent' });
-      setHTML(ico, ICONS[isBreak ? 'pause' : 'rewrite']);
-      const del = h('button', { type: 'button', class: 'rl-x', 'aria-label': isBreak ? 'Remove breakpoint' : 'Delete rule', title: isBreak ? 'Remove breakpoint' : 'Delete rule',
-        onclick: (e) => { e.stopPropagation(); removeOne(kind, x); } });
-      setHTML(del, ICONS.x);
-      const check = h('input', { type: 'checkbox', class: 'rl-check', checked: x.enabled !== false, 'aria-label': `${isBreak ? 'Breakpoint' : 'Rule'} on`, title: x.enabled !== false ? 'On. Untick to switch it off without deleting it.' : 'Off. Tick to switch it back on.',
-        onclick: (e) => e.stopPropagation(),
-        onchange: (e) => (isBreak ? core.breaks : core.rules).toggle(x.id, e.target.checked) });
-      const tags = isBreak ? [] : ruleTags(x);
-      const rerouted = !isBreak && (x.toMethod || x.toPath);
-      const open = call ? () => { dock.tab = 'requests'; ss.set('__apiPeek.tab', 'requests'); reqView.focus = null; openDetail(call); } : null;
-      return h('div', {
-        class: `rl-row${x.enabled === false ? ' off' : ''}${open ? ' link' : ''}`, role: 'listitem',
-        title: `${tip}${open ? '\n\nClick to open the latest call' : '\n\nNo captured call to open'}`,
-        tabindex: open ? '0' : null,
-        onclick: open, onkeydown: open ? (e) => { if (e.key === 'Enter' && e.target === e.currentTarget) open(); } : null,
-      },
-      check, ico,
-      h('span', { class: `m ${x.method}` }, x.method),
-      h('span', { class: 'rl-path mono' },
-        h('span', { class: 'rl-from' }, pathOf(x.match)),
-        rerouted ? h('span', { class: 'rl-arrow', 'aria-label': 'becomes' }, '→') : null,
-        rerouted && x.toMethod ? h('span', { class: `m ${x.toMethod}` }, x.toMethod) : null,
-        rerouted ? h('span', { class: 'rl-to' }, routeTo(x)) : null),
-      h('span', { class: 'rl-tags' },
-        ...tags.map((t) => h('span', { class: 'tag' }, t)),
-        !isBreak && (x.respond || x.delayMs) ? h('span', { class: 'tag simlive', title: simSummary(x) }, 'Simulated') : null,
-        !isBreak && (x.respond || x.delayMs) ? h('span', { class: 'muted rl-sim' }, simSummary(x)) : null,
-        x.once ? h('span', { class: 'tag dry', title: isBreak ? 'Removed after it pauses one call' : 'Removed after it rewrites one call' }, 'once') : null),
-      del);
+    // ---------- Setup tab: a segmented control (Variables | Overrides), one view at a time; the last one
+    // is remembered for this site. Arrow keys move between the two.
+    const VIEW_KEY = '__apiPeek.setupView';
+    const getView = () => { try { return localStorage.getItem(VIEW_KEY) === 'overrides' ? 'overrides' : 'variables'; } catch { return 'variables'; } };
+    let view = varsUi.view || getView();
+    varsUi.view = null;
+    const setView = (v, focus = false) => {
+      view = v; try { localStorage.setItem(VIEW_KEY, v); } catch { /* storage blocked */ }
+      varsUi.editing = null; varsUi.add = null;
+      draw(true);
+      if (focus) box.querySelector(`.seg [data-view=${v}]`)?.focus();
+    };
+    const allOverrides = () => [...core.breaks.list().map((x) => ({ kind: 'break', x })),
+      ...core.rules.list().filter((r) => r.kind !== 'mock').map((x) => ({ kind: 'rule', x })),
+      ...mocks().map((x) => ({ kind: 'mock', x }))];
+    function segBar() {
+      const opts = [['variables', 'Variables', varsApi.count()], ['overrides', 'Overrides', allOverrides().length]];
+      return h('div', { class: 'seg', role: 'tablist', 'aria-label': 'Setup',
+        onkeydown: (e) => {
+          if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+          e.preventDefault();
+          const next = e.key === 'Home' ? 'variables' : e.key === 'End' ? 'overrides' : view === 'variables' ? 'overrides' : 'variables';
+          if (next !== view) setView(next, true);
+        } },
+      ...opts.map(([id, label, n]) => h('button', { type: 'button', role: 'tab', class: `seg-b${view === id ? ' on' : ''}`, 'data-view': id,
+        'aria-selected': String(view === id), tabindex: view === id ? '0' : '-1', onclick: () => { if (view !== id) setView(id); } },
+      h('span', {}, label), n ? h('span', { class: 'seg-n' }, String(n)) : null)));
     }
 
-    // ---------- Variables: first on this tab. Global, then the environment you send to (marked current),
-    // then other environments that have some. A row: name, value (secret ones masked), a note (where it updates
-    // from, or what overrides it), ⋯ (Edit, Move to, Copy to, Delete). Click a row to edit it in place.
-    const scopeName = (sc) => (sc === 'global' ? 'Global' : envApi.byId(sc).name);
-    const sameScope = (a, b) => (a === 'global' || b === 'global' ? a === b : (a ?? null) === (b ?? null));
-    function varForm(sc, v) {
+    // ---------- Variables view: one flat list. A row: name, value, ↻ when it updates itself from a response
+    // (tooltip says from where), ⋯ (Edit, Duplicate, Delete). Click a row to edit it in place.
+    function varForm(v) {
       const isNew = !v;
-      const hasEnvs = envState.list.length > 0;
       const nameIn = h('input', { class: 'pf-tok mono var-name', value: v?.name || varsUi.add?.name || '', placeholder: 'orderId', 'aria-label': 'Name', spellcheck: 'false', maxlength: '64' });
       const valIn = h('input', { class: 'pf-tok mono var-val', value: v?.value ?? '', placeholder: 'Value', 'aria-label': 'Value', spellcheck: 'false', autocomplete: 'off' });
-      let scope = sc;
-      const scopePick = isNew && hasEnvs ? scopeSelect(scope, (x) => { scope = x; }) : null;
       const err = h('div', { class: 'valid bad', hidden: true });
       const src = v?.src;
-      const stopSrc = src ? h('button', { type: 'button', class: 'linkbtn', onclick: () => { varsApi.set(sc, v.name, { src: undefined }); varsUi.editing = null; draw(true); } }, 'Stop updating') : null;
+      const stopSrc = src ? h('button', { type: 'button', class: 'linkbtn', onclick: () => { varsApi.set('global', v.name, { src: undefined }); varsUi.editing = null; draw(true); } }, 'Stop updating') : null;
       const save = () => {
         const name = nameIn.value.trim();
         if (!VAR_NAME.test(name)) { err.hidden = false; err.textContent = 'Use letters, digits, _ . or -, starting with a letter or _.'; nameIn.focus(); return; }
-        if ((isNew || name !== v.name) && varsApi.get(scope, name)) { err.hidden = false; err.textContent = `${scopeName(scope)} already has {{${name}}}.`; nameIn.focus(); return; }
+        if ((isNew || name !== v.name) && varsApi.get('global', name)) { err.hidden = false; err.textContent = `{{${name}}} already exists.`; nameIn.focus(); return; }
         // Editing shows the value, so a variable marked secret (e.g. from an imported file) stops being hidden.
-        if (isNew) varsApi.set(scope, name, { value: valIn.value });
-        else varsApi.set(sc, v.name, { name, value: valIn.value, secret: undefined });
+        if (isNew) varsApi.set('global', name, { value: valIn.value });
+        else varsApi.set('global', v.name, { name, value: valIn.value, secret: undefined });
         varsUi.editing = null; varsUi.add = null;
         draw(true);
       };
       const cancel = () => { varsUi.editing = null; varsUi.add = null; draw(true); };
       const fld = (lab, el) => h('label', { class: 'env-fld' }, h('span', { class: 'env-fl' }, lab), el);
-      const box = editBox([
+      const form = editBox([
         fld('Name', nameIn),
         fld('Value', valIn),
-        scopePick ? fld('Where', scopePick) : null,
         src ? h('div', { class: 'muted var-srcnote' }, `Updates from every response of ${src.label} · ${pathLabel(src.path)}. `, stopSrc) : null,
         err,
       ].filter(Boolean), save, cancel, { saveLabel: isNew ? 'Add variable' : 'Save', title: isNew ? 'New variable' : `Edit {{${v.name}}}` });
-      box.classList.add('var-edit', 'env-form');
-      box.querySelector('.pf-save')?.classList.add('primary');
+      form.classList.add('var-edit', 'env-form');
+      form.querySelector('.pf-save')?.classList.add('primary');
       requestAnimationFrame(() => ((isNew && !nameIn.value) ? nameIn : valIn).focus());
-      return box;
+      return form;
     }
-    function varRow(sc, v) {
-      if (varsUi.editing && sameScope(varsUi.editing.scope, sc) && varsUi.editing.name === v.name) return varForm(sc, v);
-      const cur = envApi.active();
-      const others = [{ id: 'global', name: 'Global' }, ...envApi.all()].filter((e) => !sameScope(e.id ?? null, sc) && !(sc === 'global' && e.id === 'global'));
-      const target = (e) => (e.id === 'global' ? 'global' : e.id ?? null);
-      const moveTo = (e, copy) => {
-        const to = target(e);
-        if (varsApi.get(to, v.name)) { toast(`${scopeName(to)} already has {{${v.name}}}`, '', 3000); return; }
-        const snap = varsApi.snapshot();
-        varsApi.set(to, v.name, { ...v });
-        if (!copy) varsApi.remove(sc, v.name);
-        toast(`${copy ? 'Copied' : 'Moved'} {{${v.name}}} to ${scopeName(to)}`, '', 5000, { label: 'Undo', run: () => varsApi.restore(snap) });
-      };
-      const sub = (copy) => others.map((e) => ({ id: `${copy ? 'cp' : 'mv'}-${e.id ?? 'default'}`, label: e.name, env: e.id === 'global' ? undefined : e,
-        disabled: !!varsApi.get(target(e), v.name), run: () => moveTo(e, copy) }));
+    function duplicateVar(v) {
+      const base = v.name.replace(/_\d+$/, '');
+      let i = 2; while (varsApi.get('global', `${base}_${i}`)) i++;
+      const name = `${base}_${i}`;
+      varsApi.set('global', name, { value: v.value ?? '' });
+      varsUi.editing = { name }; varsUi.add = null;
+      draw(true);
+    }
+    function varRow(v) {
+      if (varsUi.editing && varsUi.editing.name === v.name) return varForm(v);
       const menu = dropMenu(`Actions for {{${v.name}}}`, [
-        { id: 'edit', label: 'Edit', icon: ICONS.pencil, run: () => { varsUi.editing = { scope: sc, name: v.name }; draw(true); } },
-        ...(others.length ? [{ id: 'move', label: 'Move to', icon: ICONS.chevRight, children: sub(false) }, { id: 'copyto', label: 'Copy to', icon: ICONS.dup, children: sub(true) }] : []),
+        { id: 'edit', label: 'Edit', icon: ICONS.pencil, run: () => { varsUi.editing = { name: v.name }; varsUi.add = null; draw(true); } },
+        { id: 'dup', label: 'Duplicate', icon: ICONS.dup, run: () => duplicateVar(v) },
         { id: 'del', label: 'Delete', icon: ICONS.trash, danger: true, sepBefore: true, run: () => {
           const snap = varsApi.snapshot();
-          varsApi.remove(sc, v.name);
+          varsApi.remove('global', v.name);
           toast(`Deleted {{${v.name}}}`, '', 5000, { label: 'Undo', run: () => varsApi.restore(snap) });
         } },
       ], { icon: ICONS.more, btnClass: 'ibtn mk-more', title: 'More actions', align: 'right' });
-      // Notes: a global one overridden by an environment; an environment one that overrides a global one.
-      const overriddenIn = sc === 'global' ? envApi.all().filter((e) => varsApi.get(e.id ?? null, v.name)) : [];
-      const note = v.src ? `↻ ${v.src.label} · ${pathLabel(v.src.path)}`
-        : overriddenIn.length ? `overridden in ${overriddenIn.map((e) => e.name).join(', ')}`
-        : sc !== 'global' && varsApi.get('global', v.name) ? 'overrides global' : '';
-      const inUse = sc === 'global' ? !overriddenIn.some((e) => (e.id ?? null) === (cur.id ?? null)) : sameScope(sc, cur.id ?? null);
       const shown = v.secret ? '••••••••' : (v.value === '' ? '(empty)' : v.value);
-      const open = () => { varsUi.editing = { scope: sc, name: v.name }; varsUi.add = null; draw(true); };
-      return h('div', { class: `var-row${inUse ? '' : ' idle'}`, role: 'listitem', tabindex: '0',
-        title: `{{${v.name}}}${v.secret ? ' (secret)' : ` = ${v.value}`}\n${sc === 'global' ? 'Global' : scopeName(sc)}${note ? ` · ${note}` : ''}\nClick to edit`,
+      const auto = v.src ? h('span', { class: 'var-auto', role: 'img', 'aria-label': `Updates from ${v.src.label}`, title: `Updates from every response of ${v.src.label} · ${pathLabel(v.src.path)}` }) : null;
+      if (auto) setHTML(auto, ICONS.reload);
+      const open = () => { varsUi.editing = { name: v.name }; varsUi.add = null; draw(true); };
+      return h('div', { class: 'var-row', role: 'listitem', tabindex: '0',
+        title: `{{${v.name}}}${v.secret ? '' : ` = ${v.value}`}\nClick to edit`,
         onclick: (e) => { if (!e.target.closest('.newwrap')) open(); }, onkeydown: (e) => { if (e.key === 'Enter' && e.target === e.currentTarget) open(); } },
       h('span', { class: 'var-n mono' }, v.name),
       h('span', { class: `var-v mono${v.value === '' && !v.secret ? ' muted' : ''}` }, shown),
-      h('span', { class: 'var-note muted' }, note),
+      auto || h('span', {}),
       menu);
     }
-    function varGroup(sc, label, lead, list, extra = null) {
-      return h('div', { class: 'var-grp' },
-        h('div', { class: 'var-gh' }, ...lead, h('span', { class: 'var-gt' }, label), extra),
-        list.length ? h('div', { class: 'var-list', role: 'list' }, ...list.map((v) => varRow(sc, v))) : null);
-    }
-    function varSection() {
-      const cur = envApi.active();
-      const n = varsApi.count();
-      const adding = varsUi.add ? varForm(varsUi.add.scope === undefined ? 'global' : varsUi.add.scope, null) : null;
-      const groups = [];
-      const g = varsApi.list('global');
-      if (g.length) groups.push(varGroup('global', 'Global', [], g));
-      const envs = envApi.all();
-      const curFirst = [cur, ...envs.filter((e) => (e.id ?? null) !== (cur.id ?? null))];
-      for (const e of curFirst) {
-        const list = varsApi.list(e.id ?? null);
-        if (!list.length) continue;
-        const isCur = (e.id ?? null) === (cur.id ?? null);
-        groups.push(varGroup(e.id ?? null, e.name, [envDot(e)], list, isCur && envState.list.length ? h('span', { class: 'muted var-cur' }, 'current') : null));
+    function variablesView() {
+      const list = varsApi.list();
+      const adding = varsUi.add ? varForm(null) : null;
+      const add = () => { varsUi.add = {}; varsUi.editing = null; draw(true); };
+      if (!list.length && !adding) {
+        return h('section', { class: 'su-view', id: 'variables', 'aria-label': 'Variables' },
+          h('div', { class: 'su-empty' }, h('span', { class: 'muted' }, 'Reuse values with ', h('span', { class: 'mono accent' }, '{{name}}'), ' in requests.'),
+            h('button', { type: 'button', class: 'btn-sm', onclick: add }, '+ Variable')));
       }
-      const addBtn = h('button', { type: 'button', class: 'linkbtn mk-new', onclick: () => { varsUi.add = { scope: 'global' }; varsUi.editing = null; draw(true); } }, '+ Variable');
-      return h('section', { class: 'mk-sec var-sec', id: 'variables', 'aria-label': 'Variables' },
-        h('div', { class: 'mk-sech' }, h('span', { class: 'mk-sect' }, 'Variables'), n ? h('span', { class: 'muted mk-live' }, String(n)) : null, h('span', { class: 'hspace' }), n || adding ? addBtn : null),
+      return h('section', { class: 'su-view', id: 'variables', 'aria-label': 'Variables' },
+        h('div', { class: 'su-head' }, h('span', { class: 'muted' }, plural(list.length, 'variable')), h('span', { class: 'hspace' }),
+          h('button', { type: 'button', class: 'linkbtn', onclick: add }, '+ Variable')),
         adding,
-        ...groups,
-        !n && !adding ? h('div', { class: 'mk-empty' }, h('span', { class: 'muted' }, 'Use {{name}} in a request’s path, params, headers or body. Global ones work everywhere; an environment’s own ones win while you send there. Or save one from a response: hover a JSON line → Save as…'),
-          h('button', { type: 'button', class: 'btn-sm mk-new', onclick: () => { varsUi.add = { scope: 'global' }; draw(true); } }, '+ Variable')) : null);
+        list.length ? h('div', { class: 'var-list', role: 'list' }, ...list.map(varRow)) : null);
     }
 
-    // Mock endpoints: their own short section at the top. A row: method, path, status, on/off switch, ⋯ (Duplicate,
-    // Delete). Click a row to edit it.
-    function mockRow(x) {
-      const on = x.enabled !== false;
-      const st = x.respond?.status || 200;
-      const inp = h('input', { type: 'checkbox', role: 'switch', checked: on, 'aria-label': `Mock ${x.method} ${x.path}` });
-      inp.addEventListener('change', () => core.rules.toggle(x.id, inp.checked));
-      const sw = h('label', { class: 'switch mk-sw', title: on ? 'On: calls get this mock. Switch off to reach the server' : 'Off: calls reach the server', onclick: (e) => e.stopPropagation() }, inp, h('span', { class: 'sw', 'aria-hidden': 'true' }));
-      const menu = dropMenu(`Actions for mock ${x.method} ${x.path}`, [
-        { id: 'edit', label: 'Edit', icon: ICONS.pencil, run: () => openMockEditor({ rule: x }) },
-        { id: 'dup', label: 'Duplicate', icon: ICONS.dup, run: () => duplicateMock(x) },
-        { id: 'del', label: 'Delete', icon: ICONS.trash, danger: true, sepBefore: true, run: () => deleteMock(x) },
-      ], { icon: ICONS.more, btnClass: 'ibtn mk-more', title: 'More actions', align: 'right' });
-      const open = () => openMockEditor({ rule: x });
-      return h('div', { class: `mk-row${on ? '' : ' off'}`, role: 'listitem', tabindex: '0', title: `${x.method} ${x.path} → ${st}${x.delayMs ? ` after ${fmtDur(x.delayMs)}` : ''}. Click to edit`,
-        onclick: (e) => { if (!e.target.closest('.newwrap, .mk-sw')) open(); }, onkeydown: (e) => { if (e.key === 'Enter' && e.target === e.currentTarget) open(); } },
-      h('span', { class: `m ${x.method}` }, x.method), h('span', { class: 'mk-rpath mono' }, x.path),
-      h('span', { class: `sb ${statusTone(st)}` }, String(st)), sw, menu);
+    // ---------- Overrides view: mocks, rules and breakpoints in one list, in the order they apply (breakpoints
+    // and rules change real calls; mocks answer last). A row: method, path, what it does, a switch. Rules and
+    // breakpoints: click opens the latest call, × deletes (Undo). Mocks: click opens Edit mock, ⋯ has Edit,
+    // Duplicate, Delete.
+    function doesTags(kind, x) {
+      if (kind === 'break') return [['Breakpoint', 'brk'], x.once && ['once', 'dry']].filter(Boolean);
+      if (kind === 'mock') return [[`Mock ${x.respond?.status || 200}`, 'mock'], x.delayMs && [`+${fmtDur(x.delayMs)}`, 'slow']].filter(Boolean);
+      const r = x.respond;
+      return [
+        r && (r.mode === 'mock' ? (r.status >= 400 ? [`Error ${r.status}`, 'err'] : [`Edited ${r.status}`, 'mock']) : r.mode === 'hang' ? ['No response', 'err'] : ['Network failure', 'err']),
+        x.delayMs && [`+${fmtDur(x.delayMs)}`, 'slow'],
+        (x.toMethod || x.toPath || x.params || x.headers || x.body != null) && ['Rewrite', 'rw'],
+        x.once && ['once', 'dry'],
+      ].filter(Boolean);
     }
-    function mockSection() {
-      const ms = mocks();
-      const live = ms.filter((x) => x.enabled !== false).length;
-      return h('section', { class: 'mk-sec', id: 'mock-endpoints', 'aria-label': 'Mock endpoints' },
-        h('div', { class: 'mk-sech' }, h('span', { class: 'mk-sect' }, 'Mock endpoints'), ms.length ? h('span', { class: 'muted mk-live' }, `${live} active`) : null, h('span', { class: 'hspace' }),
-          ms.length ? h('button', { type: 'button', class: 'linkbtn mk-new', onclick: () => openMockEditor() }, '+ Mock endpoint') : null),
-        ms.length ? h('div', { class: 'mk-list', role: 'list' }, ...ms.map(mockRow))
-          : h('div', { class: 'mk-empty' }, h('span', { class: 'muted' }, 'Answer endpoints that don’t exist yet. Create one here, or from API Docs (Mock on an endpoint).'),
-            h('button', { type: 'button', class: 'btn-sm mk-new', onclick: () => openMockEditor() }, '+ Mock endpoint')));
+    function overrideRow({ kind, x }) {
+      const on = x.enabled !== false;
+      const isMock = kind === 'mock';
+      const path = isMock ? x.path : pathOf(x.match);
+      const call = isMock ? null : callFor(x);
+      const label = `${kind === 'break' ? 'Breakpoint' : isMock ? 'Mock' : 'Rule'} ${x.method} ${path}`;
+      const inp = h('input', { type: 'checkbox', role: 'switch', checked: on, 'aria-label': `${label} on` });
+      inp.addEventListener('change', () => (kind === 'break' ? core.breaks : core.rules).toggle(x.id, inp.checked));
+      const sw = h('label', { class: 'switch ov-sw', title: on ? 'On. Switch off to keep it without using it' : 'Off', onclick: (e) => e.stopPropagation() }, inp, h('span', { class: 'sw', 'aria-hidden': 'true' }));
+      let end;
+      if (isMock) {
+        end = dropMenu(`Actions for mock ${x.method} ${x.path}`, [
+          { id: 'edit', label: 'Edit', icon: ICONS.pencil, run: () => openMockEditor({ rule: x }) },
+          { id: 'dup', label: 'Duplicate', icon: ICONS.dup, run: () => duplicateMock(x) },
+          { id: 'del', label: 'Delete', icon: ICONS.trash, danger: true, sepBefore: true, run: () => deleteMock(x) },
+        ], { icon: ICONS.more, btnClass: 'ibtn mk-more', title: 'More actions', align: 'right' });
+      } else {
+        end = h('button', { type: 'button', class: 'rl-x', 'aria-label': `Delete ${label}`, title: kind === 'break' ? 'Remove breakpoint' : 'Delete rule',
+          onclick: (e) => { e.stopPropagation(); removeOne(kind, x); } });
+        setHTML(end, ICONS.x);
+      }
+      const open = isMock ? () => openMockEditor({ rule: x })
+        : call ? () => { dock.tab = 'requests'; ss.set('__apiPeek.tab', 'requests'); reqView.focus = null; openDetail(call); } : null;
+      const tip = isMock ? `Mock: ${x.method} ${x.path} answers ${x.respond?.status || 200}${x.delayMs ? ` after ${fmtDur(x.delayMs)}` : ''}\nClick to edit`
+        : `${kind === 'break' ? breakTip(x) : ruleTip(x)}${open ? '\n\nClick to open the latest call' : '\n\nNo captured call to open'}`;
+      const rerouted = kind === 'rule' && (x.toMethod || x.toPath);
+      return h('div', { class: `ov-row${on ? '' : ' off'}${open ? ' link' : ''}${isMock ? ' mock' : ''}`, role: 'listitem', tabindex: open ? '0' : null, title: tip,
+        onclick: (e) => { if (open && !e.target.closest('.newwrap, .ov-sw, .rl-x')) open(); },
+        onkeydown: open ? (e) => { if (e.key === 'Enter' && e.target === e.currentTarget) open(); } : null },
+      h('span', { class: `m ${x.method}` }, x.method),
+      h('span', { class: 'ov-path mono' }, path, rerouted ? h('span', { class: 'muted' }, ` → ${x.toMethod ? `${x.toMethod} ` : ''}${routeTo(x)}`) : null),
+      h('span', { class: 'ov-tags' }, ...doesTags(kind, x).map(([t, c]) => h('span', { class: `ov-tag ${c}` }, t))),
+      sw, end);
+    }
+    function overridesView() {
+      const items = allOverrides();
+      if (!items.length) {
+        return h('section', { class: 'su-view', id: 'overrides', 'aria-label': 'Overrides' },
+          h('div', { class: 'su-empty' }, h('span', { class: 'muted' }, 'Mock endpoints or change real calls from a request’s ⋯ menu.'),
+            h('button', { type: 'button', class: 'btn-sm', onclick: () => openMockEditor() }, '+ Mock endpoint')));
+      }
+      const onN = items.filter((i) => i.x.enabled !== false).length;
+      const info = h('span', { class: 'su-info', tabindex: '0', role: 'img', 'aria-label': 'Order: Offline, then rules and breakpoints, then mocks',
+        title: 'Order they apply in: Offline → rules and breakpoints (real calls) → mocks.\nRules and breakpoints are made from a request: ⋯ → Run & simulate, or Testing & debugging.' });
+      setHTML(info, ICONS.info);
+      const plusBtn = h('button', { type: 'button', class: 'ibtn su-plus', 'aria-label': 'New mock endpoint', title: 'New mock endpoint', onclick: () => openMockEditor() });
+      setHTML(plusBtn, ICONS.plus);
+      const nReal = items.filter((i) => i.kind !== 'mock').length;
+      const more = dropMenu('More', [
+        { id: 'clear', label: 'Clear all rules and breakpoints', icon: ICONS.trash, danger: true, disabled: !nReal, sub: 'Mocks and variables stay. You can undo.', run: clearAll },
+      ], { icon: ICONS.more, btnClass: 'ibtn mk-more', title: 'More', align: 'right' });
+      return h('section', { class: 'su-view', id: 'overrides', 'aria-label': 'Overrides' },
+        h('div', { class: 'su-head' }, h('span', { class: 'muted' }, `${plural(items.length, 'override')} · ${onN} on`), info, h('span', { class: 'hspace' }), plusBtn, more),
+        h('div', { class: 'ov-list', role: 'list' }, ...items.map(overrideRow)));
     }
 
     function draw(force = false) {
-      // Captured calls redraw this list; don't pull a mock's open ⋯ menu out from under the pointer.
+      // Captured calls redraw this tab; don't pull an open ⋯ menu out from under the pointer,
+      // nor a variable being edited (its own buttons redraw with force).
       if (!force && box.querySelector('.dmenu:not([hidden])')) return;
-      // …nor a variable being edited (its own buttons redraw with force).
       if (!force && box.querySelector('.var-edit')) return;
-      const bl = core.breaks.list(); const rl = core.rules.list().filter((r) => r.kind !== 'mock');
-      if (!bl.length && !rl.length) {
-        box.replaceChildren(varSection(), mockSection(), h('div', { class: 'rl-empty muted' }, mocks().length ? 'No rules or breakpoints yet. On a request page, use ' : 'Nothing changes this site\'s calls. On a request page, use ', h('b', {}, 'Save rewrite rule'), ' or ⋯ → Testing & debugging → ', h('b', {}, 'Break on next call'), '.'));
-        return;
-      }
-      const sum = [bl.length && plural(bl.length, 'breakpoint'), rl.length && plural(rl.length, 'rule')].filter(Boolean).join(' · ');
-      box.replaceChildren(varSection(), mockSection(),
-        h('div', { class: 'rl-top' }, h('span', { class: 'muted rl-sum' }, sum), h('span', { class: 'hspace' }),
-          h('button', { type: 'button', class: 'linkbtn', title: 'Remove every breakpoint and rule on this site; mock endpoints stay (you can undo)', onclick: clearAll }, 'Clear all')),
-        h('div', { class: 'rl-list', role: 'list' }, ...bl.map((b) => row('break', b)), ...rl.map((r) => row('rule', r))));
+      const hadFocus = box.contains(dockEl?.getRootNode?.()?.activeElement) ? dockEl.getRootNode().activeElement : null;
+      box.replaceChildren(segBar(), view === 'variables' ? variablesView() : overridesView());
+      if (hadFocus?.classList?.contains('seg-b')) box.querySelector(`.seg [data-view=${view}]`)?.focus();
     }
     mainEl.append(box);
     draw();
     refreshers.push(() => draw());
     const onVars = () => { if (box.isConnected) draw(!box.querySelector('.var-edit')); else varsListeners.delete(onVars); };
     varsListeners.add(onVars);
-    if (varsUi.scrollTo) { varsUi.scrollTo = false; requestAnimationFrame(() => box.querySelector('#variables')?.scrollIntoView({ block: 'start' })); }
+    varsUi.scrollTo = false;
   }
 
   // Turn Offline on/off for this tab. It acts on the calls RESTless sees, so it needs capture on for this site.

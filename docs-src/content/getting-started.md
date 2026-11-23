@@ -22,7 +22,7 @@ RESTless records nothing until you allow it, one site at a time. Click **Turn on
 ## Find your way
 
 - **Requests**: every call the app makes.
-- **Rules**: everything you’ve changed, in one list.
+- **Setup**: your variables, and your mocks, rules and breakpoints.
 - **API Docs**: your OpenAPI / Swagger docs.
 
 These tabs sit under the header. Open requests get their own tabs below them, visible everywhere.

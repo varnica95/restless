@@ -536,7 +536,7 @@
     replace(list) { breaks = Array.isArray(list) ? list.map((b) => ({ ...b })) : []; save(LS_BREAKS, breaks); notify(); },
     add({ method, match, once }) {
       breaks = breaks.filter((b) => !(b.method === method && b.match === match));
-      breaks.push({ id: `b${Date.now().toString(36)}`, method, match, once: !!once, enabled: true });
+      breaks.push({ id: `b${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, method, match, once: !!once, enabled: true });
       save(LS_BREAKS, breaks); notify();
     },
     find: (method, match) => breaks.find((b) => b.method === method && b.match === match) || null,
@@ -921,7 +921,7 @@
     list: () => rules,
     upsert(rule) {
       const i = rules.findIndex((r) => r.method === rule.method && r.match === rule.match);
-      const full = { enabled: true, id: `r${Date.now().toString(36)}`, ...rule };
+      const full = { enabled: true, id: `r${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, ...rule };
       if (i >= 0) rules[i] = { ...rules[i], ...full, id: rules[i].id }; else rules.push(full);
       save(LS_RULES, rules); notify();
       return i >= 0 ? rules[i] : full;
