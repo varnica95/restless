@@ -307,7 +307,7 @@ If several calls are paused, deciding one opens the next. If the app gives up on
 
 Actions, in the request screen's header next to **‹ All requests**:
 
-- **Apply to app**: saves the change and gets the app to repeat the call, so the page shows the result. It picks how by itself, and the menu says which before you click:
+- **Apply to app**: saves the change and gets the app to repeat the call, so the page shows the result. It's greyed out (*Nothing to apply yet. Edit the request first*) until the request differs from the app's call or a simulation is live. It picks how by itself, and the menu says which before you click:
   - **The call came from a button or field** (*Re-runs “Search” on the page*): it re-runs that (clicking the button, or replaying the search input or dropdown change), or else sends focus/visibility events that make React Query, SWR and similar libraries refetch. The page keeps its state. If the app still doesn't repeat the call, a toast counts down *Reloading in 3 s* with **Cancel** (the change stays saved either way).
   - **The call happened while the page loaded** (or on a timer; *Reloads the page*): a quick refetch nudge, then the page reloads. Rules apply before the app's first call, so the reloaded page gets the change; your open request tabs come back.
   - Afterwards one line says what happened: *Applied: re-ran “Search”*, *Applied: the app refetched*, or the reload.

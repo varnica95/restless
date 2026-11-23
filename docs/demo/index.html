@@ -10373,7 +10373,7 @@
       } else { actBar.hidden = true; actBar.replaceChildren(); }
     };
     let rbQueued = false;
-    const queueRuleBar = () => { if (rbQueued) return; rbQueued = true; requestAnimationFrame(() => { rbQueued = false; drawBar(); drawTabs(); }); };
+    const queueRuleBar = () => { if (rbQueued) return; rbQueued = true; requestAnimationFrame(() => { rbQueued = false; drawBar(); drawTabs(); refreshApplyItem(); }); };
     for (const ev of ['input', 'change', 'click']) mainEl.addEventListener(ev, queueRuleBar);
     cleanups.push(() => { for (const ev of ['input', 'change', 'click']) mainEl.removeEventListener(ev, queueRuleBar); });
 
@@ -10393,6 +10393,23 @@
       return `${el ? `Re-runs ${elName(el)} on the page` : 'Reloads the page'} · ${keepRule ? 'keeps applying' : 'just once'}`;
     };
     const applied = () => { d.savedSig = sig(); d.savedLasting = keepRule; drawBar(); };
+    // Anything to apply? The same test saveRule uses: an edit to the request, or a live simulation. (A broken
+    // path, header or body still counts, so clicking says what to fix.)
+    const canApply = () => {
+      try {
+        if (!routeOk() || !headersOk() || !bodyOk()) return true;
+        const c = changes(); const r0 = simRule();
+        return !!(c.methodChanged || c.pathChanged || c.paramsChanged || c.bodyChanged || c.headersChanged || (r0 && r0.enabled !== false && simActive()));
+      } catch { return true; }
+    };
+    // Rebuild the ⋯ menu when that flips (not while it's open), so Apply to app is greyed out until there's a change.
+    let applyWas = null;
+    const refreshApplyItem = () => {
+      const now = canApply();
+      if (now === applyWas) return;
+      if (menuSlot?.querySelector('.dmenu:not([hidden])')) return;
+      buildMenu();
+    };
     const reloadSoon = (why) => {
       let n = 3; let cancelled = false;
       const cancel = () => {
@@ -10567,6 +10584,7 @@
         sub: bp ? `Breakpoint on: ${bp.once ? 'next call' : 'every call'}` : d.lower === 'edge' ? 'Open below' : null };
       const mockItem = (entry.mocked || d.copy?.mocked) && mockOf(d.copy?.mocked ? d.copy : entry)
         ? { id: 'editmock', label: 'Edit mock', icon: ICONS.cube, title: 'The response came from a mock endpoint', run: () => editMockFor(d.copy?.mocked ? d.copy : entry) } : null;
+      applyWas = canApply();
       const items = entry.manual ? [
         mockItem,
         pinItem,
@@ -10582,7 +10600,7 @@
         dupItem,
         { ...copyMenu, sepBefore: true },
         { ...runMenu, sepBefore: false }, testMenu,
-        { id: 'apply', label: 'Apply to app', sub: applyPlan(), title: 'Save the change and make the app repeat this call, so the page shows the result.\nCalls from a button or field are re-run on the page; calls made while the page loads need a reload.', icon: ICONS.upload, sepBefore: true, run: applyToApp },
+        { id: 'apply', label: 'Apply to app', disabled: !applyWas, sub: applyWas ? applyPlan() : 'Nothing to apply yet. Edit the request first', title: 'Save the change and make the app repeat this call, so the page shows the result.\nCalls from a button or field are re-run on the page; calls made while the page loads need a reload.', icon: ICONS.upload, sepBefore: true, run: applyToApp },
       ];
       const m = dropMenu('Request actions', items.filter(Boolean), { icon: ICONS.more, menuClass: 'compactmenu', btnClass: `hbox sq${bp ? ' on' : ''}`, title: bp ? `More actions (breakpoint on: ${bp.once ? 'next call' : 'every call'})` : 'More actions' });
       menuSlot.replaceChildren(m);
