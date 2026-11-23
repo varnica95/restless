@@ -8,6 +8,8 @@ lead: Change any call and send it again, compare answers, or make the app see so
 
 Change the method, path, query, headers or body, then press **Run**. Only you see the answer; the app isn’t affected.
 
+Hover a JSON line to copy its **Value** or **Key + value**. Paste a `"key": value` into a body and it lands formatted, commas included.
+
 Want the app to use your change? **⋯ → Apply to application** makes it repeat the call.
 
 ## Compare

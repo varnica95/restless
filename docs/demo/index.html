@@ -3275,6 +3275,12 @@
     .codeview.wrap .lc { white-space: pre-wrap; word-break: break-word; min-width: 0; }
     .codeview .cl.folded .lc::after { content: '…'; margin-left: 6px; padding: 0 6px; border-radius: 4px; background: var(--bg3); color: var(--dim); }
     .codeview .cl.hid { display: none; }
+    .cv-wrap { position: relative; }
+    .cv-copy { position: absolute; z-index: 3; display: inline-flex; gap: 2px; padding: 2px; background: var(--pop); border: 1px solid var(--line2); border-radius: var(--r-sm); box-shadow: var(--pop-shadow); }
+    .cv-copy[hidden] { display: none; }
+    .cv-copy button.cv-btn { font: 500 11px/1 var(--font); padding: 4px 7px; border: 0; border-radius: 4px; background: transparent; color: var(--dim); cursor: pointer; white-space: nowrap; }
+    .cv-copy button.cv-btn:hover { background: var(--hover); color: var(--fg); }
+    .cv-btn[hidden] { display: none; }
     /* compare */
     .cmpwrap > .rv-toolbar { padding-left: 14px; }
     .cmptitle { font-weight: 600; font-size: 13px; }
@@ -6252,6 +6258,7 @@
     area.addEventListener('paste', (e) => {
       if (!isJson() || area.readOnly) return;
       const text = e.clipboardData?.getData('text/plain');
+      if (text && pastePair(text)) { e.preventDefault(); return; }
       if (!text || !core.isJson(text.trim())) return;
       e.preventDefault();
       const v = area.value;
@@ -6262,6 +6269,31 @@
       const indent = /^[ \t]*/.exec(v.slice(lineStart))[0];
       insert(pretty(text.trim()).replace(/\n/g, `\n${indent}`));
     });
+    // A pasted `"key": value` (as copied from a JSON view) goes in formatted, at the cursor's indent,
+    // with the commas around it fixed: one after the previous entry, one before a following key.
+    // Into an empty body it becomes { "key": value }. One edit, so Ctrl+Z undoes it in one step.
+    function pastePair(text) {
+      const t = text.trim().replace(/,$/, '');
+      if (!/^"(?:\\.|[^"\\])*"\s*:/.test(t) || !core.isJson(`{${t}}`)) return false;
+      const frag = pretty(`{${t}}`).split('\n').slice(1, -1).map((l) => l.slice(2));
+      const v = area.value;
+      if (!v.trim()) { area.select(); insert(`{\n  ${frag.join('\n  ')}\n}`); return true; }
+      const s0 = area.selectionStart; const s1 = area.selectionEnd;
+      let p = s0 - 1; while (p >= 0 && /\s/.test(v[p])) p--;
+      let q = s1; while (q < v.length && /\s/.test(v[q])) q++;
+      const prev = v[p] || ''; const next = v[q] || '';
+      let between = v.slice(p + 1, s0);
+      const lineIndent = (at) => /^[ \t]*/.exec(v.slice(v.lastIndexOf('\n', at - 1) + 1))[0];
+      // On the same line as the previous token: start a new line at the right indent.
+      if (prev && !between.includes('\n')) between = `\n${lineIndent(p)}${prev === '{' ? '  ' : ''}`;
+      const indent = between.slice(between.lastIndexOf('\n') + 1);
+      const lead = prev && !/[{[,]/.test(prev) ? ',' : '';
+      let trail = next === '"' ? ',' : '';
+      if (next === '}' && !v.slice(s1, q).includes('\n')) trail += `\n${lineIndent(p)}`;
+      area.setSelectionRange(p + 1, s1);
+      insert(`${lead}${between}${frag.join(`\n${indent}`)}${trail}`);
+      return true;
+    }
     area.addEventListener('blur', () => {
       if (!isJson() || area.readOnly) return;
       const v = area.value;
@@ -6434,7 +6466,60 @@
         el.classList.toggle('hid', n > 0);
       }
     });
-    return box;
+    return withLineCopy(box, lines, end);
+  }
+
+  // Hovering a JSON line shows a small "Value · Key + value" chip at the right edge of the view.
+  // Value copies the value (strings without quotes, objects and arrays as formatted JSON);
+  // Key + value copies a `"key": value` fragment that pastes straight into a request body.
+  // The chip is made on first hover, so search highlighting never sees its labels.
+  function lineEntry(lines, end, i) {
+    const m = /^(\s*)("(?:\\.|[^"\\])*")\s*:\s?(.*)$/.exec(lines[i]) || /^(\s*)()(.*)$/.exec(lines[i]);
+    const [, indent, key, rest] = m;
+    const first = rest.trim();
+    if (!first || /^[}\]]/.test(first)) return null;
+    let raw = first;
+    if (end[i] > i) raw = [first, ...lines.slice(i + 1, end[i] + 1).map((l) => (l.startsWith(indent) ? l.slice(indent.length) : l.trimStart()))].join('\n');
+    raw = raw.replace(/,$/, '');
+    let value = raw;
+    if (raw.startsWith('"')) { try { value = JSON.parse(raw); } catch { /* keep as shown */ } }
+    return { key, raw, value: String(value), pair: key ? `${key}: ${raw}` : null };
+  }
+  function withLineCopy(box, lines, end) {
+    const wrap = h('div', { class: 'cv-wrap' }, box);
+    let bar = null; let cur = null;
+    const hide = () => { if (bar) bar.hidden = true; cur = null; };
+    const copy = async (btn, text, label) => {
+      try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; } catch { btn.textContent = 'Failed'; }
+      setTimeout(() => { btn.textContent = label; }, 1000);
+    };
+    const make = () => {
+      const val = h('button', { type: 'button', class: 'cv-btn', onclick: () => cur && copy(val, cur.value, 'Value') }, 'Value');
+      const pair = h('button', { type: 'button', class: 'cv-btn', onclick: () => cur && copy(pair, cur.pair, 'Key + value') }, 'Key + value');
+      bar = h('div', { class: 'cv-copy', onmouseleave: (e) => { if (!wrap.contains(e.relatedTarget)) hide(); } }, val, pair);
+      bar.val = val; bar.pair = pair;
+      bar.hidden = true;
+      wrap.append(bar);
+    };
+    box.addEventListener('mouseover', (e) => {
+      const line = e.target.closest?.('.cl');
+      if (!line || !box.contains(line)) return;
+      const entry = lineEntry(lines, end, Number(line.dataset.n) - 1);
+      if (!entry) { hide(); return; }
+      if (!bar) make();
+      cur = entry;
+      bar.val.textContent = 'Value'; bar.pair.textContent = 'Key + value';
+      bar.val.title = `Copy ${entry.value.length > 60 ? `${entry.value.slice(0, 60)}…` : entry.value}`;
+      bar.pair.hidden = !entry.pair;
+      if (entry.pair) bar.pair.title = `Copy ${entry.key}: …`;
+      bar.hidden = false;
+      const top = line.offsetTop - box.scrollTop + box.offsetTop + (line.offsetHeight - bar.offsetHeight) / 2;
+      bar.style.top = `${Math.round(top)}px`;
+      bar.style.right = `${Math.max(0, box.offsetWidth - box.clientWidth) + 6}px`;
+    });
+    box.addEventListener('mouseleave', (e) => { if (!bar || !bar.contains(e.relatedTarget)) hide(); });
+    box.addEventListener('scroll', hide);
+    return wrap;
   }
 
   // Pretty | Raw | Headers, like Postman. Pretty is the friendliest view: the error explained (pretty: a node)
