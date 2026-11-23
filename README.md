@@ -118,7 +118,7 @@ Answer calls to an endpoint that doesn't exist yet (or that you want to fake), w
 - **API Docs**: hover an endpoint for **Mock** (always shown on touch screens). A mocked endpoint shows a **Mocked** badge in the same place (*Mock off* when switched off); click it to edit.
 - **Setup → Overrides**: **+** creates a mock; each mock is a row with method, path, `Mock 200` (and the delay), a **switch** and **⋯** (Edit, Duplicate, Delete). Click a row to edit. **Duplicate** opens the form with the same response for another path. **Clear all rules and breakpoints** leaves mocks alone.
 - **Requests**: calls answered by a mock carry the **Changed** tag (its tooltip says which mock; click it to edit the mock) and **Edit mock** in the row's ⋯. On the request screen the response shows **Source: Mock endpoint · Edit mock** (also for your own runs), and ⋯ has **Edit mock**.
-- **Header**: while any mock is on, a small chip (*2 mocks active*; the number only on a narrow panel) opens Setup → Overrides.
+- **Setup tab**: while any mock or override is on, the Setup tab shows how many, so you can see at a glance that something is changed.
 - Precedence: **Offline** wins over everything, then a rule that simulates the real endpoint, then mocks. Mocks match the path on any host.
 - Mocks are part of **Settings → Import & export** (Rules and breakpoints).
 
@@ -164,7 +164,7 @@ One sheet, from the header chip or the chip before a request's address. It lists
 - Environments and users are saved per site, in this browser (localStorage).
 
 
-The **export** icon (above the list, next to Keep after reload and Clear) opens the export dialog for the calls shown (search and filters apply); a row's **⋯ → Export…** opens it for that call or endpoint. In the dialog, **Choose calls…** switches to selection: checkboxes appear on the rows, and the line above the list shows *N selected · Select all · Clear* with **Cancel** and **Export N**. Tick an endpoint row to take all its calls. Esc cancels.
+**⋯ → Export…** (above the list, next to Clear) opens the export dialog for the calls shown (search and filters apply); a row's **⋯ → Export…** opens it for that call or endpoint. In the dialog, **Choose calls…** switches to selection: checkboxes appear on the rows, and the line above the list shows *N selected · Select all · Clear* with **Cancel** and **Export N**. Tick an endpoint row to take all its calls. Esc cancels.
 
 The dialog is titled **Export N calls**, where N follows the Calls choice (*Export 1 call* for a single call):
 - **Format** (first control, full width): **Postman** (Collection v2.1 `.json`), **HAR** (`.har`) or **cURL** (a `.sh` script), with one line under it saying where it opens: *Imports into Postman, Insomnia, Bruno, Hoppscotch* / *Opens in DevTools → Network, Charles, Fiddler* / *A shell script, one curl command per request*.
@@ -178,7 +178,7 @@ The dialog is titled **Export N calls**, where N follows the Calls choice (*Expo
 - **slow**: the call took 1 s or more (its time is shown in red). **large**: the response is 1 MB or more.
 - Duplicate, slow and large are in **Filters → Show only**, with counts.
 - **Hide from list** (a row's ⋯): stops listing new calls to that endpoint (method + path, any query), for health checks, analytics, polling and other noise. The calls still go out as usual, and rules and breakpoints still apply to them; they just aren't listed. Calls already in the list stay, greyed out with a *hidden* tag. The choice is saved for the site, so it holds after a reload. **Filters → Hidden endpoints** shows the hidden endpoints, including ones with no calls left in the list (after a reload or Clear), and their ⋯ has **Show in list**. Both actions show a toast with **Undo**.
-- **Select several**: the **select** icon above the list (left of export) puts checkboxes on the rows. Tick calls or whole endpoints, then **Hide N** hides those endpoints from the list and **Show N** shows hidden ones again (both show when the selection has some of each); one Undo reverts the lot. **Export N** exports the ticked calls. With **Hidden endpoints** on, hidden endpoints with no calls listed can be ticked too. Esc or **Cancel** leaves selection.
+- **Select several**: **⋯ → Select…** above the list puts checkboxes on the rows. Tick calls or whole endpoints, then **Hide N** hides those endpoints from the list and **Show N** shows hidden ones again (both show when the selection has some of each); one Undo reverts the lot. **Export N** exports the ticked calls. With **Hidden endpoints** on, hidden endpoints with no calls listed can be ticked too. Esc or **Cancel** leaves selection.
 
 ### Testing tools (QA)
 
@@ -192,7 +192,7 @@ The request tabs you have open come back when the page reloads, in this browser 
 
 ### Keep after reload
 
-Turn on **Keep after reload** (the history icon above the table, or **Settings → Advanced**) and the captured requests stay when the page reloads or navigates within the site, like DevTools. Older calls are dimmed and listed under one **Before reload** line (in the grouped view: endpoints not called again since the reload; inside an expanded group, between its new and older calls). The request screen tags them **before reload**; a call still in flight when the page left shows as `interrupted`. The switch is saved per site; the log itself is kept per tab (`sessionStorage`), at most 300 calls, and very large bodies are dropped first. The trash button clears it.
+Turn on **Keep after reload** (**⋯ → Keep after reload** above the list, or **Settings → This site**; a dot on ⋯ shows it's on) and the captured requests stay when the page reloads or navigates within the site, like DevTools. Older calls are dimmed and listed under one **Before reload** line (in the grouped view: endpoints not called again since the reload; inside an expanded group, between its new and older calls). The request screen tags them **before reload**; a call still in flight when the page left shows as `interrupted`. The switch is saved per site; the log itself is kept per tab (`sessionStorage`), at most 300 calls, and very large bodies are dropped first. The trash button clears it.
 
 
 ### TypeScript types
@@ -307,7 +307,7 @@ If several calls are paused, deciding one opens the next. If the app gives up on
 
 Actions, in the request screen's header next to **‹ All requests**:
 
-- **Apply to app**: saves the change and gets the app to repeat the call, so the page shows the result. It's greyed out (*Nothing to apply yet. Edit the request first*) until the request differs from the app's call or a simulation is live. It picks how by itself, and the menu says which before you click:
+- **Apply to app**: saves the change and gets the app to repeat the call, so the page shows the result. It's greyed out (*Nothing to apply yet. Edit the request first*) until the request differs from the app's call or a simulation is live. It picks how by itself, and the menu says which before you click: It's also under **Save ▾ → Save and apply to app** in the edit bar.
   - **The call came from a button or field** (*Re-runs “Search” on the page*): it re-runs that (clicking the button, or replaying the search input or dropdown change), or else sends focus/visibility events that make React Query, SWR and similar libraries refetch. The page keeps its state. If the app still doesn't repeat the call, a toast counts down *Reloading in 3 s* with **Cancel** (the change stays saved either way).
   - **The call happened while the page loaded** (or on a timer; *Reloads the page*): a quick refetch nudge, then the page reloads. Rules apply before the app's first call, so the reloaded page gets the change; your open request tabs come back.
   - Afterwards one line says what happened: *Applied: re-ran “Search”*, *Applied: the app refetched*, or the reload.

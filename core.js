@@ -43,12 +43,8 @@
   }
   let recordings = load(LS_REC, {});
 
-  // ---------- capture settings (per site). Empty lists mean "everything".
-  const LS_SET = '__apiPeek.settings';
-  const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
-  const DEFAULT_SETTINGS = { include: [], exclude: [], methods: [] };
-  let settings = { ...DEFAULT_SETTINGS, ...load(LS_SET, {}) };
-  state.hiddenCount = 0;
+  // (URL / method capture filters were removed; forget any an older version saved.)
+  try { localStorage.removeItem('__apiPeek.settings'); } catch { /* storage blocked */ }
 
   // Capture is off until the user turns it on for this site (per origin, localStorage).
   // While off, the app's fetch/XHR go straight to the browser: nothing is recorded or changed.
@@ -61,23 +57,6 @@
   // Inspect (dry run) is user-started, so it works even while capture is off.
   const bypass = () => !captureOn && !state.captureMode;
 
-  // URL / method capture filters were removed from the UI; old saved filters no longer hide calls.
-  const passes = () => true;
-
-  const settingsApi = {
-    get: () => ({ ...settings }),
-    set(next) {
-      const clean = (list) => [...new Set((list || []).map((s) => String(s).trim()).filter(Boolean))];
-      settings = { include: clean(next.include), exclude: clean(next.exclude), methods: (next.methods || []).filter((m) => [...METHODS, 'OTHER'].includes(m)) };
-      save(LS_SET, settings);
-      // Drop already-logged requests that no longer match, so the log reflects the filter.
-      const before = state.requests.length;
-      state.requests = state.requests.filter((r) => passes(r.method, r.originalUrl || r.url));
-      state.hiddenCount += before - state.requests.length;
-      notify();
-    },
-    methods: [...METHODS, 'OTHER'],
-  };
 
   // Every request (even ones hidden by the capture filter) goes through these hooks.
   const requestHooks = new Set();
@@ -268,13 +247,13 @@
       originalUrl: null,
       originalBody: null,
       dryRun: !!state.captureMode,
-      hidden: !passes(req.method, req.url),
+      hidden: false,
     };
     entry.group = `${entry.method} ${matchKey(entry.url)}`;
     const stopped = muteApi.has(entry.group);
     if (stopped) entry.hidden = true;
     requestHooks.forEach((fn) => { try { fn(entry); } catch { /* ignore */ } });
-    if (entry.hidden) { if (!stopped) state.hiddenCount++; return entry; } // still trapped / rewritten, just not logged
+    if (entry.hidden) return entry; // hidden from the list: still trapped / rewritten, just not logged
     state.requests.unshift(entry);
     trimGroup(entry.group);
     if (state.requests.length > MAX_REQUESTS) state.requests.length = MAX_REQUESTS;
@@ -936,12 +915,12 @@
   Object.defineProperty(window, '__apiPeekCore', {
     value: Object.freeze({
       state, rules: rulesApi, actionable, elementKey, elText, recordingsFor, findDataSource,
-      dryRun, whenIdle, sendCopy, matchKey, isJson, applyToApp, findByKey, settings: settingsApi, capture: captureApi, mute: muteApi, pins: pinsApi,
+      dryRun, whenIdle, sendCopy, matchKey, isJson, applyToApp, findByKey, capture: captureApi, mute: muteApi, pins: pinsApi,
       breaks: breaksApi, resume, auth: authApi, net: netApi,
       onPause: (fn) => { pauseHooks.add(fn); return () => pauseHooks.delete(fn); },
       subscribe: (fn) => { listeners.add(fn); return () => listeners.delete(fn); },
       clearRecordings: () => { recordings = {}; save(LS_REC, recordings); notify(); },
-      clearRequests: () => { state.requests = []; state.hiddenCount = 0; notify(); },
+      clearRequests: () => { state.requests = []; notify(); },
       refresh: () => notify(),
     rawFetch: (...a) => origFetch(...a), // not recorded, not rewritten
       // A request you build yourself (New request / Import cURL): listed, never sent by the app.

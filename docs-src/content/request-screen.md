@@ -10,7 +10,7 @@ Change the method, path, query, headers or body, then press **Run**. Only you se
 
 Hover a JSON line to copy its **Value** or **Key + value**. Paste a `"key": value` into a body and it lands formatted, commas included.
 
-Want the app to use your change? **⋯ → Apply to app** makes it repeat the call: it re-runs the button or field that made it, or reloads the page for calls made while loading. The menu says which.
+Want the app to use your change? **⋯ → Apply to app** (or **Save ▾ → Save and apply to app**) makes it repeat the call: it re-runs the button or field that made it, or reloads the page for calls made while loading. The menu says which.
 
 ## Compare
 

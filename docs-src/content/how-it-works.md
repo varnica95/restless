@@ -8,7 +8,7 @@ RESTless runs inside the page and watches the app’s `fetch` and `XMLHttpReques
 
 ## What it stores
 
-Your rules, mocks, environments and users are saved in this browser, per site. Captured calls are kept until the page reloads, unless **Preserve log** is on. Clearing the site’s data removes everything.
+Your rules, mocks, environments and users are saved in this browser, per site. Captured calls are kept until the page reloads, unless **Keep after reload** is on. Clearing the site’s data removes everything.
 
 ## Limits
 

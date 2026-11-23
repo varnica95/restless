@@ -2,7 +2,7 @@ if (!globalThis.__restlessBridge) {
 globalThis.__restlessBridge = true;
 // RESTless — isolated-world bridge between the extension and the MAIN-world UI:
 // relays context-menu / toolbar / shortcut messages, the toolbar badge, and syncs preferences.
-const DEFAULT_PREFS = { modifier: 'ctrl', action: 'click', dock: 'push', width: 460, theme: 'dark', position: 'right', height: 340, float: null, maxTabs: 5, badgeCount: true };
+const DEFAULT_PREFS = { dock: 'push', width: 460, theme: 'dark', position: 'right', height: 340, float: null, maxTabs: 5, badgeCount: true };
 const postPrefs = (prefs) => window.postMessage({ __apiPeek: 'prefs', prefs: { ...DEFAULT_PREFS, ...(prefs || {}) } }, '*');
 const sendStored = () => chrome.storage.sync.get('prefs').then(({ prefs }) => postPrefs(prefs), () => postPrefs());
 
@@ -26,15 +26,14 @@ window.addEventListener('message', (e) => {
   if (e.data.__apiPeek === 'savePrefs' && e.data.prefs) {
     const p = e.data.prefs;
     const num = (v, lo, hi) => (Number.isFinite(v) ? Math.round(Math.min(Math.max(v, lo), hi)) : null);
-    const ok = ['ctrl', 'alt', 'shift', 'meta'].includes(p.modifier) && ['click', 'hover'].includes(p.action)
-      && ['push', 'overlay'].includes(p.dock) && ['light', 'dark', 'system'].includes(p.theme)
+    const ok = ['push', 'overlay'].includes(p.dock) && ['light', 'dark', 'system'].includes(p.theme)
       && ['right', 'left', 'top', 'bottom', 'float'].includes(p.position);
     if (ok) {
       const f = p.float && typeof p.float === 'object'
         ? { x: num(p.float.x, 0, 10000), y: num(p.float.y, 0, 10000), w: num(p.float.w, 200, 10000), h: num(p.float.h, 200, 10000) }
         : null;
       chrome.storage.sync.set({ prefs: {
-        modifier: p.modifier, action: p.action, dock: p.dock, theme: p.theme, position: p.position,
+        dock: p.dock, theme: p.theme, position: p.position,
         width: num(p.width, 320, 4000) ?? DEFAULT_PREFS.width,
         height: num(p.height, 200, 4000) ?? DEFAULT_PREFS.height,
         float: f,

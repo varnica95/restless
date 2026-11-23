@@ -10,12 +10,10 @@
   let host = null;
   let root = null;
   let refreshers = [];
-  const DEFAULT_PREFS = { modifier: 'ctrl', action: 'click', dock: 'push', width: 460, theme: 'dark', position: 'right', height: 340, float: null, maxTabs: 5, badgeCount: true };
+  const DEFAULT_PREFS = { dock: 'push', width: 460, theme: 'dark', position: 'right', height: 340, float: null, maxTabs: 5, badgeCount: true };
   let prefs = { ...DEFAULT_PREFS }; // real values arrive from chrome.storage via bridge.js
   const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
   const prefListeners = new Set();
-  const MOD_LABEL = { ctrl: isMac ? 'Control' : 'Ctrl', alt: isMac ? 'Option' : 'Alt', shift: 'Shift', meta: isMac ? 'Cmd' : 'Win' };
-  const gestureLabel = (p = prefs) => `${MOD_LABEL[p.modifier]}+${p.action}`;
   const savePrefs = (patch) => {
     prefs = { ...prefs, ...patch };
     window.postMessage({ __apiPeek: 'savePrefs', prefs }, '*');
@@ -2965,12 +2963,6 @@
     .mk-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px; border: 1px dashed var(--line2); border-radius: 8px; font-size: 12px; }
     #mock-endpoints { scroll-margin-top: 8px; border-radius: 10px; transition: box-shadow .3s; }
     #mock-endpoints.flash { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent); }
-    button.mockchip { display: inline-flex; align-items: center; gap: 5px; height: 32px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line2); background: transparent; color: var(--fg); font: 600 12px/1 var(--font); cursor: pointer; flex: none; }
-    button.mockchip:hover { background: var(--hover); }
-    .mockchip-i { display: inline-grid; color: var(--accent); }
-    .mockchip-i svg { width: 14px; height: 14px; }
-    .mockchip-t { font-weight: 500; color: var(--dim); }
-    @container rlhead (max-width: 520px) { .mockchip-t { display: none; } button.mockchip { padding: 0 8px; } }
     .spec-opw.mocked > .spec-op { padding-right: 96px; }
     button.tag.spec-mocked { position: absolute; right: 30px; top: 50%; transform: translateY(-50%); cursor: pointer; font: inherit; font-size: 11px; }
     button.tag.spec-mocked:hover { filter: brightness(1.15); }
@@ -3184,6 +3176,18 @@
     .srcseg .srcseg-l { align-self: center; padding: 0 4px 0 6px; font-size: 11px; color: var(--dim); }
     .tag.changed.tagbtn { cursor: pointer; }
     .lrow .tag.changed, .lrow .tag.simlive { flex: none; }
+    /* 0.96: list ⋯ (Select, Export, Keep after reload) */
+    .ltools .newwrap { display: inline-flex; }
+    button.ibtn.lmore { position: relative; }
+    button.ibtn.lmore.on::after { content: ''; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--bg); }
+    /* Save ▾ split button */
+    .splitbtn { display: inline-flex; align-items: stretch; }
+    .splitbtn > button.split-main { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+    .splitbtn > .newwrap { display: inline-flex; }
+    .splitbtn > .newwrap > button.split-more { height: 26px; padding: 0 6px; margin-left: 1px; border-top-left-radius: 0; border-bottom-left-radius: 0; display: inline-grid; place-items: center; }
+    .splitbtn > .newwrap > button.split-more svg { width: 12px; height: 12px; }
+    .editbar .splitbtn > .newwrap > button.split-more, .editbar .splitbtn > .newwrap > button.split-more:hover { background: var(--accent-solid, var(--accent)); color: var(--on-accent, #fff); border: 0; border-left: 1px solid color-mix(in srgb, var(--on-accent, #fff) 30%, transparent); }
+    .editbar .splitbtn > .newwrap > button.split-more:hover { filter: brightness(1.08); }
   `;
 
   // ---------- helpers
@@ -3479,12 +3483,7 @@
       : h('button', { type: 'button', class: 'hbox sq netbtn', 'aria-pressed': 'false', 'aria-label': 'Go offline',
         title: 'Go offline: make every call the app makes fail, as if there’s no internet (this tab only)', onclick: () => setOffline(true) });
     if (!nt.offline) setHTML(netChip, ICONS.wifi);
-    // "2 mocks active": only while a mock endpoint is on. Opens Rules at the Mock endpoints section.
-    const nMocks = liveMocks().length;
-    const mockChip = nMocks ? h('button', { type: 'button', class: 'hbox mockchip', title: `${nMocks} mock endpoint${nMocks === 1 ? ' is' : 's are'} on: matching calls don't reach the server. Click to manage them.`,
-      'aria-label': `${nMocks} ${nMocks === 1 ? 'mock' : 'mocks'} active. Open Mock endpoints`, onclick: goToMocks },
-    (() => { const i = h('span', { class: 'mockchip-i', 'aria-hidden': 'true' }); setHTML(i, ICONS.cube); return i; })(), h('span', { class: 'mockchip-n' }, String(nMocks)), h('span', { class: 'mockchip-t' }, nMocks === 1 ? 'mock active' : 'mocks active')) : null;
-    headMenus.replaceChildren(...[mockChip, netChip, whereAsChip({ cls: 'hbox' }), actions].filter(Boolean));
+    headMenus.replaceChildren(...[netChip, whereAsChip({ cls: 'hbox' }), actions].filter(Boolean));
   }
   function renderNav() {
     // Request tabs sit under Requests, so Requests stays selected while one of them shows.
@@ -3577,6 +3576,7 @@
     // The count only matters while "Clear N?" is showing; rebuilding on every request would steal focus.
     const key = [onRequestList(), total > 0, clearAsk, clearAsk ? total : '', keep, reqView.picking, reqView.picked.size].join('|');
     if (!force && key === statusKey) return;
+    if (!force && statusEl.querySelector('.dmenu:not([hidden])')) return; // don't close the open ⋯ menu
     statusKey = key;
     statusEl.parentElement?.classList.toggle('picking', !!reqView.picking && onRequestList());
     if (!onRequestList()) { statusEl.replaceChildren(); return; }
@@ -3611,26 +3611,21 @@
         nPause ? capBtn(true, nPause) : null, nResume ? capBtn(false, nResume) : null, go].filter(Boolean));
       return;
     }
-    const xpBtn = h('button', { type: 'button', class: 'ibtn lexport', disabled: !total, 'aria-label': 'Export requests',
-      title: 'Export the calls shown: Postman collection, HAR or cURL', onclick: () => {
-        const list = listApi ? listApi.visible() : core.state.requests;
-        openExport(list.length ? list : core.state.requests, { onChoose: (ids) => startPicking(ids) });
-      } });
-    setHTML(xpBtn, ICONS.download);
-    // Select: checkboxes on the list, then Pause / Resume capturing or Export for the selection.
-    const selBtn = h('button', { type: 'button', class: 'ibtn lselect', disabled: !total && !core.mute.list().length, 'aria-label': 'Select requests',
-      title: 'Select several requests: pause or resume capturing their endpoints, or export them', onclick: () => startPicking([]) });
-    setHTML(selBtn, ICONS.select);
-    const keepBtn = h('button', { type: 'button', class: `ibtn lkeep${keep ? ' on' : ''}`, 'aria-pressed': String(keep), 'aria-label': 'Keep after reload',
-      title: keep ? 'Keep after reload: on. Requests stay when the page reloads or navigates (this site). Click to turn off.'
-        : 'Keep after reload: off. Click to keep the requests when the page reloads or navigates (like Preserve log in DevTools).',
-      onclick: () => setPreserve(!keep) });
-    setHTML(keepBtn, ICONS.history);
+    // ⋯ holds the occasional list actions; Clear stays visible. The ⋯ gets a dot while Keep after reload is on.
+    const exportShown = () => {
+      const list = listApi ? listApi.visible() : core.state.requests;
+      openExport(list.length ? list : core.state.requests, { onChoose: (ids) => startPicking(ids) });
+    };
+    const more = dropMenu('List actions', [
+      { id: 'select', label: 'Select…', sub: 'Hide, show or export several', icon: ICONS.select, disabled: !total && !core.mute.list().length, run: () => startPicking([]) },
+      { id: 'export', label: 'Export…', sub: 'Postman collection, HAR or cURL', icon: ICONS.download, disabled: !total, run: exportShown },
+      { id: 'keep', label: 'Keep after reload', sub: keep ? 'On for this site' : 'Keep the list when the page reloads', icon: ICONS.history, checked: keep, sepBefore: true, run: () => setPreserve(!keep) },
+    ], { icon: ICONS.more, btnClass: `ibtn lmore${keep ? ' on' : ''}`, title: keep ? 'More (Keep after reload is on)' : 'More', align: 'right' });
     const clear = h('button', { type: 'button', class: 'ibtn lclear', disabled: !total, 'aria-label': 'Clear all requests',
       title: 'Clear all captured requests (rules and recorded clicks are kept)',
       onclick: () => { core.clearRequests(); reqView.expanded.clear(); updateCounts(); drawStatus(true); toast('Requests cleared'); } });
     setHTML(clear, ICONS.trash);
-    statusEl.replaceChildren(selBtn, xpBtn, keepBtn, clear);
+    statusEl.replaceChildren(more, clear);
   }
   // ---------- Shared pieces of the Login profiles and Environments dialogs: one row per item.
   // A row: radio mark · [dot] · name · muted detail · [icon] · ⋯ (hover/focus). Click selects; Edit expands in place.
@@ -4354,7 +4349,6 @@
   // ---------- Mock endpoints: answer the app's calls (and yours) for an endpoint that may not exist yet.
   // Stored as rules with kind 'mock', matched by method and path ({id} matches any one segment).
   const mocks = () => core.rules.list().filter((r) => r.kind === 'mock');
-  const liveMocks = () => mocks().filter((r) => r.enabled !== false);
   const MOCK_CODES = [200, 201, 202, 204, 400, 401, 403, 404, 409, 422, 500, 503];
   const MOCK_DEFAULT_STATUS = { GET: 200, POST: 201, PUT: 200, PATCH: 200, DELETE: 204 };
   const NO_BODY = new Set([204, 304]);
@@ -8340,6 +8334,16 @@
         },
       }, 'Save');
     }
+    // Save ▾: the split part of Save, with "Save and apply to app" (the same as ⋯ → Apply to app).
+    function saveSplit() {
+      const main = saveRuleBtn();
+      main.classList.add('split-main');
+      const chev = h('span', { 'aria-hidden': 'true' }); setHTML(chev, ICONS.chev);
+      const menu = dropMenu('Save options', [
+        { id: 'save-apply', label: 'Save and apply to app', sub: applyPlan(), icon: ICONS.upload, run: () => applyToApp() },
+      ], { icon: chev, btnClass: 'btn-sm save-rule split-more', title: 'More ways to save', align: 'right' });
+      return h('span', { class: 'splitbtn' }, main, menu);
+    }
     // The saved rule for this endpoint that changes its response (a simulation or a delay), if any.
     const simRule = () => { const m0 = entry.originalMethod || entry.method; const k0 = core.matchKey(entry.originalUrl || entry.url); return core.rules.list().find((r) => r.method === m0 && r.match === k0 && (r.respond || r.delayMs)); };
     const simGroup = () => entry.group || `${entry.originalMethod || entry.method} ${core.matchKey(entry.originalUrl || entry.url)}`;
@@ -8500,7 +8504,7 @@
           h('span', { class: 'chg', title: `Edited: ${c.list.join(', ')}` }, h('span', { class: 'chgdot', 'aria-hidden': 'true' }), 'Edited'),
           h('button', { type: 'button', class: 'linkbtn', title: 'Back to the call as the app sent it', onclick: resetDraft }, 'Reset'),
           h('span', { class: 'hspace' }),
-          keepSwitch(), saveRuleBtn());
+          keepSwitch(), saveSplit());
       }
       if (msg) {
         const extraBtns = (msg.extra || []).filter((x) => x.tagName === 'BUTTON');
@@ -9629,7 +9633,6 @@
             h('button', { type: 'button', class: 'sbtn2', onclick: () => drawReset(false) }, 'Cancel'),
             h('button', { type: 'button', class: 'sbtn2 danger solid', onclick: () => {
               savePrefs({ ...DEFAULT_PREFS });
-              core.settings.set({});
               if (preserveOn()) setPreserve(false);
               flashOnRender = 'Reset to defaults';
               renderTab();
@@ -10993,7 +10996,6 @@
         });
       }
       lastVisible = items;
-      const hidden = core.state.hiddenCount;
       const groups = groupRequests(items);
       const narrowed = items.length !== all.length;
       const part = (n, one, many) => `${n} ${n === 1 ? one : many}`;
@@ -11020,8 +11022,6 @@
           h('span', { class: 'cnt-s' }, narrowed ? `${items.length}/${all.length}` : String(items.length))),
         h('span', { class: 'sdot' }, '·'),
         h('span', {}, part(groups.length, 'endpoint', 'endpoints')),
-        hidden ? [h('span', { class: 'sdot' }, '·'), h('button', { type: 'button', class: 'cap-note', title: 'Left out by a capture filter saved by an older RESTless version. Click to remove the filter and list these calls from now on.',
-          onclick: () => { core.settings.set({}); toast('Old capture filter removed. New calls are listed again', '', 4000); } }, `${hidden} filtered out`)] : null,
       ].flat().filter(Boolean));
       const scroll = listBox.scrollTop;
 
