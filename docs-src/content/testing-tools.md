@@ -8,9 +8,9 @@ lead: Quick checks for offline mode, permissions and validation.
 
 Click the **wifi** button in the header. Every call the app makes now fails, as if there’s no internet. Only this tab is affected, and it stays offline after a reload. Click **Offline** to go back online.
 
-## Run as every user
+## Try with every user
 
-**⋯ → Run & simulate → Run as every user** sends the request as each user of the environment and lists the status for each. A quick permission check: *Admin 200, Viewer 403*.
+**⋯ → Run & simulate → Try with every user** sends the request as each user of the environment and lists the status for each. A quick permission check: *Admin 200, Viewer 403*.
 
 ## Test edge cases
 

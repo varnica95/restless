@@ -30,4 +30,4 @@ Give the app a different answer without touching the server: an **edited respons
 
 ## Also in ⋯
 
-**Copy as** cURL, fetch or TypeScript · **Duplicate** · **Run in bulk** · **Run as every user** · **Test edge cases**
+**Copy as** cURL, fetch or TypeScript · **Duplicate** · **Run in bulk** · **Try with every user** · **Test edge cases**

@@ -13,9 +13,9 @@ lead: Install RESTless, open the panel and start watching your app’s API calls
 
 Click the RESTless icon in the toolbar, or press <kbd>Ctrl</kbd>+<kbd>Y</kbd>. The panel opens beside your page.
 
-## Turn on capturing
+## Turn on recording
 
-RESTless records nothing until you allow it, one site at a time. Click **Turn on capturing**, or **Turn on and reload** to catch the calls the page makes while loading.
+RESTless records nothing until you allow it, one site at a time. Click **Record this site**, or **Record and reload** to catch the calls the page makes while loading.
 
 [[shots: requests | Every API call, grouped by endpoint]]
 

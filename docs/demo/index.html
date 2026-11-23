@@ -5412,7 +5412,7 @@
     if (!keys.length) return;
     keys.forEach((k) => core.mute.set(k, pause));
     const n = keys.length;
-    toast(`${pause ? 'Paused' : 'Resumed'} capturing ${n} endpoint${n === 1 ? '' : 's'}`, '', 6000,
+    toast(`${pause ? 'Hidden' : 'Showing again'}: ${n} endpoint${n === 1 ? '' : 's'}`, '', 6000,
       { label: 'Undo', run: () => keys.forEach((k) => core.mute.set(k, !pause)) });
     stopPicking();
   }
@@ -5450,10 +5450,10 @@
       const nResume = keys.length - nPause;
       const capBtn = (pause, count) => {
         const b = h('button', { type: 'button', class: `sbtn pk-cap ${pause ? 'pk-pause' : 'pk-resume'}`,
-          title: pause ? `Stop capturing ${count} selected endpoint${count === 1 ? '' : 's'}: their new calls aren't listed or changed` : `Capture ${count} selected endpoint${count === 1 ? '' : 's'} again`,
+          title: pause ? `Hide ${count} selected endpoint${count === 1 ? '' : 's'} from the list. Their calls still go out as usual` : `Show ${count} selected endpoint${count === 1 ? '' : 's'} in the list again`,
           onclick: () => setPickedCapture(pause) });
-        const i = h('span', { class: 'pk-ic', 'aria-hidden': 'true' }); setHTML(i, pause ? ICONS.pause : ICONS.play);
-        b.append(i, h('span', {}, `${pause ? 'Pause' : 'Resume'} ${count}`));
+        const i = h('span', { class: 'pk-ic', 'aria-hidden': 'true' }); setHTML(i, pause ? ICONS.eyeoff : ICONS.eye);
+        b.append(i, h('span', {}, `${pause ? 'Hide' : 'Show'} ${count}`));
         return b;
       };
       const go = h('button', { type: 'button', class: 'pf-done xp-go', disabled: !n,
@@ -5472,9 +5472,9 @@
     const selBtn = h('button', { type: 'button', class: 'ibtn lselect', disabled: !total && !core.mute.list().length, 'aria-label': 'Select requests',
       title: 'Select several requests: pause or resume capturing their endpoints, or export them', onclick: () => startPicking([]) });
     setHTML(selBtn, ICONS.select);
-    const keepBtn = h('button', { type: 'button', class: `ibtn lkeep${keep ? ' on' : ''}`, 'aria-pressed': String(keep), 'aria-label': 'Preserve log',
-      title: keep ? 'Preserve log: on. Requests stay when the page reloads or navigates (this site). Click to turn off.'
-        : 'Preserve log: off. Click to keep the captured requests when the page reloads or navigates, like DevTools.',
+    const keepBtn = h('button', { type: 'button', class: `ibtn lkeep${keep ? ' on' : ''}`, 'aria-pressed': String(keep), 'aria-label': 'Keep after reload',
+      title: keep ? 'Keep after reload: on. Requests stay when the page reloads or navigates (this site). Click to turn off.'
+        : 'Keep after reload: off. Click to keep the requests when the page reloads or navigates (like Preserve log in DevTools).',
       onclick: () => setPreserve(!keep) });
     setHTML(keepBtn, ICONS.history);
     const clear = h('button', { type: 'button', class: 'ibtn lclear', disabled: !total, 'aria-label': 'Clear all requests',
@@ -8279,7 +8279,7 @@
     // Tags about the call itself; shown in the Response header after status, time, size and age.
     const callTagsEl = () => [
       reqRewritten(entry) ? h('button', { type: 'button', class: 'tag rw tagbtn', title: 'A rewrite rule changed this call. Click to see the original.', onclick: () => { original.hidden = !original.hidden; } }, 'rewritten') : null,
-      entry.dryRun ? h('span', { class: 'tag dry', title: 'Captured by a dry run; it was never sent' }, 'dry run') : null,
+      entry.dryRun ? h('span', { class: 'tag dry', title: 'Recorded without sending: it was never sent' }, 'not sent') : null,
       entry.netMode ? h('span', { class: `tag netmode ${entry.netMode}`, title: netTagTip(entry) }, 'Offline') : null,
       !entry.netMode && !entry.mocked && (entry.simulated || entry.delayedMs) ? h('span', { class: 'tag simlive', title: simTagTip(entry) }, 'Simulated') : null,
       entry.asProfile ? h('span', { class: 'tag prof', title: `Sent as the user "${entry.asProfile}" (Where & as)` }, `as ${entry.asProfile}`) : null,
@@ -8774,7 +8774,7 @@
         ? 'Body not kept for this older call: only the latest 5 calls per endpoint keep theirs. Press Run to fetch it again.'
         : entry.paused ? 'Waiting for you to continue.'
           : entry.manual ? 'Not sent yet. Press Run to see the response here.'
-            : entry.dryRun ? 'This call was captured by a dry run, so there is no response. Press Run to send it.'
+            : entry.dryRun ? 'This call was recorded without sending, so there is no response. Press Run to send it.'
             : 'No response captured. Press Run to send the request and see its response here.');
     }
 
@@ -9081,7 +9081,7 @@
       });
       const openRow = P.rows.find((r) => r.key === P.open && r.res);
       return h('div', { class: 'perm' },
-        h('div', { class: 'perm-top' }, h('span', { class: 'perm-title' }, 'As every user'), h('span', { class: 'muted perm-sub mono' }, `${P.method} ${P.path} · ${P.env}`), h('span', { class: 'hspace' }), close),
+        h('div', { class: 'perm-top' }, h('span', { class: 'perm-title' }, 'With every user'), h('span', { class: 'muted perm-sub mono' }, `${P.method} ${P.path} · ${P.env}`), h('span', { class: 'hspace' }), close),
         h('div', { class: 'perm-list', role: 'list' }, ...rows),
         h('div', { class: 'perm-acts' }, h('span', { class: 'muted' }, busy ? 'Sending…' : 'Click a user to see the response.'), h('span', { class: 'hspace' }), again, copyBtn),
         openRow ? h('div', { class: 'perm-res' }, h('div', { class: 'perm-resh' }, userAvatar(openRow.key), h('b', {}, openRow.name)),
@@ -10195,7 +10195,7 @@
           msg = null; d.status = null;
           drawBar();
         },
-      }, keepRule ? 'Save rewrite rule' : 'Save for next call');
+      }, 'Save');
     }
     // The saved rule for this endpoint that changes its response (a simulation or a delay), if any.
     const simRule = () => { const m0 = entry.originalMethod || entry.method; const k0 = core.matchKey(entry.originalUrl || entry.url); return core.rules.list().find((r) => r.method === m0 && r.match === k0 && (r.respond || r.delayMs)); };
@@ -10208,7 +10208,7 @@
       if (d.simArmed && simActive()) return 'used';
       return simActive() ? 'draft' : 'off';
     }
-    const SIM_CHIP = { off: 'Off', draft: 'Draft', live: 'Live · every call', armed: 'Armed · next call', used: 'Used' };
+    const SIM_CHIP = { off: 'Off', draft: 'Draft', live: 'Live · keeps applying', armed: 'Live · just once', used: 'Used' };
     const SIM_TIP = {
       off: 'The app gets the real response.',
       draft: 'Set up, not live: the app still gets the real response.',
@@ -10318,7 +10318,7 @@
             onclick: () => { keepRule = v; ss.set('__apiPeek.keepRule', v ? '1' : '0'); drawSimFoot(); } }, label)));
         const primary = h('button', { type: 'button', class: 'btn-sm primary sim-go',
           title: keepRule ? 'Make it live: the app gets this on every call. The app repeats the call now when it can.' : 'The app\'s next call to this endpoint gets this, then it switches off',
-          onclick: () => (keepRule ? simApply() : simArm()) }, keepRule ? 'Apply' : 'Arm');
+          onclick: () => (keepRule ? simApply() : simArm()) }, 'Apply');
         simSaveBox.replaceChildren(h('div', { class: 'sim-acts' }, scope, h('span', { class: 'hspace' }), primary),
           helper(d.simNote || 'Not live. The app still gets the real response.'));
         return;
@@ -10349,7 +10349,7 @@
       else if (savedNow) {
         metaRight.replaceChildren(
           h('span', { class: 'chg saved', title: d.savedLasting ? 'Every matching call is rewritten until you remove the rule' : 'The next matching call is rewritten' },
-            h('span', { class: 'chgdot', 'aria-hidden': 'true' }), d.savedLasting ? 'Saved as rewrite rule' : 'Saved for next call'),
+            h('span', { class: 'chgdot', 'aria-hidden': 'true' }), d.savedLasting ? 'Saved · keeps applying' : 'Saved · just once'),
           h('span', { class: 'hspace' }),
           h('button', { type: 'button', class: 'linkbtn', onclick: () => goToMocks() }, 'View in Setup'));
       } else {
@@ -10557,8 +10557,8 @@
         ...resKids.map((k, i) => (i === 0 ? { ...k, section: 'Response' } : k)),
       ] };
       const pauseItem = capturePaused(entry)
-        ? { id: 'mute', label: 'Resume capturing', icon: ICONS.eye, run: () => { setCapturePaused(entry, false); buildMenu(); } }
-        : { id: 'mute', label: 'Pause capturing', icon: ICONS.eyeoff, title: 'Stop listing new calls to this endpoint (they still go out)', run: () => { setCapturePaused(entry, true); buildMenu(); } };
+        ? { id: 'mute', label: 'Show in list', icon: ICONS.eye, run: () => { setCapturePaused(entry, false); buildMenu(); } }
+        : { id: 'mute', label: 'Hide from list', icon: ICONS.eyeoff, title: 'Stop listing new calls to this endpoint. They still go out as usual', run: () => { setCapturePaused(entry, true); buildMenu(); } };
       const openTool = (id) => { d.lower = d.lower === id && !(id === 'simulate' && simState() !== 'off') ? 'response' : id; drawLower(); drawLowerHead(); drawBar(); requestAnimationFrame(() => toolCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' })); buildMenu(); };
       // Compact menu: a few direct actions, then three submenus (Copy as, Run & simulate, Testing & debugging),
       // then Apply / Reload. Second lines only show state (Open, On); the rest is in tooltips.
@@ -10568,7 +10568,7 @@
         : { id: 'simulate', label: 'Simulate response…', sub: d.lower === 'simulate' ? (simState() === 'off' ? 'Open · click to close' : 'Open') : null, icon: ICONS.flask, title: 'Change what the app gets back for this endpoint', run: () => openTool('simulate') };
       const bulkItem = { id: 'mock', label: 'Run in bulk…', sub: d.lower === 'mock' ? 'Open · click to close' : null, icon: ICONS.cube, title: 'Send this request many times with generated data', run: () => openTool('mock') };
       const nUsers = usersOf(runEnv()).length;
-      const runAllItem = { id: 'run-all', label: 'Run as every user…', icon: ICONS.user, title: nUsers ? `Send it as each of the ${plural(nUsers, 'user')} in ${runEnv().name} and compare the statuses` : `${runEnv().name} has no users yet`, run: runAsEveryUser };
+      const runAllItem = { id: 'run-all', label: 'Try with every user…', icon: ICONS.user, title: nUsers ? `Send it as each of the ${plural(nUsers, 'user')} in ${runEnv().name} and compare the statuses` : `${runEnv().name} has no users yet`, run: runAsEveryUser };
       const edgeItem = { id: 'edge', label: 'Test edge cases…', sub: d.lower === 'edge' ? 'Open · click to close' : null, icon: ICONS.spark, title: 'One field at a time: empty, too long, wrong type…', run: () => openTool('edge') };
       const pkey = captureKey(entry);
       const pinItem = { id: 'pin', label: core.pins.has(pkey) ? 'Unpin endpoint' : 'Pin endpoint', title: core.pins.has(pkey) ? 'Remove it from the top of Requests' : 'Keep it at the top of Requests', icon: ICONS.pin,
@@ -11454,7 +11454,7 @@
           h('button', { type: 'button', class: 'link', title: 'Opens chrome://extensions/shortcuts', onclick: () => window.postMessage({ __apiPeek: 'openShortcuts' }, '*') }, 'Change ↗'))));
 
     // Advanced: Preserve log, Max open tabs, stored data, reset
-    const keepSw = sw(preserveOn(), 'Preserve log', (on) => { setPreserve(on); saved(on ? 'Preserve log on' : 'Preserve log off'); });
+    const keepSw = sw(preserveOn(), 'Keep after reload', (on) => { setPreserve(on); saved(on ? 'Keep after reload on' : 'Keep after reload off'); });
     const tabsIn = h('input', { type: 'number', min: 1, max: 20, step: 1, value: maxTabs(), class: 'num-sm', 'aria-label': 'Max open tabs (1 to 20)' });
     tabsIn.addEventListener('change', () => {
       const v = Math.min(Math.max(Math.round(Number(tabsIn.value) || DEFAULT_PREFS.maxTabs), 1), 20);
@@ -11481,7 +11481,7 @@
     drawReset(false);
     const adv = h('details', { class: 'st-sec sadv' },
       h('summary', {}, h('span', { class: 'st-head' }, 'Advanced')),
-      row('Preserve log', 'Keep captured requests across reloads and navigation.', keepSw,
+      row('Keep after reload', 'Keep the request list across reloads and navigation (like Preserve log in DevTools).', keepSw,
         { tip: 'Like DevTools. Older calls get a history icon. Saved for this site; the log itself stays in this browser tab, up to 300 calls.' }),
       row('Max open tabs (1–20)', 'The least recently used tab closes past the limit.', tabsIn),
       h('div', { class: 'st-head sub' }, 'Stored data'),
@@ -12410,7 +12410,7 @@
     const key = captureKey(r);
     const short = key.replace(/^(\S+) https?:\/\/[^/]+/, '$1 ');
     core.mute.set(key, on);
-    toast(on ? `Paused capturing ${short}` : `Capturing ${short} again`, '', 6000, { label: 'Undo', run: () => core.mute.set(key, !on) });
+    toast(on ? `Hidden from the list: ${short}` : `Showing ${short} again`, '', 6000, { label: 'Undo', run: () => core.mute.set(key, !on) });
   }
 
   // Capture is opt-in per site: until it's on, the Requests tab explains that and offers to turn it on.
@@ -12424,12 +12424,12 @@
     setHTML(ic, ICONS.power);
     const had = core.state.requests.length;
     mainEl.replaceChildren(h('div', { class: 'capoff' }, ic,
-      h('h3', {}, 'Capturing is off for this site'),
+      h('h3', {}, 'Recording is off for this site'),
       h('p', {}, 'RESTless doesn\'t record or change requests on ', h('b', {}, location.host), ' until you turn it on.'),
       h('div', { class: 'capoff-acts' },
-        h('button', { type: 'button', class: 'primary', onclick: () => setCapture(true) }, 'Turn on capturing'),
-        h('button', { type: 'button', class: 'ghost', title: 'Turn on, then reload so the calls made while the page loads are captured too', onclick: () => setCapture(true, { reload: true }) }, 'Turn on and reload')),
-      had ? h('p', { class: 'capoff-note' }, `${had} request${had === 1 ? '' : 's'} captured earlier stay hidden until you turn it back on.`) : null));
+        h('button', { type: 'button', class: 'primary', onclick: () => setCapture(true) }, 'Record this site'),
+        h('button', { type: 'button', class: 'ghost', title: 'Turn on, then reload so the calls made while the page loads are recorded too', onclick: () => setCapture(true, { reload: true }) }, 'Record and reload')),
+      had ? h('p', { class: 'capoff-note' }, `${had} request${had === 1 ? '' : 's'} recorded earlier stay hidden until you turn recording back on.`) : null));
   }
 
   function renderRequests() {
@@ -12491,7 +12491,7 @@
       isLarge(r) ? h('span', { class: 'tag slow', title: `The response is ${fmtSize(r.responseSize)} (1 MB or more)` }, 'large') : null,
       r.asProfile ? h('span', { class: 'tag prof', title: `Sent as the user "${r.asProfile}" (Where & as)` }, `as ${r.asProfile}`) : null,
       reqRewritten(r) ? iconTag('rw', 'pencil', 'rewritten', 'Changed on the way out by a rewrite rule') : null,
-      r.dryRun ? h('span', { class: 'tag dry' }, 'dry run') : null,
+      r.dryRun ? h('span', { class: 'tag dry', title: 'Recorded without sending' }, 'not sent') : null,
       r.paused ? h('span', { class: 'tag pz' }, 'paused') : null,
       r.manual ? iconTag('', 'user', 'yours', 'A request you made') : null,
       r.netMode ? h('span', { class: `tag netmode ${r.netMode}`, title: netTagTip(r) }, 'Offline') : null,
@@ -12522,7 +12522,7 @@
       const what = rule.respond ? ({ mock: `a ${rule.respond.status} response`, 'network-error': 'a network failure', hang: 'no response' })[rule.respond.mode] || 'a simulated response' : 'the real response';
       return h('span', { class: 'tag simlive', title: `Simulated: the app gets ${what}${rule.delayMs ? `, ${fmtDur(rule.delayMs)} late` : ''}${rule.once ? ' (next call only)' : ' on every call'}. Turn it off in the call's Simulation card or in Setup.` }, 'Simulated');
     };
-    const stoppedTag = () => h('span', { class: 'tag stoptag', title: 'Capturing paused: new calls to this endpoint go out as usual but aren\'t listed. Resume it from ⋯.' }, h('span', { class: 'st-l' }, 'not captured'), h('span', { class: 'st-s' }, 'off'));
+    const stoppedTag = () => h('span', { class: 'tag stoptag', title: 'Hidden from the list: new calls to this endpoint go out as usual but aren\'t listed. Show it again from ⋯.' }, h('span', { class: 'st-l' }, 'hidden'), h('span', { class: 'st-s' }, 'hidden'));
     const setStopped = (r, on) => {
       setCapturePaused(r, on);
       if (!on && reqView.stopped && !core.mute.list().length) { reqView.stopped = false; renderTab(); } // nothing left to show under "Not captured"
@@ -12600,8 +12600,8 @@
         r.mocked && mockOf(r) ? item('editmock', 'Edit mock', 'cube', () => editMockFor(r), { title: 'This call was answered by a mock endpoint' }) : null,
         core.pins.has(pk) ? item('pin', 'Unpin', 'pin', () => togglePin(pk, false)) : item('pin', 'Pin to top', 'pin', () => togglePin(pk, true), { title: 'Keep this endpoint at the top of the list' }),
         r.pinStub ? null : r.manual ? null : isStopped(r)
-          ? item('mute', 'Resume capturing', 'eye', () => setStopped(r, false))
-          : item('mute', 'Pause capturing', 'eyeoff', () => setStopped(r, true), { title: 'Stop listing new calls to this endpoint (they still go out)' }),
+          ? item('mute', 'Show in list', 'eye', () => setStopped(r, false))
+          : item('mute', 'Hide from list', 'eyeoff', () => setStopped(r, true), { title: 'Stop listing new calls to this endpoint. They still go out as usual' }),
         r.stub ? null : item('export', many ? `Export ${group.calls.length} calls…` : 'Export…', 'download', () => openExport(many ? group.calls : [r], { onChoose: (ids) => startPicking(ids) })),
         r.responseText != null ? item('cmp', 'Compare with…', 'compare', () => startComparePick(r), { title: 'Then click the call to compare it with (any endpoint)' }) : null,
         copyAs,
@@ -12678,7 +12678,7 @@
       const when = new Date(r.startedAt);
       return h('div', {
         class: `lrow call${withPath ? '' : ' sub'}${reqView.selected === r.id ? ' sel' : ''}${errTone(r)}${r.prev ? ' prev' : ''}${isStopped(r) ? ' stopped' : ''}${r.stub ? ' stub' : ''}`, tabindex: '0', role: 'button',
-        title: `${r.method} ${r.url}\n${r.stub ? `Not captured since ${when.toLocaleString()}. Resume it from ⋯.` : when.toLocaleString()}${pt ? `\n${r.status}: ${pt}` : ''}`,
+        title: `${r.method} ${r.url}\n${r.stub ? `Hidden since ${when.toLocaleString()}. Show it again from ⋯.` : when.toLocaleString()}${pt ? `\n${r.status}: ${pt}` : ''}`,
         onclick: (e) => { if (reqView.picking && !r.pinStub) { togglePick([r.id], !reqView.picked.has(r.id)); return; } if (r.stub) return; if (reqView.cmpPick) { finishComparePick(r); return; } if (reqView.picking) togglePick([r.id], !reqView.picked.has(r.id)); else if (bgClick(e)) openInBackground(r); else selectCall(r); },
         onmousedown: (e) => { if (e.button === 1) e.preventDefault(); }, // no autoscroll cursor
         onauxclick: (e) => { if (e.button === 1 && !reqView.cmpPick && !reqView.picking) { e.preventDefault(); openInBackground(r); } },
@@ -12715,7 +12715,7 @@
     const onlyItems = [
       { id: 'mine', label: 'Your requests', sub: 'Built with New request or imported from cURL', section: 'Show only',
         isOn: () => reqView.mine, toggle: () => { reqView.mine = !reqView.mine; }, count: () => core.state.requests.filter((r) => r.manual).length },
-      { id: 'changed', label: 'Rewritten or simulated', sub: 'Changed by a rule, a simulation or a delay',
+      { id: 'changed', label: 'Changed by you', sub: 'Changed by a rule, a simulation or a delay',
         isOn: () => reqView.changed, toggle: () => { reqView.changed = !reqView.changed; }, count: () => core.state.requests.filter(isChanged).length },
       { id: 'dups', label: 'Duplicate calls', sub: 'The same request again within 1 s',
         isOn: () => reqView.dups, toggle: () => { reqView.dups = !reqView.dups; }, count: () => dupMap.size },
@@ -12723,7 +12723,7 @@
         isOn: () => reqView.slow, toggle: () => { reqView.slow = !reqView.slow; }, count: () => core.state.requests.filter(isSlow).length },
       { id: 'large', label: 'Large (≥ 1 MB)', sub: 'Response of a megabyte or more',
         isOn: () => reqView.large, toggle: () => { reqView.large = !reqView.large; }, count: () => core.state.requests.filter(isLarge).length },
-      { id: 'stopped', label: 'Not captured', sub: 'Endpoints you paused; resume them from ⋯',
+      { id: 'stopped', label: 'Hidden endpoints', sub: 'Endpoints you hid from the list; show them again from ⋯',
         isOn: () => reqView.stopped, toggle: () => { reqView.stopped = !reqView.stopped; }, count: () => core.mute.list().length },
     ];
     const menuItems = [...methodItems, ...onlyItems];
@@ -12840,13 +12840,13 @@
           n ? h('button', { type: 'button', class: 'linkbtn muted', onclick: () => { reqView.picked.clear(); renderList(); drawStatus(); } }, 'Clear') : null].filter(Boolean));
       } else stats.replaceChildren(...[
         (() => {
-          const b = h('button', { type: 'button', class: `capdot${capOn ? '' : ' off'}`, role: 'switch', 'aria-checked': String(capOn), 'aria-label': `Capture on ${location.host}`,
-            title: capOn ? `Live: capturing on ${location.host}. Click to pause.\nOff by default on every site: while off, nothing on this site is recorded or changed.`
-              : `Paused: nothing on ${location.host} is recorded or changed. Click to go live again.`,
+          const b = h('button', { type: 'button', class: `capdot${capOn ? '' : ' off'}`, role: 'switch', 'aria-checked': String(capOn), 'aria-label': `Record ${location.host}`,
+            title: capOn ? `Recording ${location.host}. Click to turn off.\nOff by default on every site: while off, nothing on this site is recorded or changed.`
+              : `Off: nothing on ${location.host} is recorded or changed. Click to record.`,
             onclick: () => setCapture(!capOn) });
           const ic = h('span', { class: 'cap-ic', 'aria-hidden': 'true' });
           setHTML(ic, capOn ? ICONS.pause : ICONS.play);
-          b.append(ic, h('span', { class: 'capdot-t' }, capOn ? 'Live' : 'Paused'));
+          b.append(ic, h('span', { class: 'capdot-t' }, capOn ? 'Recording' : 'Off'));
           return b;
         })(),
         h('span', { class: 'cnt' }, h('span', { class: 'cnt-l' }, narrowed ? `${items.length} of ${part(all.length, 'request', 'requests')}` : part(items.length, 'request', 'requests')),
@@ -12982,8 +12982,8 @@
           if (single) exp.hidden = true; // one call: the row opens it
           const head = h('div', {
             class: `lrow grp${open ? ' open' : ''}${headSel ? ' sel' : ''}${errTone(last)}${last.prev ? ' prev' : ''}${stopped ? ' stopped' : ''}${last.stub ? ' stub' : ''}`, tabindex: '0', role: 'button',
-            title: last.stub ? `${g.key}\nNot captured since ${new Date(last.startedAt).toLocaleString()}. Resume it from ⋯.`
-              : `${g.key}\nLast call ${fmtAgo(last.startedAt)} (${new Date(last.startedAt).toLocaleTimeString()})${pt ? `\n${last.status}: ${pt}` : ''}${stopped ? '\nCapturing paused: new calls aren\'t listed' : ''}`,
+            title: last.stub ? `${g.key}\nHidden since ${new Date(last.startedAt).toLocaleString()}. Show it again from ⋯.`
+              : `${g.key}\nLast call ${fmtAgo(last.startedAt)} (${new Date(last.startedAt).toLocaleTimeString()})${pt ? `\n${last.status}: ${pt}` : ''}${stopped ? '\nHidden from the list: new calls aren\'t listed' : ''}`,
             onclick: (e) => { if (bgClick(e) && !reqView.cmpPick && !reqView.picking) openInBackground(last); else toggle(); },
             onmousedown: (e) => { if (e.button === 1) e.preventDefault(); },
             onauxclick: (e) => { if (e.button === 1 && !reqView.cmpPick && !reqView.picking) { e.preventDefault(); openInBackground(last); } },

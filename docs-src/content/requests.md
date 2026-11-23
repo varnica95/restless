@@ -13,7 +13,7 @@ lead: Every API call your app makes, grouped by endpoint.
 ## Keep what matters
 
 - **Pin** an endpoint to keep it at the top: hover the row and click the pin, or use **⋯ → Pin to top**.
-- **Preserve log** (the history icon) keeps calls when the page reloads.
+- **Keep after reload** (the pin icon) keeps calls when the page reloads.
 - **Select** (the checkbox icon above the list) to pause or resume capturing several endpoints at once, or export them.
 - **Middle-click** a request to open it in a new tab and stay on the list.
 - Open request tabs come back after a reload, with your edits.
