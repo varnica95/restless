@@ -5031,23 +5031,8 @@
     /* Buttons: the Add as a button dialog */
     .btdlg .pdlg-body { display: flex; flex-direction: column; gap: 12px; padding: 2px 18px 16px; }
     .btdlg .bt-name { font-family: inherit; }
-    .btdlg .bt-fld { grid-template-columns: 104px minmax(0, 1fr); }
-    .btdlg select { height: 32px; padding: 0 8px; font-size: 12.5px; width: 100%; min-width: 0; }
+    .btdlg select { height: 30px; padding: 0 8px; font-size: 12px; min-width: 0; max-width: 100%; }
     .btdlg .bt-name { height: 32px; }
-    .bt-sec { display: flex; flex-direction: column; gap: 6px; }
-    .bt-fills { display: flex; flex-direction: column; gap: 6px; }
-    .bt-fill { display: grid; grid-template-columns: minmax(84px, 38%) 14px minmax(0, 1fr); align-items: center; gap: 6px; }
-    .bt-slot { display: flex; flex-direction: column; min-width: 0; font-size: 12.5px; }
-    .bt-slot .mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .bt-where { font-size: 11px; }
-    .bt-pick { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-    .bt-pick .bt-fixed { height: 30px; font-size: 12px; }
-    .bt-pick .bt-fixed[hidden] { display: none; }
-    .bt-preview { margin: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg2); font-size: 11.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; max-height: 160px; overflow: auto; }
-    .bt-note, .bt-none { font-size: 11.5px; }
-    .bt-opts { display: flex; flex-wrap: wrap; gap: 6px 16px; }
-    .bt-opts label.chk { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dim); }
-    .bt-opts label.chk input { width: 14px; height: 14px; margin: 0; accent-color: var(--accent); }
     .bt-empty { flex-direction: column; text-align: center; }
     /* Buttons: the Items view of a list response */
     .bt-ico { display: inline-grid; place-items: center; color: var(--accent); }
@@ -5077,23 +5062,15 @@
       .bt-row { grid-template-columns: minmax(0, 1fr) auto auto; }
       .bt-row .bt-id { display: none; }
       button.bt-btn { max-width: 110px; }
-      .btdlg .bt-fld { grid-template-columns: minmax(0, 1fr); gap: 4px; }
     }
     @container rlmain (max-width: 340px) { .rvtabs .tab { padding: 0 6px; } .rvtabs { gap: 0; } }
     .pdlg.pdlg2.waask, .pdlg.pdlg2.btdlg { min-height: 0; }
     /* Buttons 2: the Add a button dialog */
     .bt-namerow { display: flex; flex-direction: column; gap: 4px; }
-    .bt-where-line { font-size: 11.5px; margin-top: -4px; }
     .bt-sentence { font-size: 12.5px; line-height: 1.5; padding: 8px 10px; border-radius: var(--r); background: var(--bg2); border: 1px solid var(--line); }
     .bt-sentence .mono { font-size: 12px; color: var(--fg); word-break: break-all; }
-    .bt-ask { display: flex; flex-direction: column; gap: 6px; }
-    .bt-ask:empty { display: none; }
-    .bt-ask-h { font-size: 12px; color: var(--warn, #d9a441); }
-    .bt-custom { display: flex; flex-direction: column; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
-    .bt-custom[hidden] { display: none; }
     .bt-acts-row { display: flex; align-items: center; gap: 8px; }
     .bt-acts-row .bt-save { min-width: 108px; height: 32px; }
-    button.linkbtn.bt-customize { font-size: 12px; }
     /* Buttons 2: Items view */
     button.bt-ghost { height: 26px; padding: 0 10px; border-radius: var(--r); border: 1px dashed var(--accent-line); background: transparent; color: var(--accent); font-size: 12px; font-weight: 500; white-space: nowrap; }
     button.bt-ghost:hover { background: var(--accent-soft); border-style: solid; }
@@ -5110,6 +5087,22 @@
     .bt-hint button.bt-hint-x { width: 24px; height: 24px; padding: 0; display: inline-grid; place-items: center; }
     .bt-acts-row .btn-sm.primary, .bt-hint .btn-sm.primary, .bt-empty .btn-sm.primary, #buttons .su-empty .btn-sm.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
     .bt-acts-row .btn-sm.primary:hover, .bt-hint .btn-sm.primary:hover, .bt-empty .btn-sm.primary:hover, #buttons .su-empty .btn-sm.primary:hover { filter: brightness(1.08); }
+    /* Buttons 3: the request with tokens */
+    .bt-pickrow { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 11.5px; margin-top: -4px; }
+    .bt-pickrow:empty { display: none; }
+    .bt-pick-l { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .bt-req { padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg2); font-size: 12px; line-height: 1.75; overflow-x: auto; }
+    .bt-req-l { white-space: pre; }
+    .bt-req .bt-m { font-weight: 600; }
+    .bt-req .newwrap { display: inline-block; vertical-align: baseline; }
+    button.bt-tok { font: inherit; font-size: 12px; line-height: 1.4; padding: 0 3px; margin: 0 -1px; border-radius: 4px; border: 1px dashed transparent; background: transparent; color: inherit; cursor: pointer; border-bottom: 1px dotted var(--dim); }
+    button.bt-tok:hover, button.bt-tok[aria-expanded="true"] { background: var(--hover); }
+    button.bt-tok.ph { color: var(--accent-fg, var(--accent)); background: var(--accent-soft); border: 1px solid var(--accent-line); }
+    button.bt-tok.unsure { color: var(--warn, #d9a441); background: color-mix(in srgb, var(--warn, #d9a441) 14%, transparent); border: 1px dashed var(--warn, #d9a441); }
+    .bt-tokmenu { max-height: 260px; overflow-y: auto; }
+    .bt-unsure { margin-top: 4px; font-size: 11.5px; color: var(--warn, #d9a441); }
+    .bt-items-h { justify-content: space-between; }
+    button.linkbtn.bt-manage { font-size: 11.5px; }
   `;
 
   // ---------- helpers
@@ -6960,15 +6953,59 @@
     try { f.srcdoc = ttPolicy ? ttPolicy.createHTML(doc) : doc; return f; } catch { /* Trusted Types without our policy */ }
     return h('div', { class: 'muted rv-empty' }, 'This page\'s security policy doesn\'t allow a preview here. Use Raw, or copy the HTML.');
   }
-  // ---------- Buttons: a request saved as a button on each item of a list response (the Items view).
-  // A button: { id, name, on: { method, key, tpl, label }, req: { method, url, headers, body, bodyKind },
-  //   fills: [{ slot, from }], ask, refresh, enabled }
-  //   slot: { where: 'path', index, name } | { where: 'query', key, name } | { where: 'body', path, name }
-  //   from: { kind: 'row', path } | { kind: 'list', key } | { kind: 'var', name } | { kind: 'fixed', value }
-  // `on` is the list call: its method and address (key), and the API docs path (tpl) when there is one,
-  // so a button also shows on page 2, or on another project's list of the same endpoint.
+  // ---------- Buttons: a request with {{item.x}} placeholders, shown on each item of a list (the Items view).
+  // A button: { id, name, on: { path, label }, req: { method, url, headers, body, bodyKind } }
+  //   on.path: the list's path with ids as {} ('/api/tasks', '/api/tasks/{}/steps'), so it shows on every
+  //   page, filter and parent id of that list.
+  //   req: the request, with {{item.id}}, {{item.assignee.id}} … where a value comes from the item. Other
+  //   {{variables}} work as everywhere. DELETE asks first; anything but GET refreshes the app's list after.
   const BTN_KEY = '__apiPeek.buttons';
-  let btnState = (() => { try { const v = JSON.parse(localStorage.getItem(BTN_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch { return []; } })();
+  const ITEM_RX = /\{\{\s*item\.([\w$.-]+)\s*\}\}/g;
+  const BRACES = /\{\{.+?\}\}/;
+  const looksId = (s) => /^\d+$/.test(s) || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-/i.test(s) || BRACES.test(s) || (/\d/.test(s) && /[a-z]/i.test(s) && /^[\w-]{8,}$/.test(s));
+  const decSeg = (s) => { try { return decodeURIComponent(s); } catch { return s; } };
+  // Split a URL without new URL(), so {{placeholders}} stay as typed.
+  const urlParts = (url) => {
+    const m = /^([a-z][\w+.-]*:\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?$/i.exec(String(url || '')) || [];
+    return { origin: m[1] || '', path: m[2] || '', query: (m[3] || '').slice(1), hash: m[4] || '' };
+  };
+  const queryPairs = (q) => (q ? q.split('&').filter(Boolean).map((kv) => {
+    const i = kv.indexOf('=');
+    const dec = (s) => { try { return decodeURIComponent(s.replace(/\+/g, ' ')); } catch { return s; } };
+    return i < 0 ? [dec(kv), ''] : [dec(kv.slice(0, i)), dec(kv.slice(i + 1))];
+  }) : []);
+  const encKeep = (s) => (BRACES.test(s) ? s : encodeURIComponent(s));
+  const pathOnly = (u) => { try { return new URL(u, location.href).pathname; } catch { return urlParts(u).path; } };
+  // '/api/projects/7/tasks' → '/api/projects/{}/tasks': ids and placeholders count as "any id".
+  const anyIdPath = (p) => String(p || '').replace(/\/$/, '').split('/').map((s) => (s && (looksId(decSeg(s)) || /^\{.*\}$/.test(s)) ? '{}' : s)).join('/');
+  const getPath = (o, p) => p.reduce((x, k) => (x == null ? undefined : x[k]), o);
+
+  // Buttons saved before 0.102 kept a separate list of rules (fills); they become placeholders.
+  function migrateButton(b) {
+    if (!b || !b.fills) return b;
+    const u = urlParts(b.req.url); const segs = u.path.split('/');
+    let pairs = queryPairs(u.query);
+    let obj = null; try { obj = b.req.body != null ? JSON.parse(b.req.body) : null; } catch { obj = null; }
+    const marks = {};
+    for (const { slot, from } of b.fills) {
+      const tok = from.kind === 'row' ? `{{item.${from.path.join('.')}}}` : from.kind === 'var' ? `{{${from.name}}}` : null;
+      const val = tok ?? (from.kind === 'fixed' ? from.value : undefined);
+      if (val === undefined) continue;
+      if (slot.where === 'path') segs[slot.index] = tok || encodeURIComponent(String(val));
+      else if (slot.where === 'query') pairs = pairs.map(([k, x]) => (k === slot.key ? [k, tok || String(val)] : [k, x]));
+      else if (obj && typeof obj === 'object') {
+        let o = obj; const p = slot.path;
+        for (let i = 0; i < p.length - 1; i++) { if (o[p[i]] == null || typeof o[p[i]] !== 'object') o[p[i]] = {}; o = o[p[i]]; }
+        if (tok) { const m = `\u0000${Object.keys(marks).length}`; marks[m] = tok; o[p[p.length - 1]] = m; } else o[p[p.length - 1]] = val;
+      }
+    }
+    let body = b.req.body;
+    if (obj) { body = JSON.stringify(obj, null, 2); for (const [m, tok] of Object.entries(marks)) body = body.split(JSON.stringify(m)).join(tok); }
+    const url = `${u.origin}${segs.join('/')}${pairs.length ? `?${pairs.map(([k, x]) => `${encKeep(k)}=${encKeep(x)}`).join('&')}` : ''}${u.hash}`;
+    const listPath = b.on?.tpl || String(b.on?.label || '').replace(/^\w+\s+/, '');
+    return { id: b.id, name: b.name, on: { path: anyIdPath(listPath), label: `GET ${listPath}` }, req: { ...b.req, url, body } };
+  }
+  let btnState = (() => { try { const v = JSON.parse(localStorage.getItem(BTN_KEY) || '[]'); return Array.isArray(v) ? v.map(migrateButton).filter(Boolean) : []; } catch { return []; } })();
   const buttonsApi = {
     list: () => btnState,
     count: () => btnState.length,
@@ -6976,15 +7013,14 @@
     upsert(b) { buttonsApi.put(btnState.some((x) => x.id === b.id) ? btnState.map((x) => (x.id === b.id ? b : x)) : [...btnState, b]); },
     remove(id) { buttonsApi.put(btnState.filter((x) => x.id !== id)); },
     forCall(method, url) {
-      if (!btnState.length) return [];
-      const m = String(method || 'GET').toUpperCase();
-      let k; try { k = core.matchKey(url); } catch { return []; }
-      let tpl;
-      const tplOf = () => (tpl === undefined ? (tpl = (specApi?.current && specApi.match(m, url)?.path) || null) : tpl);
-      return btnState.filter((b) => b.enabled !== false && b.on.method === m && (b.on.key === k || (b.on.tpl && b.on.tpl === tplOf())));
+      if (!btnState.length || String(method || 'GET').toUpperCase() !== 'GET') return [];
+      const p = anyIdPath(pathOnly(url));
+      return btnState.filter((b) => b.on.path === p);
     },
   };
-  const sameOn = (a, b) => !!a && !!b && a.method === b.method && ((a.key && a.key === b.key) || (!!a.tpl && a.tpl === b.tpl));
+  const asksFirst = (b) => b.req.method === 'DELETE';
+  // A button's address as shown: GET /api/tasks/{{item.id}}.
+  const buttonPath = (b) => `${b.req.method} ${urlParts(b.req.url).path}`;
 
   // The list inside a response: a top-level array of objects, or the first one under a wrapper
   // ({ items: [...] }, { data: { content: [...] } } …). Returns { items, at } or null.
@@ -7003,8 +7039,7 @@
     }
     return null;
   }
-  const getPath = (o, p) => p.reduce((x, k) => (x == null ? undefined : x[k]), o);
-  // Field paths with a plain value (not objects or arrays) in the first few items: ['id'], ['assignee', 'id'] …
+  // Field paths with a plain value in the first few items: ['id'], ['assignee', 'id'] …
   function leafPaths(items, max = 40) {
     const out = []; const seen = new Set();
     const walk = (x, p) => {
@@ -7017,156 +7052,134 @@
     items.slice(0, 5).forEach((it) => walk(it, []));
     return out;
   }
-  const BRACES = /\{\{.+?\}\}/;
-  const looksId = (s) => /^\d+$/.test(s) || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-/i.test(s) || BRACES.test(s) || (/\d/.test(s) && /[a-z]/i.test(s) && /^[\w-]{8,}$/.test(s));
-  const singularId = (seg) => (seg ? `${String(seg).replace(/ies$/, 'y').replace(/s$/, '').replace(/[^\w]/g, '')}Id` : 'id');
-  const decSeg = (s) => { try { return decodeURIComponent(s); } catch { return s; } };
-  // Split a URL without new URL(), so {{variables}} stay as typed.
-  const urlParts = (url) => {
-    const m = /^([a-z][\w+.-]*:\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?$/i.exec(String(url || '')) || [];
-    return { origin: m[1] || '', path: m[2] || '', query: (m[3] || '').slice(1), hash: m[4] || '' };
-  };
-  const queryPairs = (q) => (q ? q.split('&').filter(Boolean).map((kv) => {
-    const i = kv.indexOf('=');
-    const dec = (s) => { try { return decodeURIComponent(s.replace(/\+/g, ' ')); } catch { return s; } };
-    return i < 0 ? [dec(kv), ''] : [dec(kv.slice(0, i)), dec(kv.slice(i + 1))];
-  }) : []);
-  const encKeep = (s) => (BRACES.test(s) ? s : encodeURIComponent(s));
-  const pathOnly = (u) => { try { return new URL(u, location.href).pathname; } catch { return urlParts(u).path; } };
-  // Names of the path's {params} by segment index, from the API docs (null without docs).
-  function pathParamNames(method, url) {
-    const op = specApi?.current ? specApi.match(method, url) : null;
-    if (!op) return null;
-    const segs = urlParts(url).path.split('/'); const t = op.path.split('/'); const off = segs.length - t.length;
-    const names = {};
-    t.forEach((s, i) => { const m = /^\{(.+)\}$/.exec(s); if (m && i + off >= 0) names[i + off] = m[1]; });
-    return names;
-  }
-  // What a list call offers a button: its path ids and query values ({{list.projectId}}, {{list.page}}).
-  function listFieldsOf(method, url) {
-    const { path, query } = urlParts(url);
-    const segs = path.split('/');
-    const names = pathParamNames(method, url);
-    const out = [];
-    segs.forEach((s, i) => {
-      const v = decSeg(s);
-      if (s && (names ? names[i] : looksId(v))) out.push({ key: (names && names[i]) || singularId(segs[i - 1]), value: v });
+  // A JSON body that may hold unquoted placeholders ("id": {{item.id}}): parsed with each one swapped for a
+  // marker string, so its fields can be walked. Returns { obj, marks } or null when it isn't JSON.
+  function parseTemplateBody(body) {
+    if (body == null) return null;
+    const marks = {}; let n = 0;
+    const text = String(body).replace(/("(?:[^"\\]|\\.)*")|\{\{\s*([^}]+?)\s*\}\}/g, (m, str, inner) => {
+      if (str) return str;
+      const k = `\u0000${n++}`; marks[k] = `{{${inner}}}`; return JSON.stringify(k);
     });
-    for (const [k, v] of queryPairs(query)) if (!out.some((f) => f.key === k)) out.push({ key: k, value: v });
-    return out;
+    try { const obj = JSON.parse(text); return obj && typeof obj === 'object' && !Array.isArray(obj) ? { obj, marks } : null; } catch { return null; }
   }
-  // The parts of a request a button can fill: path ids, query values and body fields.
-  function slotsOf(req) {
+  // The parts a button can take from the item: path ids, query values and body fields. Each:
+  // { key, where, path?, index?, value (as it is now), item (['id'] when it's {{item.id}}) }.
+  function partsOf(req) {
+    const out = [];
     const { path, query } = urlParts(req.url);
-    const segs = path.split('/');
-    const names = pathParamNames(req.method, req.url);
-    const out = [];
-    segs.forEach((s, i) => {
+    path.split('/').forEach((s, i) => {
       const v = decSeg(s);
-      if (!s || !(names ? names[i] || BRACES.test(v) : looksId(v))) return;
-      out.push({ slot: { where: 'path', index: i, name: (names && names[i]) || singularId(segs[i - 1]) }, value: v });
+      if (!s || !looksId(v)) return;
+      const m = /^\{\{\s*item\.([\w$.-]+)\s*\}\}$/.exec(v);
+      if (BRACES.test(v) && !m) return; // another {{variable}}: leave it
+      out.push({ key: `p:${i}`, where: 'path', index: i, value: v, item: m ? m[1].split('.') : null });
     });
-    for (const [k, v] of queryPairs(query)) out.push({ slot: { where: 'query', key: k, name: k }, value: v });
-    if (req.body != null && req.bodyKind !== 'formdata') {
-      let o = null; try { o = JSON.parse(req.body); } catch { /* not JSON, or {{name}} outside quotes */ }
-      if (o && typeof o === 'object' && !Array.isArray(o)) for (const p of leafPaths([o], 30)) out.push({ slot: { where: 'body', path: p, name: p[p.length - 1] }, value: getPath(o, p) });
+    for (const [k, v] of queryPairs(query)) {
+      const m = /^\{\{\s*item\.([\w$.-]+)\s*\}\}$/.exec(v);
+      if (BRACES.test(v) && !m) continue;
+      out.push({ key: `q:${k}`, where: 'query', name: k, value: v, item: m ? m[1].split('.') : null });
+    }
+    const t = parseTemplateBody(req.body);
+    if (t) {
+      for (const p of leafPaths([t.obj], 30)) {
+        let v = getPath(t.obj, p);
+        let item = null;
+        if (typeof v === 'string' && t.marks[v]) { const m = /^\{\{\s*item\.([\w$.-]+)\s*\}\}$/.exec(t.marks[v]); if (!m) continue; item = m[1].split('.'); v = t.marks[v]; }
+        out.push({ key: `b:${p.join('.')}`, where: 'body', path: p, name: p[p.length - 1], value: v, item });
+      }
     }
     return out;
   }
-  const slotKey = (s) => (s.where === 'path' ? `p:${s.index}` : s.where === 'query' ? `q:${s.key}` : `b:${s.path.join('.')}`);
-  const slotLabel = (s) => (s.where === 'path' ? `{${s.name}}` : s.where === 'query' ? `${s.key}` : s.path.join('.'));
-  const fromLabel = (f) => (f.kind === 'row' ? `item.${f.path.join('.')}` : f.kind === 'list' ? `list.${f.key}` : f.kind === 'var' ? `{{${f.name}}}` : 'fixed');
-  // A first guess at where each part comes from. Ids (path parts, …Id fields): a field of the items with the
-  // same value (the request was likely made from one of them), else one with the same name, else a part of the
-  // list call. Everything else keeps the value it has.
-  function guessFills(slots, items, listFields) {
+  // Where each part most likely comes from. An id (a path part, or a field named …id) takes the item's field
+  // with the same value (the request was likely made from one of the items), else the one with the same name.
+  // sure: false when it's an id it couldn't place, or several fields fit: those show in amber.
+  function guessParts(parts, items) {
     const rowPaths = leafPaths(items);
     const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
-    return slots.map(({ slot, value }) => {
-      const sv = value == null ? '' : String(value);
-      const idish = slot.where === 'path' || /id$/i.test(slot.name);
-      const keep = { slot, from: { kind: 'fixed', value }, sure: true };
-      if (BRACES.test(sv) || !idish) return keep;
-      const byName = rowPaths.find((p) => norm(p.join('')) === norm(slot.name)) || rowPaths.find((p) => norm(p[p.length - 1]) === norm(slot.name));
-      if (sv) {
-        const byVal = rowPaths.filter((p) => items.some((it) => String(getPath(it, p)) === sv));
-        if (byVal.length) {
-          const byNameHit = byVal.find((p) => byName && p.join('.') === byName.join('.'));
-          const idHit = byVal.find((p) => p.length === 1 && norm(p[0]) === 'id');
-          const pick = byNameHit || idHit || byVal[0];
-          // Sure when only one field has that value, or the name agrees, or it's the path's id.
-          return { slot, from: { kind: 'row', path: pick }, sure: byVal.length === 1 || !!byNameHit || (!!idHit && slot.where === 'path') };
-        }
-        const lf = listFields.find((f) => f.value === sv);
-        if (lf) return { slot, from: { kind: 'list', key: lf.key }, sure: true };
+    return parts.map((pt) => {
+      if (pt.item) return { ...pt, sure: true };
+      const sv = pt.value == null ? '' : String(pt.value);
+      const name = pt.name || '';
+      const idish = pt.where === 'path' || /id$/i.test(name);
+      if (!idish) return { ...pt, sure: true };
+      const byName = name ? (rowPaths.find((p) => norm(p.join('')) === norm(name)) || rowPaths.find((p) => norm(p[p.length - 1]) === norm(name))) : null;
+      const byVal = sv ? rowPaths.filter((p) => items.some((it) => String(getPath(it, p)) === sv)) : [];
+      if (byVal.length) {
+        const nameHit = byName && byVal.find((p) => p.join('.') === byName.join('.'));
+        const idHit = byVal.find((p) => p.length === 1 && norm(p[0]) === 'id');
+        return { ...pt, item: nameHit || idHit || byVal[0], sure: byVal.length === 1 || !!nameHit || (!!idHit && pt.where === 'path') };
       }
-      if (byName) return { slot, from: { kind: 'row', path: byName }, sure: true };
-      const lfn = listFields.find((f) => norm(f.key) === norm(slot.name));
-      if (lfn) return { slot, from: { kind: 'list', key: lfn.key }, sure: true };
-      if (slot.where === 'path' && rowPaths.some((p) => p.length === 1 && p[0] === 'id') && !listFields.some((f) => f.value === sv)) return { slot, from: { kind: 'row', path: ['id'] }, sure: false };
-      return { ...keep, sure: false };
+      if (byName) return { ...pt, item: byName, sure: true };
+      if (pt.where === 'path' && rowPaths.some((p) => p.length === 1 && p[0] === 'id')) return { ...pt, item: ['id'], sure: false };
+      return { ...pt, sure: false };
     });
   }
-  // The request for one item: the button's request with its parts filled from the item, the list call or
-  // variables. Returns { req, missing } (missing: fields this item doesn't have).
-  function buttonRequest(b, item, listUrl) {
-    const lf = Object.fromEntries((listUrl ? listFieldsOf(b.on.method, listUrl) : []).map((f) => [f.key, f.value]));
-    const missing = [];
-    const u = urlParts(b.req.url);
-    const segs = u.path.split('/');
+  // The request with each part set to {{item.x}} (or back to its value): what a button saves.
+  function templateFrom(req, parts) {
+    const u = urlParts(req.url); const segs = u.path.split('/');
     let pairs = queryPairs(u.query);
-    let obj = null; let orig = null;
-    if (b.req.body != null) { try { obj = JSON.parse(b.req.body); orig = JSON.parse(b.req.body); } catch { obj = null; } }
-    const varsInBody = [];
-    for (const { slot, from } of b.fills || []) {
-      let v = from.kind === 'row' ? getPath(item, from.path) : from.kind === 'list' ? lf[from.key] : from.kind === 'var' ? `{{${from.name}}}` : from.value;
-      if (v === undefined || (v === null && slot.where !== 'body')) {
-        if (from.kind === 'row') missing.push(from.path.join('.'));
-        else if (from.kind === 'list') missing.push(`list.${from.key}`);
-        continue;
-      }
-      if (from.kind === 'var' && slot.where === 'body') varsInBody.push(from.name);
-      // A value from the address is text: in a body field that was a number (or true/false), it goes in as one.
-      if (slot.where === 'body' && typeof v === 'string' && from.kind === 'list') {
-        const was = getPath(orig, slot.path);
-        if (typeof was === 'number' && v.trim() !== '' && !Number.isNaN(Number(v))) v = Number(v);
-        else if (typeof was === 'boolean' && /^(true|false)$/.test(v)) v = v === 'true';
-      }
-      const s = v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v);
-      if (slot.where === 'path') segs[slot.index] = encKeep(s);
-      else if (slot.where === 'query') pairs = pairs.map(([k, x]) => (k === slot.key ? [k, s] : [k, x]));
-      else if (obj && typeof obj === 'object') {
-        let o = obj; const p = slot.path;
-        for (let i = 0; i < p.length - 1; i++) { if (o[p[i]] == null || typeof o[p[i]] !== 'object') o[p[i]] = {}; o = o[p[i]]; }
-        o[p[p.length - 1]] = v;
+    const t = parseTemplateBody(req.body);
+    const marks = { ...(t?.marks || {}) }; let n = Object.keys(marks).length;
+    const tok = (pt) => `{{item.${pt.item.join('.')}}}`;
+    const plain = (pt) => (pt.item && BRACES.test(String(pt.value)) ? pt.fallback ?? pt.value : pt.value);
+    for (const pt of parts) {
+      if (pt.where === 'path') segs[pt.index] = pt.item ? tok(pt) : encodeURIComponent(String(plain(pt)));
+      else if (pt.where === 'query') pairs = pairs.map(([k, x]) => (k === pt.name ? [k, pt.item ? tok(pt) : String(plain(pt))] : [k, x]));
+      else if (t) {
+        let o = t.obj; const p = pt.path;
+        for (let i = 0; i < p.length - 1; i++) o = o[p[i]];
+        if (pt.item) { const m = `\u0000${n++}`; marks[m] = tok(pt); o[p[p.length - 1]] = m; } else o[p[p.length - 1]] = plain(pt);
       }
     }
+    let body = req.body;
+    if (t) { body = JSON.stringify(t.obj, null, 2); for (const [m, x] of Object.entries(marks)) body = body.split(JSON.stringify(m)).join(x); }
     const url = `${u.origin}${segs.join('/')}${pairs.length ? `?${pairs.map(([k, x]) => `${encKeep(k)}=${encKeep(x)}`).join('&')}` : ''}${u.hash}`;
-    let body = b.req.body;
-    if (obj) {
-      body = JSON.stringify(obj, null, 2);
-      // A variable goes in as itself, so {{orderId}} can stay a number (see varsApi.fillJson).
-      for (const n of varsInBody) body = body.split(`"{{${n}}}"`).join(`{{${n}}}`);
-    }
-    return { req: { ...b.req, url, body }, missing };
+    return { ...req, url, body };
   }
-  // A button's address with the parts it fills shown as {name}: GET /api/tasks/{taskId}.
-  const buttonPath = (b) => {
-    const u = urlParts(b.req.url); const segs = u.path.split('/');
-    for (const f of b.fills || []) if (f.slot.where === 'path' && f.from.kind !== 'fixed') segs[f.slot.index] = `{${f.slot.name}}`;
-    return `${b.req.method} ${segs.join('/')}`;
-  };
+  // A button's request for one item: each {{item.x}} filled from it. In a JSON body an unquoted one goes in
+  // as JSON (a number stays a number), one inside a string as text. Returns { req, missing }.
+  function fillItem(req, item) {
+    const missing = new Set();
+    const val = (p) => { const v = getPath(item, p.split('.')); if (v === undefined) missing.add(p); return v; };
+    const txt = (v) => (v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v));
+    const u = urlParts(req.url);
+    const path = u.path.split('/').map((s) => decSeg(s).replace(ITEM_RX, (m, p) => encodeURIComponent(txt(val(p))))).join('/');
+    const pairs = queryPairs(u.query).map(([k, x]) => [k, x.replace(ITEM_RX, (m, p) => txt(val(p)))]);
+    const url = `${u.origin}${path}${pairs.length ? `?${pairs.map(([k, x]) => `${encKeep(k)}=${encKeep(x)}`).join('&')}` : ''}${u.hash}`;
+    const headers = Object.fromEntries(Object.entries(req.headers || {}).map(([k, v]) => [k, String(v).replace(ITEM_RX, (m, p) => txt(val(p)))]));
+    let body = req.body;
+    if (body != null) {
+      const s = String(body); let out = ''; let inStr = false; let i = 0;
+      while (i < s.length) {
+        const c = s[i];
+        if (c === '\\' && inStr) { out += s.slice(i, i + 2); i += 2; continue; }
+        if (c === '"') { inStr = !inStr; out += c; i++; continue; }
+        if (c === '{' && s[i + 1] === '{') {
+          const m = /^\{\{\s*item\.([\w$.-]+)\s*\}\}/.exec(s.slice(i));
+          if (m) {
+            const v = val(m[1]);
+            out += inStr ? JSON.stringify(txt(v)).slice(1, -1) : (v === undefined ? 'null' : JSON.stringify(v));
+            i += m[0].length; continue;
+          }
+        }
+        out += c; i++;
+      }
+      body = out;
+    }
+    return { req: { ...req, url, headers, body }, missing: [...missing] };
+  }
   const itemTitle = (it) => {
     for (const k of ['name', 'title', 'label', 'displayName', 'fullName', 'email', 'username', 'code', 'key', 'slug', 'description']) {
-      if (typeof it[k] === 'string' && it[k].trim()) return it[k];
+      if (typeof it?.[k] === 'string' && it[k].trim()) return it[k];
     }
-    return Object.values(it).find((v) => typeof v === 'string' && v.trim() && v.length < 80) || '';
+    return Object.values(it || {}).find((v) => typeof v === 'string' && v.trim() && v.length < 80) || '';
   };
-  const itemId = (it) => it.id ?? it.uuid ?? it._id ?? it.key ?? null;
+  const itemId = (it) => it?.id ?? it?.uuid ?? it?._id ?? it?.key ?? null;
   // Send a button's request for one item, as Run does: to the active environment, as its user, with
   // {{variables}} filled. Returns { res, req } or null (cancelled, or the item lacks a field).
   async function runButton(b, item, listEntry) {
-    const { req, missing } = buttonRequest(b, item, listEntry?.url);
+    const { req, missing } = fillItem(b.req, item);
     if (missing.length) { toast(`${b.name}: this item has no ${missing[0]}`, 'warn', 4500); return null; }
     const env = envApi.active();
     const texts = [req.url, req.body || '', ...Object.values(req.headers || {})];
@@ -7179,55 +7192,40 @@
       headers: Object.fromEntries(Object.entries(req.headers || {}).map(([k, v]) => [k, varsApi.fill(String(v), env)])),
       body: req.body == null ? req.body : jsonBody ? varsApi.fillJson(req.body, env) : varsApi.fill(req.body, env),
     };
-    if (b.ask) {
+    if (asksFirst(b)) {
       const ok = await confirmDlg({ title: `${b.name}?`, intro: `${filled.method} ${pathOnly(filled.url)}${env?.id != null ? ` on ${env.name}` : ''}`, ok: 'Send' });
       if (!ok) return null;
     }
     const sendUrl = retarget(filled.url, env);
     let res;
     try { res = await core.sendCopy(sendAs(env, filled, sendUrl)); } catch (err) { res = { status: 'failed', ms: 0, text: String(err?.message || err) }; }
-    // The app's list shows the change: re-run what loaded it (as Apply to app does), quietly.
-    if (b.refresh && typeof res.status === 'number' && res.status < 400 && listEntry && !listEntry.manual) core.applyToApp(listEntry).catch(() => {});
+    // A change that worked: the app loads its list again (as Apply to app does), quietly.
+    if (b.req.method !== 'GET' && typeof res.status === 'number' && res.status < 400 && listEntry && !listEntry.manual) core.applyToApp(listEntry).catch(() => {});
     return { res, req: { ...filled, url: sendUrl } };
   }
 
-  // Lists a button can go on: recent GET calls whose response is a list (newest first), then API docs GET
-  // endpoints that return one. With a request, the likeliest first: the list its path starts with
-  // (/api/tasks for /api/tasks/42).
+  // Lists a button can go on: recent GET calls whose response is a list (newest first). With a request,
+  // the likeliest first: the list its path starts with (/api/tasks for /api/tasks/42).
   function listSourcesFor(req) {
     const out = []; const seen = new Set();
     for (const r of core.state.requests) {
       if (out.length >= 12) break;
       if (r.method !== 'GET' || r.responseText == null || typeof r.status !== 'number' || r.status >= 400) continue;
-      let key; try { key = core.matchKey(r.url); } catch { continue; }
-      if (seen.has(key)) continue;
+      const path = anyIdPath(pathOnly(r.url));
+      if (seen.has(path)) continue;
       const list = listItemsOf(r.responseText);
       if (!list) continue;
-      seen.add(key);
-      const op = specApi?.current ? specApi.match('GET', r.url) : null;
-      out.push({ on: { method: 'GET', key, tpl: op?.path || null, label: `GET ${pathOnly(r.url)}` }, url: r.url, items: list.items, at: list.at, from: 'call', entry: r });
-    }
-    if (specApi?.current) {
-      for (const op of specApi.current.ops) {
-        if (op.method !== 'GET' || out.some((x) => x.on.tpl === op.path)) continue;
-        const r = op.responses['200'] || op.responses['2XX'] || op.responses.default;
-        let text = null;
-        if (r?.example != null) text = typeof r.example === 'string' ? r.example : JSON.stringify(r.example);
-        else if (r?.schema) { try { text = JSON.stringify(specApi.sample(r.schema)); } catch { /* no sample */ } }
-        const list = text ? listItemsOf(text) : null;
-        if (!list) continue;
-        out.push({ on: { method: 'GET', key: null, tpl: op.path, label: `GET ${op.path}` }, url: op.path, items: list.items, at: list.at, from: 'docs' });
-      }
+      seen.add(path);
+      out.push({ on: { path, label: `GET ${pathOnly(r.url)}` }, url: r.url, items: list.items, at: list.at, entry: r });
     }
     if (!req) return out;
-    const p = pathOnly(req.url);
-    const score = (s) => { const lp = (s.from === 'docs' ? s.on.tpl : pathOnly(s.url)).replace(/\/$/, ''); return lp && p.startsWith(`${lp}/`) ? lp.length : 0; };
+    const p = anyIdPath(pathOnly(req.url));
+    const score = (s) => (p.startsWith(`${s.on.path}/`) ? s.on.path.length : 0);
     return out.map((s, i) => ({ s, i, sc: score(s) })).sort((a, b) => b.sc - a.sc || a.i - b.i).map((x) => x.s);
   }
-  const listPathOf = (src) => (src.from === 'docs' ? src.on.tpl : pathOnly(src.url)).replace(/\/$/, '');
   // "tasks" → "task": what one item of a list is called, from its path.
   const itemNoun = (src) => {
-    const seg = (src ? listPathOf(src) : '').split('/').filter((s) => s && !/^\{.*\}$/.test(s) && !looksId(decSeg(s))).pop() || '';
+    const seg = (src ? src.on.path : '').split('/').filter((s) => s && s !== '{}').pop() || '';
     const w = seg.replace(/ies$/, 'y').replace(/(ss|us)$/, '$1').replace(/([^s])s$/, '$1').replace(/[-_]+/g, ' ');
     return w && w.length < 24 ? w : 'item';
   };
@@ -7236,58 +7234,54 @@
     const noun = itemNoun(src);
     const segs = urlParts(req.url).path.split('/').filter(Boolean);
     const last = segs[segs.length - 1] || '';
-    const tail = last && !looksId(decSeg(last)) && !/^\{.*\}$/.test(last) && segs.length > 1 && looksId(decSeg(segs[segs.length - 2] || '')) ? last : '';
+    const tail = last && !looksId(decSeg(last)) && segs.length > 1 && looksId(decSeg(segs[segs.length - 2] || '')) ? last : '';
     if (tail) return tail.replace(/[-_]+/g, ' ').replace(/^./, (c) => c.toUpperCase());
     const verb = { GET: 'Open', DELETE: 'Delete', PUT: 'Update', PATCH: 'Update', POST: 'Send' }[req.method] || req.method;
     return `${verb} ${noun}`.slice(0, 40);
   }
-  // What a button on a list could send (when starting from the list): calls already made to this list's
-  // items (/api/tasks/2/archive), API docs endpoints under it, else opening one (GET /api/tasks/{id}).
+  // What a button on a list could send (starting from the list): opening one (GET /api/tasks/{id}) first,
+  // then calls already made to its items (/api/tasks/2/archive), then API docs endpoints under it.
   function actionsFor(src) {
-    const base = listPathOf(src);
-    const origin = (() => { try { return new URL(src.from === 'call' ? src.url : location.href).origin; } catch { return location.origin; } })();
+    const base = pathOnly(src.url).replace(/\/$/, '');
+    const origin = (() => { try { return new URL(src.url, location.href).origin; } catch { return location.origin; } })();
     const first = src.items[0] || {};
     const out = []; const seen = new Set();
-    const add = (a) => { const k = `${a.method} ${a.tplKey}`; if (seen.has(k)) return; seen.add(k); out.push(a); };
-    const tplOfPath = (p) => p.split('/').map((s) => (looksId(decSeg(s)) ? '{}' : s)).join('/');
+    const add = (a) => { const k = `${a.method} ${anyIdPath(pathOnly(a.url))}`; if (seen.has(k)) return; seen.add(k); out.push(a); };
+    const id = itemId(first);
+    if (id != null) add({ method: 'GET', url: `${origin}${base}/${encodeURIComponent(String(id))}`, headers: {}, body: null, bodyKind: null });
     for (const r of core.state.requests) {
       if (out.length >= 8) break;
       const p = pathOnly(r.url);
       if (!p.startsWith(`${base}/`) || r.dryRun) continue;
-      const rest = p.slice(base.length + 1).split('/');
-      if (!looksId(decSeg(rest[0] || ''))) continue;
-      add({ method: r.method, url: r.url, headers: r.headers || {}, body: r.body ?? null, bodyKind: r.bodyKind || null, tplKey: tplOfPath(p), why: 'call' });
+      if (!looksId(decSeg(p.slice(base.length + 1).split('/')[0] || ''))) continue;
+      add({ method: r.method, url: r.url, headers: r.headers || {}, body: r.body ?? null, bodyKind: r.bodyKind || null });
     }
     if (specApi?.current) {
+      const tpl = specApi.match('GET', src.url)?.path;
       for (const op of specApi.current.ops) {
-        if (!op.path.startsWith(`${src.on.tpl || base}/{`)) continue;
+        if (!tpl || !op.path.startsWith(`${tpl}/{`)) continue;
         const url = origin + op.path.replace(/\{([^}]+)\}/g, (m, k) => encodeURIComponent(String(first[k] ?? itemId(first) ?? k)));
         let body = null;
         if (op.body?.schema && !['GET', 'HEAD', 'DELETE'].includes(op.method)) { try { body = JSON.stringify(specApi.sample(op.body.schema), null, 2); } catch { /* none */ } }
-        add({ method: op.method, url, headers: body ? { 'content-type': 'application/json' } : {}, body, bodyKind: body ? 'json' : null, tplKey: tplOfPath(pathOnly(url)), why: 'docs' });
+        add({ method: op.method, url, headers: body ? { 'content-type': 'application/json' } : {}, body, bodyKind: body ? 'json' : null });
       }
     }
-    const id = itemId(first);
-    if (id != null) add({ method: 'GET', url: `${origin}${base}/${encodeURIComponent(String(id))}`, headers: {}, body: null, bodyKind: null, tplKey: `${base}/{}`, why: 'guess' });
-    // Opening one first: it's harmless to try. Then what was already called, then the docs.
-    const rank = (a) => (a.method === 'GET' ? 0 : a.why === 'call' ? 1 : 2);
-    return out.map((a, i) => ({ a, i })).sort((x, y) => rank(x.a) - rank(y.a) || x.i - y.i).map((x) => x.a);
+    return out;
   }
-  // Which part of a request is a path id (for the "make it a button" hint after a Run).
-  const hasPathId = (req) => slotsOf(req).some((s) => s.slot.where === 'path' && !BRACES.test(String(s.value)));
+  const tplKeyOf = (req) => `${req.method} ${anyIdPath(urlParts(req.url).path.replace(ITEM_RX, '1'))}`;
   const HINTS_KEY = '__apiPeek.btnHints';
   const hintsOff = () => { try { return JSON.parse(localStorage.getItem(HINTS_KEY) || '[]'); } catch { return []; } };
   // After a successful Run of /api/tasks/1/archive: "Make this a button on each task? Add" (once per
   // endpoint, until dismissed or made).
   function buttonHint(req, onAdd) {
-    if (!req || !hasPathId(req)) return null;
-    const src = listSourcesFor(req).find((s) => { const lp = listPathOf(s); return lp && pathOnly(req.url).startsWith(`${lp}/`); });
+    if (!req || !partsOf(req).some((p) => p.where === 'path')) return null;
+    const src = listSourcesFor(req).find((s) => anyIdPath(pathOnly(req.url)).startsWith(`${s.on.path}/`));
     if (!src) return null;
-    const tplKey = `${req.method} ${urlParts(req.url).path.split('/').map((s) => (looksId(decSeg(s)) ? '{}' : s)).join('/')}`;
-    if (hintsOff().includes(tplKey)) return null;
-    if (buttonsApi.list().some((b) => sameOn(b.on, src.on) && `${b.req.method} ${urlParts(b.req.url).path.split('/').map((s) => (looksId(decSeg(s)) ? '{}' : s)).join('/')}` === tplKey)) return null;
+    const key = tplKeyOf(req);
+    if (hintsOff().includes(key)) return null;
+    if (buttonsApi.list().some((b) => b.on.path === src.on.path && tplKeyOf(b.req) === key)) return null;
     const close = h('button', { type: 'button', class: 'ibtn bt-hint-x', 'aria-label': 'Not now', title: 'Not now',
-      onclick: () => { try { localStorage.setItem(HINTS_KEY, JSON.stringify([...hintsOff(), tplKey].slice(-200))); } catch { /* storage blocked */ } bar.remove(); } });
+      onclick: () => { try { localStorage.setItem(HINTS_KEY, JSON.stringify([...hintsOff(), key].slice(-200))); } catch { /* storage blocked */ } bar.remove(); } });
     setHTML(close, ICONS.x);
     const ic = h('span', { class: 'bt-ico', 'aria-hidden': 'true' }); setHTML(ic, ICONS.bolt);
     const bar = h('div', { class: 'bt-hint', role: 'note' }, ic,
@@ -7296,143 +7290,124 @@
     return bar;
   }
 
-  // ---------- The Add a button sheet. Two ways in:
-  //  - from a request (⋯ → Add as a button…, or the hint after a Run): it picks the list;
-  //  - from a list (+ Add button in its Items view, or Try an example): it picks what to send.
-  // The main view: name (prefilled), one sentence of preview, only the parts it couldn't match, and Add button.
-  // Customize has the rest: the list or the request, every part and where it comes from, and the options.
+  // ---------- The Add a button dialog: a name, the request with the values it takes from the item shown as
+  // {{item.x}} (tap one to pick another field, or to keep the value), and Add button. Ways in: from a request
+  // (⋯ → Add as a button…, the hint after a Run) it picks the list; from a list (+ Add button in Items,
+  // Try an example) it picks what to send. Either choice shows as a small picker only when there's more than one.
   let btnFocus = null; // { id, at }: the button just added, pulsed on the first item
   const COACH_KEY = '__apiPeek.btnCoach';
-  function openButtonDlg({ req = null, btn = null, list = null, custom = false } = {}) {
+  function openButtonDlg({ req = null, btn = null, list = null } = {}) {
     if (!dockEl) return;
     dockEl.querySelector('.pdlg-wrap')?.remove();
     const back = document.activeElement;
-    let sources = list ? [list] : listSourcesFor(btn ? btn.req : req);
-    if (btn && !sources.some((s) => sameOn(s.on, btn.on))) sources.unshift({ on: btn.on, url: btn.on.label.replace(/^\w+ /, ''), items: [], at: '', from: 'saved' });
-    let src = btn ? sources.find((s) => sameOn(s.on, btn.on)) : sources[0] || null;
+    const sources = list ? [list] : listSourcesFor(btn ? btn.req : req);
+    if (btn && !sources.some((s) => s.on.path === btn.on.path)) sources.unshift({ on: btn.on, url: btn.on.label.replace(/^\w+ /, ''), items: [], at: '', entry: null });
+    let src = btn ? sources.find((s) => s.on.path === btn.on.path) : sources[0] || null;
     const actions = list && !btn && !req ? actionsFor(list) : null;
     let base = btn ? btn.req : req ? { method: req.method, url: req.url, headers: req.headers || {}, body: req.body ?? null, bodyKind: req.bodyKind || null } : actions?.[0] || null;
-    let slots = []; let fills = [];
-    let named = !!btn; // the user typed a name: keep it when the request changes
-    let showCustom = custom || !!btn;
-    const fieldsFor = (s) => (s && s.from === 'call' ? listFieldsOf('GET', s.url) : s ? listFieldsOf('GET', s.url) : []);
-    const resetFills = () => {
-      slots = base ? slotsOf(base) : [];
-      const saved = btn && src && sameOn(src.on, btn.on) && base === btn.req ? new Map(btn.fills.map((f) => [slotKey(f.slot), f])) : null;
-      const guess = src ? guessFills(slots, src.items, fieldsFor(src)) : slots.map(({ slot, value }) => ({ slot, from: { kind: 'fixed', value }, sure: true }));
-      fills = guess.map((g) => (saved?.has(slotKey(g.slot)) ? { ...saved.get(slotKey(g.slot)), sure: true } : g));
-    };
-    resetFills();
-    const askDefault = () => base?.method === 'DELETE';
-    const refDefault = () => !!base && base.method !== 'GET';
-    let ask = btn ? !!btn.ask : askDefault();
-    let refresh = btn ? !!btn.refresh : refDefault();
+    let parts = [];
+    let named = !!btn;
+    const reset = () => { parts = base ? guessParts(partsOf(base), src?.items || []) : []; };
+    reset();
 
-    const { card, body, wrap, closeBtn } = dlgShell({ id: 'bt', title: btn ? 'Edit button' : 'Add a button', cls: 'btdlg' });
+    const { body, wrap, closeBtn } = dlgShell({ id: 'bt', title: btn ? 'Edit button' : 'Add a button', cls: 'btdlg' });
     const nameIn = h('input', { class: 'pf-tok bt-name', value: btn?.name || (base ? nameFor(base, src) : ''), 'aria-label': 'Button name', maxlength: '40', spellcheck: 'false' });
     nameIn.addEventListener('input', () => { named = true; });
-    const whereEl = h('div', { class: 'muted bt-where-line' });
+    const pickRow = h('div', { class: 'bt-pickrow' });
+    const reqBox = h('div', { class: 'bt-req mono', 'aria-label': 'What it sends' });
     const sentence = h('div', { class: 'bt-sentence' });
-    const askBox = h('div', { class: 'bt-ask' });
-    const customBox = h('div', { class: 'bt-custom' });
-    const customLink = h('button', { type: 'button', class: 'linkbtn bt-customize', 'aria-expanded': String(showCustom), onclick: () => { showCustom = !showCustom; draw(); } });
-    const enc = (f) => (f.kind === 'row' ? `row:${JSON.stringify(f.path)}` : f.kind === 'list' ? `list:${f.key}` : f.kind === 'var' ? `var:${f.name}` : 'fixed');
-    const short = (v) => { const s = v == null ? 'null' : typeof v === 'object' ? JSON.stringify(v) : String(v); return s.length > 24 ? `${s.slice(0, 23)}…` : s; };
-    const reqLine = (r) => { const s = urlParts(r.url); return `${r.method} ${s.path}${s.query ? `?${s.query}` : ''}`; };
-
-    // One "comes from" picker. full: every source (Customize); else just this item's fields and "keep".
-    function fromPicker(f, i, full) {
-      const rowPaths = src ? leafPaths(src.items) : [];
-      const lfs = full ? fieldsFor(src) : [];
-      const vars = full ? varsApi.list().map((v) => v.name) : [];
-      const orig = slots[i]?.value;
-      const sel = h('select', { class: 'bt-from', 'aria-label': `${slotLabel(f.slot)} comes from` },
-        rowPaths.length ? h('optgroup', { label: `This ${itemNoun(src)}` }, ...rowPaths.map((p) => h('option', { value: `row:${JSON.stringify(p)}` }, `${p.join('.')}  (${short(getPath(src.items[0], p))})`))) : null,
-        lfs.length ? h('optgroup', { label: 'The list call' }, ...lfs.map((x) => h('option', { value: `list:${x.key}` }, `list.${x.key}  (${short(x.value)})`))) : null,
-        vars.length ? h('optgroup', { label: 'Variables' }, ...vars.map((n) => h('option', { value: `var:${n}` }, `{{${n}}}`))) : null,
-        h('option', { value: 'fixed' }, full ? 'Fixed value' : `Keep ${short(orig)}`));
-      sel.value = enc(f.from);
-      if (sel.value !== enc(f.from)) sel.value = 'fixed';
-      const fixedIn = full ? h('input', { class: 'pf-tok mono bt-fixed', value: f.from.kind === 'fixed' ? (f.from.value == null ? 'null' : typeof f.from.value === 'object' ? JSON.stringify(f.from.value) : String(f.from.value)) : '', 'aria-label': `Fixed value for ${slotLabel(f.slot)}`, spellcheck: 'false', hidden: sel.value !== 'fixed' }) : null;
-      const typed = (t) => {
-        if (f.slot.where !== 'body') return t;
-        if (typeof orig === 'number' && t.trim() !== '' && !Number.isNaN(Number(t))) return Number(t);
-        if (typeof orig === 'boolean' && /^(true|false)$/.test(t)) return t === 'true';
-        if (t === 'null') return null;
-        return t;
-      };
-      sel.addEventListener('change', () => {
-        const v = sel.value;
-        fills[i] = { slot: f.slot, sure: true, from: v.startsWith('row:') ? { kind: 'row', path: JSON.parse(v.slice(4)) } : v.startsWith('list:') ? { kind: 'list', key: v.slice(5) } : v.startsWith('var:') ? { kind: 'var', name: v.slice(4) } : { kind: 'fixed', value: orig } };
-        draw();
-      });
-      fixedIn?.addEventListener('input', () => { fills[i] = { slot: f.slot, sure: true, from: { kind: 'fixed', value: typed(fixedIn.value) } }; drawSentence(); });
-      return h('div', { class: 'bt-fill', role: 'row' },
-        h('span', { class: 'bt-slot', role: 'cell' }, h('span', { class: 'mono' }, slotLabel(f.slot)), h('span', { class: 'muted bt-where' }, f.slot.where)),
-        h('span', { class: 'bt-arrow muted', 'aria-hidden': 'true' }, '←'),
-        h('span', { class: 'bt-pick', role: 'cell' }, sel, fixedIn));
+    const short = (v) => { const s = v == null ? 'null' : typeof v === 'object' ? JSON.stringify(v) : String(v); return s.length > 22 ? `${s.slice(0, 21)}…` : s; };
+    const first = () => src?.items?.[0];
+    const plainOf = (pt) => (pt.item && BRACES.test(String(pt.value)) ? (first() ? getPath(first(), pt.item) : pt.value) : pt.value);
+    // One value of the request: {{item.x}} (purple), an id it couldn't place (amber), or a plain value. Tap it
+    // to choose a field of the item, or to keep the value.
+    function token(pt) {
+      const label = pt.item ? `{{item.${pt.item.join('.')}}}` : pt.where === 'body' ? JSON.stringify(plainOf(pt)) : String(plainOf(pt));
+      const fields = src ? leafPaths(src.items) : [];
+      const keep = plainOf(pt);
+      const items = [
+        ...(fields.length ? [{ section: `From each ${itemNoun(src)}` }] : []),
+        ...fields.map((p) => ({ id: `f:${p.join('.')}`, label: `item.${p.join('.')}`, sub: short(getPath(first(), p)), checked: !!pt.item && pt.item.join('.') === p.join('.'),
+          run: () => { pt.item = p; pt.sure = true; draw(); } })),
+        { id: 'keep', label: `Keep ${short(keep)}`, sub: 'The same for every item', sepBefore: fields.length > 0, checked: !pt.item,
+          run: () => { pt.fallback = keep; pt.value = keep; pt.item = null; pt.sure = true; draw(); } },
+      ].map((it) => (it.section ? null : it)).filter(Boolean);
+      const t = h('span', { class: 'bt-tok-t' }, label);
+      return dropMenu(`Where ${pt.where === 'path' ? 'this path part' : pt.name} comes from`, items,
+        { icon: t, btnClass: `bt-tok${pt.item ? ' ph' : ''}${pt.sure === false ? ' unsure' : ''}`, title: pt.sure === false ? 'Not sure where this comes from: tap to pick a field, or keep it' : pt.item ? 'Taken from each item: tap to change' : 'Tap to take it from each item instead', align: 'left', menuClass: 'bt-tokmenu' });
+    }
+    // The request as text, with its values as tokens.
+    function drawReq() {
+      if (!base) { reqBox.replaceChildren(h('span', { class: 'muted' }, 'Nothing to send yet.')); return; }
+      const byKey = new Map(parts.map((p) => [p.key, p]));
+      const u = urlParts(base.url);
+      const line = [h('span', { class: `bt-m m-${base.method.toLowerCase()}` }, base.method), ' '];
+      u.path.split('/').forEach((s, i) => { if (i) line.push('/'); const pt = byKey.get(`p:${i}`); line.push(pt ? token(pt) : decSeg(s)); });
+      const pairs = queryPairs(u.query);
+      pairs.forEach(([k, v], i) => { line.push(i ? '&' : '?', `${k}=`); const pt = byKey.get(`q:${k}`); line.push(pt ? token(pt) : v); });
+      const rows = [h('div', { class: 'bt-req-l' }, ...line)];
+      const t = base.method !== 'GET' ? parseTemplateBody(base.body) : null;
+      if (t) {
+        const walk = (o, path, ind) => {
+          const pad = '  '.repeat(ind);
+          const keys = Object.keys(o);
+          keys.forEach((k, i) => {
+            const v = o[k]; const p = [...path, k]; const comma = i < keys.length - 1 ? ',' : '';
+            if (v && typeof v === 'object' && !Array.isArray(v)) {
+              rows.push(h('div', { class: 'bt-req-l' }, `${pad}  ${JSON.stringify(k)}: {`));
+              walk(v, p, ind + 1);
+              rows.push(h('div', { class: 'bt-req-l' }, `${pad}  }${comma}`));
+            } else {
+              const pt = byKey.get(`b:${p.join('.')}`);
+              rows.push(h('div', { class: 'bt-req-l' }, `${pad}  ${JSON.stringify(k)}: `, pt ? token(pt) : (typeof v === 'string' && t.marks[v] ? t.marks[v] : JSON.stringify(v)), comma));
+            }
+          });
+        };
+        rows.push(h('div', { class: 'bt-req-l' }, '{'));
+        walk(t.obj, [], 0);
+        rows.push(h('div', { class: 'bt-req-l' }, '}'));
+      } else if (base.body != null && base.method !== 'GET' && String(base.body).trim()) rows.push(h('div', { class: 'bt-req-l muted' }, String(base.body).slice(0, 300)));
+      reqBox.replaceChildren(...rows);
     }
     function drawSentence() {
-      if (!base) { sentence.replaceChildren(h('span', { class: 'muted' }, 'Pick what it sends under Customize.')); return; }
-      if (!src || !src.items.length) {
-        sentence.replaceChildren('Pressing it sends ', h('span', { class: 'mono' }, reqLine(base)), src?.from === 'saved' ? h('span', { class: 'muted' }, ' (its list hasn’t loaded on this page yet).') : '.');
+      if (!base || !src || !src.items.length) {
+        sentence.replaceChildren(src && !src.items.length ? h('span', { class: 'muted' }, 'Its list hasn’t loaded on this page yet.') : '');
+        sentence.hidden = !sentence.childNodes.length;
         return;
       }
-      const b = { req: base, fills, on: src.on };
-      const listUrl = src.from === 'call' ? src.url : null;
-      const it = src.items[0];
-      const { req: r, missing } = buttonRequest(b, it, listUrl);
-      const t = itemTitle(it); const id = itemId(it);
-      const lacking = src.items.filter((x) => buttonRequest(b, x, listUrl).missing.length).length;
-      sentence.replaceChildren(`Pressing it on ${t ? `“${t}”` : id != null ? `${itemNoun(src)} ${id}` : `the first ${itemNoun(src)}`} sends `,
-        h('span', { class: 'mono' }, missing.length ? reqLine(base) : reqLine(r)), '.',
-        lacking ? h('span', { class: 'muted' }, ` Not on ${plural(lacking, itemNoun(src))} that lack ${missing[0] || 'a field'}.`) : '');
-      if (showCustom) {
-        let shown = reqLine(missing.length ? base : r);
-        if (r.body != null && r.method !== 'GET') shown += `\n${String(r.body).length > 600 ? `${String(r.body).slice(0, 600)}…` : r.body}`;
-        const pre = customBox.querySelector('.bt-preview'); if (pre) pre.textContent = shown;
-      }
+      sentence.hidden = false;
+      const tpl = templateFrom(base, parts);
+      const it = first();
+      const { req: r, missing } = fillItem(tpl, it);
+      const tt = itemTitle(it); const id = itemId(it);
+      const lacking = src.items.filter((x) => fillItem(tpl, x).missing.length).length;
+      const unsure = parts.filter((p) => p.sure === false).length;
+      const s = urlParts(r.url);
+      sentence.replaceChildren(`Pressing it on ${tt ? `“${tt}”` : id != null ? `${itemNoun(src)} ${id}` : `the first ${itemNoun(src)}`} sends `,
+        h('span', { class: 'mono' }, missing.length ? `${base.method} ${urlParts(base.url).path}` : `${r.method} ${s.path}${s.query ? `?${s.query}` : ''}`), '.',
+        lacking ? h('span', { class: 'muted' }, ` Not on ${plural(lacking, itemNoun(src))} without ${missing[0] || 'that field'}.`) : '',
+        unsure ? h('div', { class: 'bt-unsure' }, unsure === 1 ? 'Check the amber value: tap it to pick a field, or keep it.' : 'Check the amber values: tap each to pick a field, or keep it.') : '');
     }
-    function draw() {
-      whereEl.replaceChildren(src ? `On each ${itemNoun(src)} of ${src.on.label.replace(/^GET /, '')}` : '');
-      // Only what it couldn't work out on its own.
-      const unsure = fills.map((f, i) => [f, i]).filter(([f]) => f.sure === false);
-      askBox.replaceChildren(...(unsure.length && !showCustom ? [h('div', { class: 'bt-ask-h' }, unsure.length === 1 ? 'Which field is this?' : 'Which fields are these?'), ...unsure.map(([f, i]) => fromPicker(f, i, false))] : []));
-      customLink.textContent = showCustom ? 'Fewer options' : 'Customize';
-      customLink.setAttribute('aria-expanded', String(showCustom));
-      if (!showCustom) { customBox.replaceChildren(); customBox.hidden = true; drawSentence(); return; }
-      customBox.hidden = false;
-      const fld = (lab, el) => h('label', { class: 'env-fld bt-fld' }, h('span', { class: 'env-fl' }, lab), el);
-      const parts = [];
-      if (actions && actions.length) {
-        const actSel = h('select', { class: 'bt-act', 'aria-label': 'It sends' }, ...actions.map((a, i) => h('option', { value: String(i), selected: a === base }, `${a.method} ${pathOnly(a.url)}${a.why === 'docs' ? ' · API docs' : a.why === 'guess' ? '' : ' · called'}`)));
-        actSel.addEventListener('change', () => { base = actions[+actSel.value]; resetFills(); if (!named) nameIn.value = nameFor(base, src); ask = askDefault(); refresh = refDefault(); draw(); });
-        parts.push(fld('It sends', actSel));
+    function drawPick() {
+      const kids = [];
+      if (actions && actions.length > 1) {
+        const sel = h('select', { class: 'bt-act', 'aria-label': 'It sends' }, ...actions.map((a, i) => h('option', { value: String(i), selected: a === base }, `${a.method} ${pathOnly(a.url)}`)));
+        sel.addEventListener('change', () => { base = actions[+sel.value]; reset(); if (!named) nameIn.value = nameFor(base, src); draw(); });
+        kids.push(h('label', { class: 'bt-pick-l' }, h('span', { class: 'muted' }, 'Sends'), sel));
       }
-      if (sources.length && !list) {
-        const srcSel = h('select', { class: 'bt-src', 'aria-label': 'On the items of' },
-          ...sources.map((s, i) => h('option', { value: String(i), selected: s === src }, `${s.on.label}${s.from === 'docs' ? ' · API docs' : s.from === 'saved' ? ' · not loaded yet' : ` · ${plural(s.items.length, 'item')}`}`)));
-        srcSel.addEventListener('change', () => { src = sources[+srcSel.value]; resetFills(); if (!named) nameIn.value = nameFor(base, src); draw(); });
-        parts.push(fld('On the items of', srcSel));
-      }
-      parts.push(h('div', { class: 'bt-sec' }, h('div', { class: 'env-fl' }, 'Fill from'),
-        h('div', { class: 'bt-fills', role: 'table', 'aria-label': 'Fill from' }, ...(fills.length ? fills.map((f, i) => fromPicker(f, i, true)) : [h('div', { class: 'muted bt-none' }, 'Nothing to fill: it’s sent the same for every item.')]))));
-      parts.push(h('div', { class: 'bt-sec' }, h('div', { class: 'env-fl' }, 'Request'), h('pre', { class: 'bt-preview mono' })));
-      const askIn = h('input', { type: 'checkbox', checked: ask }); askIn.addEventListener('change', () => { ask = askIn.checked; });
-      const refIn = h('input', { type: 'checkbox', checked: refresh }); refIn.addEventListener('change', () => { refresh = refIn.checked; });
-      parts.push(h('div', { class: 'bt-opts' },
-        h('label', { class: 'chk' }, askIn, h('span', {}, 'Ask before sending')),
-        h('label', { class: 'chk', title: 'After it works, the app loads its list again, so you see the change on the page' }, refIn, h('span', {}, 'Refresh the app’s list after'))));
-      customBox.replaceChildren(...parts);
-      drawSentence();
+      if (!list && sources.length > 1) {
+        const sel = h('select', { class: 'bt-src', 'aria-label': 'On the items of' }, ...sources.map((s, i) => h('option', { value: String(i), selected: s === src }, `${s.on.label.replace(/^GET /, '')}${s.items.length ? ` · ${plural(s.items.length, 'item')}` : ''}`)));
+        sel.addEventListener('change', () => { src = sources[+sel.value]; reset(); if (!named) nameIn.value = nameFor(base, src); draw(); });
+        kids.push(h('label', { class: 'bt-pick-l' }, h('span', { class: 'muted' }, `On each ${itemNoun(src)} of`), sel));
+      } else if (src) kids.push(h('span', { class: 'muted' }, `On each ${itemNoun(src)} of ${src.on.label.replace(/^GET /, '')}`));
+      pickRow.replaceChildren(...kids);
     }
+    function draw() { drawPick(); drawReq(); drawSentence(); }
     const close = () => { closeEnvDlg = null; wrap.remove(); back?.focus?.(); };
     const save = () => {
-      if (!src || !base) { showCustom = true; draw(); return; }
+      if (!src || !base) return;
       const name = nameIn.value.trim() || nameFor(base, src);
-      const b = { id: btn?.id || `b${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, name, on: src.on, req: base,
-        fills: fills.filter((f) => !(f.from.kind === 'fixed' && f.from.value === slots.find((s) => slotKey(s.slot) === slotKey(f.slot))?.value)).map(({ slot, from }) => ({ slot, from })),
-        ask, refresh, enabled: btn ? btn.enabled !== false : true };
+      const b = { id: btn?.id || `b${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, name, on: src.on, req: templateFrom(base, parts) };
       close();
       if (btn) { buttonsApi.upsert(b); return; }
       btnFocus = { id: b.id, at: Date.now() };
@@ -7441,7 +7416,7 @@
     };
     closeBtn.addEventListener('click', close);
     wrap.addEventListener('mousedown', (ev) => { if (ev.target === wrap) close(); });
-    wrap.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } });
+    wrap.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !e.defaultPrevented) { e.preventDefault(); e.stopPropagation(); close(); } });
     closeEnvDlg = close;
     if (!sources.length) {
       // No list yet: load the one this request belongs to (/api/tasks for /api/tasks/2), then carry on.
@@ -7458,28 +7433,34 @@
     } else {
       body.append(
         h('label', { class: 'bt-namerow' }, h('span', { class: 'env-fl' }, 'Name'), nameIn),
-        whereEl, sentence, askBox, customBox,
-        h('div', { class: 'row bt-acts-row' }, h('button', { type: 'button', class: 'btn-sm primary bt-save', onclick: save }, btn ? 'Save' : 'Add button'), h('span', { class: 'hspace' }), customLink));
+        pickRow, reqBox, sentence,
+        h('div', { class: 'row bt-acts-row' }, h('button', { type: 'button', class: 'btn-sm primary bt-save', onclick: save }, btn ? 'Save' : 'Add button'),
+          btn ? h('span', { class: 'hspace' }) : null,
+          btn ? h('button', { type: 'button', class: 'linkbtn danger', onclick: () => { close(); deleteButton(btn); } }, 'Delete') : null));
       draw();
     }
     dockEl.append(wrap);
     requestAnimationFrame(() => (sources.length ? body.querySelector('.bt-save') : body.querySelector('.btn-sm.primary') || closeBtn)?.focus());
   }
+  function deleteButton(b) {
+    const before = buttonsApi.list();
+    buttonsApi.remove(b.id);
+    toast(`Deleted “${b.name}”`, '', 5000, { label: 'Undo', run: () => buttonsApi.put(before) });
+  }
   // GET a list through the page (so it's captured like the app's own call). Returns its source, or null.
   async function loadList(url) {
-    let key; try { key = core.matchKey(url); } catch { return null; }
+    const path = anyIdPath(pathOnly(url));
     try { await window.fetch(url, { credentials: 'include', headers: { accept: 'application/json' } }); } catch { return null; }
     for (let i = 0; i < 20; i++) {
-      const r = core.state.requests.find((e) => e.method === 'GET' && core.matchKey(e.url) === key && e.responseText != null);
+      const r = core.state.requests.find((e) => e.method === 'GET' && anyIdPath(pathOnly(e.url)) === path && e.responseText != null);
       if (r) return listItemsOf(r.responseText) ? listSourcesFor(null).find((s) => s.entry === r) || null : null;
       await new Promise((res) => setTimeout(res, 100));
     }
     return null;
   }
   // After adding: open the list's latest call on Items, where the new button pulses on the first item.
-  async function showOnList(src) {
-    let entry = src.entry || core.state.requests.find((e) => e.method === 'GET' && e.responseText != null && (e.url && ((src.on.key && core.matchKey(e.url) === src.on.key) || (src.on.tpl && specApi?.current && specApi.match('GET', e.url)?.path === src.on.tpl))));
-    if (!entry && src.from === 'docs' && !/\{/.test(src.on.tpl)) { const s2 = await loadList(new URL(src.on.tpl, location.href).href); entry = s2?.entry || null; }
+  function showOnList(src) {
+    const entry = core.state.requests.find((e) => e.method === 'GET' && e.responseText != null && anyIdPath(pathOnly(e.url)) === src.on.path) || src.entry;
     if (!entry) { openButtons(); return; }
     dock.tab = 'requests'; ss.set('__apiPeek.tab', 'requests');
     openDetail(entry);
@@ -7491,7 +7472,7 @@
     dock.tab = 'rules'; ss.set('__apiPeek.tab', 'rules');
     renderTab();
   }
-  // Setup → Buttons, empty: start from the most recent list (or one in the API docs).
+  // Setup → Buttons, empty: start from the most recent list.
   function tryExample() {
     const src = listSourcesFor(null)[0];
     if (!src) return false;
@@ -7503,11 +7484,11 @@
   // row offers + Add button. A button just added pulses there, with a one-time tip.
   function itemsView(list, btns, ctx) {
     const st = ctx.state.btnRes || (ctx.state.btnRes = {});
-    const src = (() => { const op = specApi?.current ? specApi.match('GET', ctx.url) : null; let key = null; try { key = core.matchKey(ctx.url); } catch { /* keep */ }
-      return { on: { method: 'GET', key, tpl: op?.path || null, label: `GET ${pathOnly(ctx.url)}` }, url: ctx.url, items: list.items, at: list.at, from: 'call', entry: ctx.entry }; })();
+    const src = { on: { path: anyIdPath(pathOnly(ctx.url)), label: `GET ${pathOnly(ctx.url)}` }, url: ctx.url, items: list.items, at: list.at, entry: ctx.entry };
     const fresh = btnFocus && Date.now() - btnFocus.at < 15000 ? btnFocus : null;
     let coachSeen = false; try { coachSeen = !!localStorage.getItem(COACH_KEY); } catch { /* storage blocked */ }
-    const seenCoach = () => { try { localStorage.setItem(COACH_KEY, '1'); } catch { /* storage blocked */ } box.querySelector('.bt-coach')?.remove(); };
+    let box = null;
+    const seenCoach = () => { try { localStorage.setItem(COACH_KEY, '1'); } catch { /* storage blocked */ } box?.querySelector('.bt-coach')?.remove(); };
     const rows = list.items.slice(0, 200).map((it, i) => {
       const id = itemId(it); const title = itemTitle(it);
       const resEl = h('span', { class: 'bt-res' });
@@ -7531,20 +7512,19 @@
           { label: 'Open', run: () => { const ne = core.addManual({ method: out.req.method, url: out.req.url, headers: out.req.headers, body: out.req.body, bodyKind: out.req.bodyKind }); dock.tab = 'requests'; ss.set('__apiPeek.tab', 'requests'); openDetail(ne); } });
       };
       const btnEl = (b) => {
-        const el = h('button', { type: 'button', class: `bt-btn${fresh && fresh.id === b.id && i === 0 ? ' pulse' : ''}`, title: `${buttonPath(b)}${b.ask ? ' · asks first' : ''}`, onclick: () => go(b) });
+        const el = h('button', { type: 'button', class: `bt-btn${fresh && fresh.id === b.id && i === 0 ? ' pulse' : ''}`, title: `${buttonPath(b)}${asksFirst(b) ? ' · asks first' : ''}`, onclick: () => go(b) });
         const ic = h('span', { class: 'bt-ico', 'aria-hidden': 'true' }); setHTML(ic, ICONS.bolt);
         el.append(ic, h('span', {}, b.name));
         return el;
       };
-      // Newest first when the buttons don't all fit, so the one just added is the one you see.
+      // The one just added first, so it's the one you see when they don't all fit.
       const ordered = fresh ? [...btns.filter((b) => b.id === fresh.id), ...btns.filter((b) => b.id !== fresh.id)] : btns;
       const acts = !btns.length
         ? (i === 0 ? [h('button', { type: 'button', class: 'bt-ghost', onclick: () => openButtonDlg({ list: src }) }, '+ Add button')] : [])
         : ordered.length > 2
-          ? [btnEl(ordered[0]), dropMenu(`More buttons for ${title || id || `item ${i + 1}`}`, [
-            ...ordered.slice(1).map((b) => ({ id: `bt-${b.id}`, label: b.name, icon: ICONS.bolt, sub: buttonPath(b), run: () => go(b) })),
-            { id: 'bt-add', label: 'Add a button…', icon: ICONS.plus, sepBefore: true, run: () => openButtonDlg({ list: src }) }],
-          { icon: ICONS.chevDown, btnClass: 'bt-btn bt-more', title: 'More buttons', align: 'right' })]
+          ? [btnEl(ordered[0]), dropMenu(`More buttons for ${title || id || `item ${i + 1}`}`,
+            ordered.slice(1).map((b) => ({ id: `bt-${b.id}`, label: b.name, icon: ICONS.bolt, sub: buttonPath(b), run: () => go(b) })),
+            { icon: ICONS.chevDown, btnClass: 'bt-btn bt-more', title: 'More buttons', align: 'right' })]
           : ordered.map(btnEl);
       showRes();
       return h('div', { class: `bt-row${!btns.length && i === 0 ? ' bt-row-ghost' : ''}`, role: 'listitem' },
@@ -7553,14 +7533,20 @@
         resEl,
         h('span', { class: 'bt-acts' }, ...acts));
     });
-    const firstName = itemTitle(list.items[0]) || (itemId(list.items[0]) != null ? `${itemNoun(src)} ${itemId(list.items[0])}` : `the first ${itemNoun(src)}`);
+    const firstName = itemTitle(list.items[0]) ? `“${itemTitle(list.items[0])}”` : itemId(list.items[0]) != null ? `${itemNoun(src)} ${itemId(list.items[0])}` : `the first ${itemNoun(src)}`;
     const coach = fresh && !coachSeen ? h('div', { class: 'bt-coach', role: 'status' },
-      h('span', {}, `Tap to try it on ${itemTitle(list.items[0]) ? `“${firstName}”` : firstName}`),
+      h('span', {}, `Tap to try it on ${firstName}`),
       h('button', { type: 'button', class: 'linkbtn', onclick: seenCoach }, 'Got it')) : null;
+    // Manage: each button of this list, with Edit and Delete.
+    const manage = btns.length ? dropMenu('Manage buttons', [
+      ...btns.map((b) => ({ id: `m-${b.id}`, label: b.name, icon: ICONS.bolt, sub: buttonPath(b), children: [
+        { id: 'edit', label: 'Edit', icon: ICONS.pencil, run: () => openButtonDlg({ btn: b }) },
+        { id: 'del', label: 'Delete', icon: ICONS.trash, danger: true, run: () => deleteButton(b) }] })),
+      { id: 'add', label: 'Add a button…', icon: ICONS.plus, sepBefore: true, run: () => openButtonDlg({ list: src }) },
+    ], { icon: document.createTextNode('Buttons ▾'), btnClass: 'linkbtn bt-manage', title: 'Add, edit or delete buttons', align: 'right' }) : null;
     const listEl = h('div', { class: 'bt-list', role: 'list' }, ...(coach ? [rows[0], coach, ...rows.slice(1)] : rows));
-    const box = h('div', { class: 'bt-items' },
-      h('div', { class: 'muted bt-items-h' }, `${plural(list.items.length, itemNoun(src))}${list.at.includes('.') ? ` in ${list.at}` : ''}${list.items.length > 200 ? ' · first 200 shown' : ''}`,
-        btns.length ? [' · ', h('button', { type: 'button', class: 'linkbtn', onclick: () => openButtonDlg({ list: src }) }, '+ Add button'), ' · ', h('button', { type: 'button', class: 'linkbtn', onclick: () => openButtons() }, 'Manage')] : null),
+    box = h('div', { class: 'bt-items' },
+      h('div', { class: 'muted bt-items-h' }, h('span', { class: 'bt-count' }, `${plural(list.items.length, itemNoun(src))}${list.at.includes('.') ? ` in ${list.at}` : ''}${list.items.length > 200 ? ' · first 200 shown' : ''}`), manage),
       listEl);
     if (fresh) requestAnimationFrame(() => box.querySelector('.bt-btn.pulse')?.scrollIntoView({ block: 'nearest' }));
     return box;
@@ -13881,7 +13867,7 @@
       const open = () => { varsUi.editing = { name: v.name }; varsUi.add = null; draw(true); };
       return h('div', { class: 'var-row', role: 'listitem', tabindex: '0',
         title: `{{${v.name}}}${v.secret ? '' : ` = ${v.value}`}\nClick to edit`,
-        onclick: (e) => { if (!e.target.closest('.newwrap')) open(); }, onkeydown: (e) => { if (e.key === 'Enter' && e.target === e.currentTarget) open(); } },
+        onclick: (e) => { if (e.target.isConnected && !e.target.closest('.newwrap')) open(); }, onkeydown: (e) => { if (e.key === 'Enter' && e.target === e.currentTarget) open(); } },
       h('span', { class: 'var-n mono' }, v.name),
       h('span', { class: `var-v mono${v.value === '' && !v.secret ? ' muted' : ''}` }, shown),
       auto || h('span', {}),
@@ -13974,31 +13960,22 @@
         h('div', { class: 'ov-list', role: 'list' }, ...items.map(overrideRow)));
     }
 
-    // ---------- Buttons view: requests saved as buttons on the items of a list (made from a request's ⋯ menu).
+    // ---------- Buttons view: an overview of every button (made from a list's Items, or a request's ⋯ menu).
     function buttonRow(b) {
-      const on = b.enabled !== false;
-      const inp = h('input', { type: 'checkbox', role: 'switch', checked: on, 'aria-label': `${b.name} on` });
-      inp.addEventListener('change', () => { buttonsApi.upsert({ ...b, enabled: inp.checked }); draw(true); });
-      const sw = h('label', { class: 'switch ov-sw', title: on ? 'On. Switch off to hide it without deleting it' : 'Off', onclick: (e) => e.stopPropagation() }, inp, h('span', { class: 'sw', 'aria-hidden': 'true' }));
       const menu = dropMenu(`Actions for ${b.name}`, [
         { id: 'edit', label: 'Edit', icon: ICONS.pencil, run: () => openButtonDlg({ btn: b }) },
-        { id: 'dup', label: 'Duplicate', icon: ICONS.dup, run: () => { buttonsApi.upsert({ ...b, id: `b${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, name: `${b.name} 2` }); draw(true); } },
-        { id: 'del', label: 'Delete', icon: ICONS.trash, danger: true, sepBefore: true, run: () => {
-          const before = buttonsApi.list();
-          buttonsApi.remove(b.id); draw(true);
-          toast(`Deleted “${b.name}”`, '', 5000, { label: 'Undo', run: () => { buttonsApi.put(before); draw(true); } });
-        } },
+        { id: 'del', label: 'Delete', icon: ICONS.trash, danger: true, sepBefore: true, run: () => deleteButton(b) },
       ], { icon: ICONS.more, btnClass: 'ibtn mk-more', title: 'More actions', align: 'right' });
       const ic = h('span', { class: 'bt-ico', 'aria-hidden': 'true' }); setHTML(ic, ICONS.bolt);
-      const fillsTxt = (b.fills || []).filter((f) => f.from.kind !== 'fixed').map((f) => `${slotLabel(f.slot)} ← ${fromLabel(f.from)}`).join(', ');
-      return h('div', { class: `ov-row bt-srow link${on ? '' : ' off'}`, role: 'listitem', tabindex: '0',
-        title: `${buttonPath(b)}\nOn the items of ${b.on.label}${fillsTxt ? `\n${fillsTxt}` : ''}${b.ask ? '\nAsks before sending' : ''}\nClick to edit`,
-        onclick: (e) => { if (!e.target.closest('.newwrap, .ov-sw')) openButtonDlg({ btn: b }); },
+      return h('div', { class: 'ov-row bt-srow link', role: 'listitem', tabindex: '0',
+        title: `${buttonPath(b)}\nOn each item of ${b.on.label.replace(/^GET /, '')}${asksFirst(b) ? '\nAsks before sending' : ''}\nClick to edit`,
+        // A click from its ⋯ menu (or one that removed the row, like Delete) isn't a click on the row.
+        onclick: (e) => { if (e.target.isConnected && !e.target.closest('.newwrap')) openButtonDlg({ btn: b }); },
         onkeydown: (e) => { if (e.key === 'Enter' && e.target === e.currentTarget) openButtonDlg({ btn: b }); } },
       ic,
       h('span', { class: 'bt-sname' }, h('span', { class: 'bt-n' }, b.name), h('span', { class: 'muted mono bt-sub' }, `${buttonPath(b)} · on ${b.on.label.replace(/^GET /, '')}`)),
-      h('span', { class: 'ov-tags' }, b.ask ? h('span', { class: 'ov-tag' }, 'asks first') : null),
-      sw, menu);
+      h('span', { class: 'ov-tags' }, asksFirst(b) ? h('span', { class: 'ov-tag' }, 'asks first') : null),
+      menu);
     }
     function buttonsView() {
       const list = buttonsApi.list();
@@ -14007,9 +13984,8 @@
           h('div', { class: 'su-empty' }, h('span', { class: 'muted' }, 'One-tap buttons on each item of a list.'),
             h('button', { type: 'button', class: 'btn-sm primary', onclick: (e) => { if (!tryExample()) { e.currentTarget.replaceWith(h('span', { class: 'muted' }, 'Open a page of your app that shows a list first.')); } } }, 'Try an example')));
       }
-      const onN = list.filter((b) => b.enabled !== false).length;
       return h('section', { class: 'su-view', id: 'buttons', 'aria-label': 'Buttons' },
-        h('div', { class: 'su-head' }, h('span', { class: 'muted' }, `${plural(list.length, 'button')} · ${onN} on`)),
+        h('div', { class: 'su-head' }, h('span', { class: 'muted' }, plural(list.length, 'button'))),
         h('div', { class: 'ov-list', role: 'list' }, ...list.map(buttonRow)));
     }
 

@@ -348,17 +348,19 @@ Use `{{name}}` in a request's path, query params, headers or body, and RESTless 
 
 One-tap buttons on each item of a list (*Open task*, *Archive*), so you can try an endpoint on any row without building UI for it.
 
+A button is just a request with **`{{item.x}}`** placeholders where values come from the item: `POST /api/tasks/{{item.id}}/archive` with `{ "taskId": {{item.id}}, "subtaskId": {{item.subtask.id}} }`. Pressing it on an item fills them from that item's object in the list response. In a JSON body an unquoted placeholder keeps its type (a number stays a number); inside a string it's text. Your `{{variables}}` work too, and anything else is sent as written.
+
 **Make one (2 taps):**
-- **From a list:** open the list call in Requests → Response → **Items**. With no buttons yet, the first item has a dashed **+ Add button**. Tap it, then **Add button**. RESTless picks what it sends: a call you already made to one of these items (`/api/tasks/2/archive`), an API docs endpoint under the list, or else opening one (`GET /api/tasks/{id}`).
-- **From a request:** after a successful **Run** of a request with an id in its path, a note asks *Make this a button on each task?* Tap **Add**, then **Add button**. (**✕** hides it for that endpoint.) **⋯ → Add as a button…** does the same at any time.
+- **From a list:** open the list call in Requests → Response → **Items**. With no buttons yet, the first item has a dashed **+ Add button**. Tap it, then **Add button**. It sends opening one (`GET /api/tasks/{{item.id}}`) unless you pick another request in **Sends**: a call you made to one of its items (`/api/tasks/2/archive`) or an API docs endpoint under the list.
+- **From a request:** after a successful **Run** of a request with an id in its path, a note asks *Make this a button on each task?* Tap **Add**, then **Add button** (**✕** hides it for that endpoint). **⋯ → Add as a button…** does the same at any time.
 
-The dialog has a name (prefilled; leave it or change it), where it goes (*On each task of /api/tasks*) and one sentence of preview: *Pressing it on "Hyper" sends GET /api/tasks/1.* Values are matched for you: an id that equals a field of the items (or has its name) comes from the item, a value in the list's address from the list call, the rest stays as it is. Only what it couldn't match is shown (*Which field is this?*).
+The dialog shows the name (prefilled), the list it goes on, the request with its placeholders highlighted, and one sentence of preview: *Pressing it on "Hyper" sends GET /api/tasks/1.* RESTless puts the placeholders in for you: an id that equals a field of the items (or has its name) becomes `{{item.that.field}}`. One it can't place shows in **amber**. Tap any value to take it from another field of the item, or to **Keep** it the same for every item.
 
-**Customize** has everything else: what it sends (from a list) or which list it goes on (from a request), every part and where it comes from (this item's field, the list call, a variable, or a fixed value), the full request, and two options: **Ask before sending** (on for DELETE) and **Refresh the app's list after** (on for anything but GET).
+After **Add button** you land on the list's Items, where the new button pulses on the first item, with a one-time tip: *Tap to try it on "Hyper"*. Pressing a button sends the request like **Run** (active environment and user, variables filled), shows the status on that row and a note with **Open** (the exact request). **DELETE** buttons ask first; any button that isn't a GET makes the app load its list again after it works. More than two buttons collapse into **▾**. **Buttons ▾** above the items has **Edit** and **Delete** for each, and **Add a button…**
 
-After **Add button** you land on the list's Items, where the new button pulses on the first item, with a one-time tip: *Tap to try it on "Hyper"*. Pressing a button sends the request like **Run** (active environment and user, `{{variables}}` filled), shows the status on that row and a note with **Open** (the exact request). More than two buttons collapse into **▾**, which also has **Add a button…**.
+A button belongs to its list's path with ids treated as "any id", so it shows on every page and filter (`?page=2`) and for every parent (`/projects/7/tasks` and `/projects/8/tasks`).
 
-No list loaded yet? The dialog offers **Load the list now** (it loads `/api/tasks` for `/api/tasks/2`). **Setup → Buttons** is for managing them (switch, edit, duplicate, delete); empty, it has **Try an example**, which starts from your most recent list.
+No list loaded yet? The dialog offers **Load the list now** (it loads `/api/tasks` for `/api/tasks/2`). **Setup → Buttons** lists them all (click to edit, **⋯** to delete); empty, it has **Try an example**. Buttons from older versions are converted to placeholders.
 
 ## How it works
 
