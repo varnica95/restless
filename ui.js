@@ -3229,12 +3229,7 @@
     }
     @container rlmain (max-width: 340px) { .rvtabs .tab { padding: 0 6px; } .rvtabs { gap: 0; } }
     .pdlg.pdlg2.waask, .pdlg.pdlg2.btdlg { min-height: 0; }
-    /* Buttons 2: bottom sheet */
-    .pdlg-wrap.sheet-wrap { align-items: flex-end; padding: 0; }
-    .pdlg-wrap.sheet-wrap > .pdlg.btdlg { width: 100%; max-width: none; border-radius: 14px 14px 0 0; border-bottom: 0; max-height: calc(100% - 40px); animation: bt-up .18s ease-out; }
-    @keyframes bt-up { from { transform: translateY(24px); opacity: .6; } to { transform: none; opacity: 1; } }
-    @media (prefers-reduced-motion: reduce) { .pdlg-wrap.sheet-wrap > .pdlg.btdlg { animation: none; } }
-    .btdlg .pdlg-head { padding-top: 14px; }
+    /* Buttons 2: the Add a button dialog */
     .bt-namerow { display: flex; flex-direction: column; gap: 4px; }
     .bt-where-line { font-size: 11.5px; margin-top: -4px; }
     .bt-sentence { font-size: 12.5px; line-height: 1.5; padding: 8px 10px; border-radius: var(--r); background: var(--bg2); border: 1px solid var(--line); }
@@ -5482,7 +5477,6 @@
     let refresh = btn ? !!btn.refresh : refDefault();
 
     const { card, body, wrap, closeBtn } = dlgShell({ id: 'bt', title: btn ? 'Edit button' : 'Add a button', cls: 'btdlg' });
-    wrap.classList.add('sheet-wrap');
     const nameIn = h('input', { class: 'pf-tok bt-name', value: btn?.name || (base ? nameFor(base, src) : ''), 'aria-label': 'Button name', maxlength: '40', spellcheck: 'false' });
     nameIn.addEventListener('input', () => { named = true; });
     const whereEl = h('div', { class: 'muted bt-where-line' });

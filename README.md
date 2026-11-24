@@ -352,13 +352,13 @@ One-tap buttons on each item of a list (*Open task*, *Archive*), so you can try 
 - **From a list:** open the list call in Requests → Response → **Items**. With no buttons yet, the first item has a dashed **+ Add button**. Tap it, then **Add button**. RESTless picks what it sends: a call you already made to one of these items (`/api/tasks/2/archive`), an API docs endpoint under the list, or else opening one (`GET /api/tasks/{id}`).
 - **From a request:** after a successful **Run** of a request with an id in its path, a note asks *Make this a button on each task?* Tap **Add**, then **Add button**. (**✕** hides it for that endpoint.) **⋯ → Add as a button…** does the same at any time.
 
-The sheet has a name (prefilled; leave it or change it), where it goes (*On each task of /api/tasks*) and one sentence of preview: *Pressing it on "Hyper" sends GET /api/tasks/1.* Values are matched for you: an id that equals a field of the items (or has its name) comes from the item, a value in the list's address from the list call, the rest stays as it is. Only what it couldn't match is shown (*Which field is this?*).
+The dialog has a name (prefilled; leave it or change it), where it goes (*On each task of /api/tasks*) and one sentence of preview: *Pressing it on "Hyper" sends GET /api/tasks/1.* Values are matched for you: an id that equals a field of the items (or has its name) comes from the item, a value in the list's address from the list call, the rest stays as it is. Only what it couldn't match is shown (*Which field is this?*).
 
 **Customize** has everything else: what it sends (from a list) or which list it goes on (from a request), every part and where it comes from (this item's field, the list call, a variable, or a fixed value), the full request, and two options: **Ask before sending** (on for DELETE) and **Refresh the app's list after** (on for anything but GET).
 
 After **Add button** you land on the list's Items, where the new button pulses on the first item, with a one-time tip: *Tap to try it on "Hyper"*. Pressing a button sends the request like **Run** (active environment and user, `{{variables}}` filled), shows the status on that row and a note with **Open** (the exact request). More than two buttons collapse into **▾**, which also has **Add a button…**.
 
-No list loaded yet? The sheet offers **Load the list now** (it loads `/api/tasks` for `/api/tasks/2`). **Setup → Buttons** is for managing them (switch, edit, duplicate, delete); empty, it has **Try an example**, which starts from your most recent list.
+No list loaded yet? The dialog offers **Load the list now** (it loads `/api/tasks` for `/api/tasks/2`). **Setup → Buttons** is for managing them (switch, edit, duplicate, delete); empty, it has **Try an example**, which starts from your most recent list.
 
 ## How it works
 

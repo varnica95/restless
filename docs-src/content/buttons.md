@@ -8,7 +8,7 @@ lead: One-tap buttons on each item of a list. Two taps to make one.
 
 **From a request:** after a successful **Run** of `/api/tasks/1` (any request with an id in its path), tap **Add** on *Make this a button on each task?*, then **Add button**. Or use **⋯ → Add as a button…**
 
-The sheet shows the name (prefilled) and what pressing it does: *Pressing it on "Hyper" sends GET /api/tasks/1.* If RESTless can't tell where a value comes from, it asks: *Which field is this?*
+The dialog shows the name (prefilled) and what pressing it does: *Pressing it on "Hyper" sends GET /api/tasks/1.* If RESTless can't tell where a value comes from, it asks: *Which field is this?*
 
 ## Try it
 
@@ -16,7 +16,7 @@ You land on the list's **Items**. The new button pulses on the first item. Tap i
 
 ## Customize
 
-Under **Customize** in the sheet:
+Under **Customize** in the dialog:
 
 - **It sends** (from a list) or **On the items of** (from a request).
 - **Fill from**: for each id, query value or body field, a field of the item, a value from the list call (`list.projectId`), a variable, or a fixed value.
@@ -27,7 +27,7 @@ Under **Customize** in the sheet:
 
 ## No list yet?
 
-The sheet offers **Load the list now**. In **Setup → Buttons**, **Try an example** starts from your most recent list.
+The dialog offers **Load the list now**. In **Setup → Buttons**, **Try an example** starts from your most recent list.
 
 ## Manage them
 
