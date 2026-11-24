@@ -10,7 +10,7 @@ Click the **wifi** button in the header. Every call the app makes now fails, as 
 
 ## Try with every user
 
-**⋯ → Send copies → Try with every user** sends the request as each user of the environment and lists the status for each. A quick permission check: *Admin 200, Viewer 403*.
+**⋯ → Send copies → Try with every user** sends the request as each user of the environment and lists the status for each. A quick permission check: *Admin 200, Viewer 403*. It needs at least one saved user; until then it's greyed out.
 
 ## Test edge cases
 

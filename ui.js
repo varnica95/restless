@@ -3175,6 +3175,7 @@
       .lowhead .simbtn .rvlabel { display: none; }
     }
     .sb.undoc { outline: 1px dashed currentColor; outline-offset: 1px; }
+    .edge-opt[hidden], .edge-key[hidden] { display: none; }
   `;
 
   // ---------- helpers
@@ -7130,24 +7131,27 @@
       return h('div', { class: 'cmpwrap' }, headRow, bar, h('div', { class: 'cmp-body' }, ...body.flat().filter(Boolean)), ignFoot);
     }
     // ---------- Run as every user: the same request once per user (Send to / Send as), statuses side by side.
+    // Only the users of the environment it's sent to. On Default the app's own login comes first; a saved
+    // user with the very same token would only repeat that row, so it's left out.
+    function everyUserRows(req, env) {
+      const hasAuth = Object.keys(req.headers || {}).some((k) => k.toLowerCase() === 'authorization');
+      const appTok = Object.entries(req.headers || {}).find(([k]) => k.toLowerCase() === 'authorization')?.[1] || '';
+      return usersOf(env).map((key) => {
+        if (key === 'app') return { key, name: hasAuth ? (appUserName() ? `${appUserName()} · current` : 'Current') : 'No login', user: 'app', headers: req.headers };
+        const p = userByKey(key);
+        if (appTok && env.id == null && String(p.value || '').trim() === String(appTok).trim()) return null;
+        return { key, name: p.name, user: p, headers: req.headers, skip: !p.value ? 'no token' : userExpiry(p)?.expired ? 'token expired' : null };
+      }).filter(Boolean);
+    }
     async function runAsEveryUser() {
       if (!routeOk() || !headersOk() || !bodyOk()) { say('Fix the request first.', 'warn'); return; }
       if (!varsReady()) return;
       const req = current();
       const env = runEnv();
       const sendUrl = retarget(req.url, env);
-      // Only the users of the environment it's sent to. On Default the app's own login comes first; a saved
-      // user with the very same token would only repeat that row, so it's left out.
-      const hasAuth = Object.keys(req.headers || {}).some((k) => k.toLowerCase() === 'authorization');
-      const appTok = Object.entries(req.headers || {}).find(([k]) => k.toLowerCase() === 'authorization')?.[1] || '';
-      const list = usersOf(env).map((key) => {
-        if (key === 'app') return { key, name: hasAuth ? (appUserName() ? `${appUserName()} · current` : 'Current') : 'No login', user: 'app', headers: req.headers };
-        const p = userByKey(key);
-        if (appTok && env.id == null && String(p.value || '').trim() === String(appTok).trim()) return null;
-        return { key, name: p.name, user: p, headers: req.headers, skip: !p.value ? 'no token' : userExpiry(p)?.expired ? 'token expired' : null };
-      }).filter(Boolean);
-      if (!list.length) {
-        say(`${env.name} has no users yet.`, 'info', h('button', { type: 'button', class: 'linkbtn', onclick: () => openWhereAs({ add: `u:${envKeyOf(env)}` }) }, 'Add user'));
+      const list = everyUserRows(req, env);
+      if (list.length < 2) {
+        say(`Add a user to ${env.name} to compare.`, 'info', h('button', { type: 'button', class: 'linkbtn', onclick: () => openWhereAs({ add: `u:${envKeyOf(env)}` }) }, 'Add user'));
         return;
       }
       const n = list.filter((u) => !u.skip).length;
@@ -7520,7 +7524,9 @@
         runBtn.classList.toggle('stop', E.running);
         const cut = !E.running && E.results.length && E.results.some((r) => r.state === 'wait');
         sumEl.replaceChildren(...(E.results.length ? [cut ? h('b', {}, `Stopped after a 500 (${done} of ${list.length} sent). `) : '', `✓ ${counts.ok} rejected`, ' · ', h('span', { class: counts.warn ? 'edge-w' : '' }, `⚠ ${counts.warn} accepted`), ' · ', h('span', { class: counts.bad ? 'edge-b' : '' }, `✕ ${counts.bad} crashed or failed`), counts.fine ? ` · ${counts.fine} fine` : '']
-          : [`${list.length} requests, one field changed at a time${vars.length > LIMIT ? ` (first ${LIMIT} of ${vars.length})` : ''}.`]));
+          : vars.length > LIMIT ? [`Only the first ${LIMIT} of ${vars.length} fields.`] : []));
+        // The legend and "Only problems" only help once there are results.
+        probsLbl.hidden = keyEl.hidden = !E.results.length;
         const groups = new Map();
         list.forEach((vr, i) => { const k = nameOf(vr.f); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(i); });
         const out = [];
@@ -7572,11 +7578,13 @@
       runBtn.addEventListener('click', run);
       const stop5 = h('input', { type: 'checkbox', checked: E.stop5xx }); stop5.addEventListener('change', () => { E.stop5xx = stop5.checked; });
       const probs = h('input', { type: 'checkbox', checked: E.problems }); probs.addEventListener('change', () => { E.problems = probs.checked; drawResults(); });
+      const probsLbl = h('label', { class: 'edge-opt' }, probs, 'Only problems');
+      const keyEl = h('div', { class: 'muted edge-key' }, '✓ rejected (4xx) is what you want · ⚠ accepted (2xx) may mean missing validation · ✕ crashed (5xx) or failed');
       box.append(...[
-        h('div', { class: 'edge-bar' }, runBtn, h('label', { class: 'edge-opt' }, stop5, 'Stop on first 500'), h('label', { class: 'edge-opt' }, probs, 'Only problems')),
+        h('div', { class: 'edge-bar' }, runBtn, h('label', { class: 'edge-opt' }, stop5, 'Stop on first 500'), probsLbl),
         h('div', { class: 'edge-sumrow' }, sumEl),
         !/^(GET|HEAD|OPTIONS)$/i.test(draft.method) ? h('div', { class: 'note warn edge-wr' }, `${draft.method}: each request may create or change data. You’ll be asked before it sends.`) : null,
-        h('div', { class: 'muted edge-key' }, '✓ rejected (4xx) is what you want · ⚠ accepted (2xx) may mean missing validation · ✕ crashed (5xx) or failed'),
+        keyEl,
         resultsBox].filter(Boolean));
       drawResults();
       return box;
@@ -8684,7 +8692,8 @@
         ...reqKids.map((k, i) => (i === 0 ? { ...k, section: 'Request' } : k)),
         ...resKids.map((k, i) => (i === 0 ? { ...k, section: 'Response' } : k)),
       ] };
-      const openTool = (id) => { d.lower = d.lower === id && !(id === 'simulate' && simState() !== 'off') ? 'response' : id; drawLower(); drawLowerHead(); drawBar(); requestAnimationFrame(() => toolCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' })); buildMenu(); };
+      // One tool at a time: opening one closes the "With every user" results too.
+      const openTool = (id) => { if (d.respSource === 'perm') d.respSource = d.copy && !d.copy.preview ? 'copy' : 'app'; d.lower = d.lower === id && !(id === 'simulate' && simState() !== 'off') ? 'response' : id; drawLower(); drawLowerHead(); drawBar(); requestAnimationFrame(() => toolCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' })); buildMenu(); };
       // Compact menu: a few direct actions, then three submenus (Copy as, Send copies, Change the app's call),
       // then Apply / Reload. Second lines only show state (Open, On); the rest is in tooltips.
       const simItem = entry.manual
@@ -8692,8 +8701,10 @@
           title: 'Simulation changes what the app gets back for its own calls. This is your request: Run shows the server\'s real response. To simulate this endpoint, make the app call it (or use Break on next call), then open that call from Requests.', run: () => {} }
         : { id: 'simulate', label: 'Simulate response…', sub: d.lower === 'simulate' ? (simState() === 'off' ? 'Open · click to close' : 'Open') : null, icon: ICONS.flask, title: 'Change what the app gets back for this endpoint', run: () => openTool('simulate') };
       const bulkItem = { id: 'mock', label: 'Run in bulk…', sub: d.lower === 'mock' ? 'Open · click to close' : null, icon: ICONS.cube, title: 'Send this request many times with generated data', run: () => openTool('mock') };
-      const nUsers = usersOf(runEnv()).length;
-      const runAllItem = { id: 'run-all', label: 'Try with every user…', icon: ICONS.user, title: nUsers ? `Send it as each of the ${plural(nUsers, 'user')} in ${runEnv().name} and compare the statuses` : `${runEnv().name} has no users yet`, run: runAsEveryUser };
+      const nUsers = (() => { try { return everyUserRows(current(runEnv(), { raw: true }), runEnv()).length; } catch { return 0; } })();
+      const runAllItem = nUsers < 2
+        ? { id: 'run-all', label: 'Try with every user…', icon: ICONS.user, disabled: true, sub: 'Add a user in Send to first', title: `Needs at least one saved user in ${runEnv().name} to compare with`, run: () => {} }
+        : { id: 'run-all', label: 'Try with every user…', icon: ICONS.user, title: `Send it as each of the ${plural(nUsers, 'user')} in ${runEnv().name} and compare the statuses`, run: runAsEveryUser };
       const edgeItem = { id: 'edge', label: 'Test edge cases…', sub: d.lower === 'edge' ? 'Open · click to close' : null, icon: ICONS.spark, title: 'One field at a time: empty, too long, wrong type…', run: () => openTool('edge') };
       const dupItem = { id: 'dup', label: 'Duplicate request', title: 'A copy you can edit and run on its own', icon: ICONS.dup, run: duplicate };
       // Two submenus by intent: send copies of this request yourself, or change what the app's own call does.
