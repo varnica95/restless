@@ -48,8 +48,9 @@ The panel's state (open or minimized) is kept per tab, so a reload keeps it open
 - The panel header shows the logo and name, then on the right the **Send to / Send as chip** and the **Settings** gear. Under it, always visible, the main tabs: **Requests**, **Setup** and **API Docs**, each with its icon, name and count (the Rules count turns amber while a rule or breakpoint is on). Under those, the open request tabs.
   - **Send to / Send as chip** (always there): where your requests go and who they're sent as, in words: **● Staging · as Ana** (**○ Default** at first). Clicking it opens **Send to / Send as**. In a narrow panel, and in the small chip in front of a request's path, the user shows as an avatar (initials) instead. The avatar's ring takes the colour of the environment the user is the default for (grey for none); a **dashed ring** means the user isn't the selected environment's default (a mismatch, allowed); a red dot on it means the user's token has expired.  Click it to open **Send to / Send as**.
   - **Settings** (the gear, last on the right): opens Settings, titled *Settings*; the gear stays highlighted while you're there, and clicking it again goes back to the tab you came from. Settings has:
-  - **Setup**: your variables and everything that changes this site's calls. A segmented control at the top switches between two views (← → keys too); the last one is remembered for the site.
+  - **Setup**: your variables and everything that changes this site's calls. A segmented control at the top switches between three views (← → keys too); the last one is remembered for the site.
     - **Variables**: one list. Each row: name, value, **↻** when it updates itself from a response (hover for which call), and **⋯** (Edit, Duplicate, Delete with Undo). Click a row to edit it in place (name and value); **+ Variable** adds one. **Duplicate** makes `name_2` and opens it. Empty: *Reuse values with {{name}} in requests.* and **+ Variable**.
+    - **Buttons**: requests you turned into buttons on the items of a list (see *Buttons on list items*). A switch turns one off without deleting it; click a row to edit it; **⋯** has **Edit**, **Duplicate** and **Delete** (with Undo).
     - **Overrides**: mocks, rules and breakpoints in one list, in the order they apply (breakpoints and rules change real calls, mocks answer last; the ⓘ says so: Offline → rules → mocks). Each row: method, path (`→ new route` when a rule reroutes), a tag for what it does (`Mock 200`, `+2.0 s`, `Error 500`, `Edited 200`, `No response`, `Network failure`, `Rewrite`, `Breakpoint`, `once`) and a **switch** (off rows are dimmed). Rules and breakpoints: click a row to open the latest captured call; **×** (on hover) deletes it, with Undo. Mocks: click a row for **Edit mock**; **⋯** has Edit, Duplicate, Delete. The header shows the summary (*6 overrides · 4 on*), **+** (new mock endpoint) and **⋯ → Clear all rules and breakpoints** (mocks and variables stay; Undo). Rules and breakpoints are made from a request (⋯ → Change the app's call). Empty: *Mock endpoints or change real calls from a request's ⋯ menu.* and **+ Mock endpoint**.
     - The **Setup** tab's count turns amber while any override is on.
   - **Settings**: appearance, shortcuts, docking, per-site capture switch, stored data.
@@ -218,7 +219,7 @@ Click any request to open it; it opens in a request tab. Esc (or the **Requests*
 
 - **Run** sends the edited request yourself and shows the response below; the app doesn't see it (this was *Send copy*). Its tooltip is one line; with a Draft simulation it says Run previews instead. On a paused call it reads **Continue**, with **Send unchanged** and **Drop** in the bar under it.
 - **⋯** is a short menu with three submenus (› opens them beside the menu; on a narrow panel they open just under the item):
-  - **Duplicate request** (becomes your own request, tagged *yours*). Pinning and hiding are list actions: they're on the row (pin icon, row ⋯ → Hide from list).
+  - **Duplicate request** (becomes your own request, tagged *yours*). **Add as a button…** puts this request as a button on each item of a list (see *Buttons on list items*). Pinning and hiding are list actions: they're on the row (pin icon, row ⋯ → Hide from list).
   - **Copy as ›**: *Request* (**URL**, **cURL**, **Fetch**, **Request body**, **Body as TypeScript**) and *Response* (**Response body**, **TypeScript**), copied as you see them here (with your edits, and the response that's showing).
   - **Send copies ›** (you send them; the app doesn't see these): **Run in bulk…**, **Try with every user…**, **Test edge cases…**.
   - **Change the app's call ›** (app's own calls only): **Simulate response…**, **Break on next call**, **Break on every call** (ticked when set; click again to turn off). While a breakpoint is on, the item's second line says so (*Breakpoint on: next call*) and the ⋯ button turns purple.
@@ -342,6 +343,20 @@ Use `{{name}}` in a request's path, query params, headers or body, and RESTless 
 - **Built-ins:** `{{$uuid}}`, `{{$timestamp}}` (Unix seconds), `{{$now}}` (ISO date and time), `{{$randomInt}}` (0–1000).
 - **Chaining (Save as…):** hover a line of a JSON response on the request screen: next to **Value** and **Key + value** there's **Save as…**. Name it (from the key) and keep **Update from every response of METHOD /path** on to have it follow that endpoint. Then every successful response from it (your **Run**, or the app's own calls) updates the value, and Run says *Updated {{taskId}}*. The variable's row shows where it updates from (`↻ POST /api/tasks · id`); edit it to **Stop updating**.
 - **Saved** for this site, and part of **Settings → Export / Import** (with environments and users).
+
+### Buttons on list items
+
+Turn any request into a button on each item of a list, so you can run it for one row with a click: *Open task*, *Archive*, *Move to top*. Handy when you're building the backend and the app's own button doesn't exist yet.
+
+1. Open the request: a captured call, one from **API Docs → Try it**, or your own. Make it work for one item (e.g. `POST /api/tasks/1/archive` with its body).
+2. **⋯ → Add as a button…** Give it a name and pick **On the items of**: a recent GET whose response is a list (top-level array, or under `items`, `data`, `content`…), or a GET endpoint from the API docs that returns one. The likeliest list is preselected (`/api/tasks` for `/api/tasks/1/archive`).
+3. **Fill from** lists the parts that can change per item: path ids, query values and body fields. Each one comes from **This item** (any field, nested too: `assignee.id`), **The list call** (its path ids and query values, e.g. `list.projectId` from `/api/tasks?projectId=42`), one of your **Variables**, or a **Fixed value**. RESTless guesses: an id whose value matches a field of the items (or has the same name) comes from the item, a value from the list's address from the list call, and everything else stays fixed. With API docs loaded, path parts take the docs' names (`{taskId}`).
+4. **Preview** shows the exact request for the first item, and says if some items lack a field (the button won't send there).
+5. Options: **Ask before sending** (on for DELETE) and **Refresh the app's list after** (on for anything but GET): after a success the app loads its list again, like *Apply to app*.
+
+The buttons show in the list response's **Items** view (Requests → the list call → Response → **Items**, which opens first when a list has buttons): one row per item (its id and name) with the buttons; more than two collapse into a ▾. Pressing one sends the request like **Run** does (to the active environment, as its user, with `{{variables}}` filled), then shows the status on that row and a note with **Open**, which opens the exact request as your own. A button follows its list across pages and filters, and with API docs loaded across other ids in the path too (`/projects/7/tasks` and `/projects/8/tasks`).
+
+Buttons are saved for this site and managed in **Setup → Buttons**.
 
 ## How it works
 

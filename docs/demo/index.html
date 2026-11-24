@@ -5028,6 +5028,58 @@
     }
     .sb.undoc { outline: 1px dashed currentColor; outline-offset: 1px; }
     .edge-opt[hidden], .edge-key[hidden] { display: none; }
+    /* Buttons: the Add as a button dialog */
+    .btdlg .pdlg-body { display: flex; flex-direction: column; gap: 12px; padding: 2px 18px 16px; }
+    .btdlg .bt-name { font-family: inherit; }
+    .btdlg .bt-fld { grid-template-columns: 104px minmax(0, 1fr); }
+    .btdlg select { height: 32px; padding: 0 8px; font-size: 12.5px; width: 100%; min-width: 0; }
+    .btdlg .bt-name { height: 32px; }
+    .bt-sec { display: flex; flex-direction: column; gap: 6px; }
+    .bt-fills { display: flex; flex-direction: column; gap: 6px; }
+    .bt-fill { display: grid; grid-template-columns: minmax(84px, 38%) 14px minmax(0, 1fr); align-items: center; gap: 6px; }
+    .bt-slot { display: flex; flex-direction: column; min-width: 0; font-size: 12.5px; }
+    .bt-slot .mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bt-where { font-size: 11px; }
+    .bt-pick { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .bt-pick .bt-fixed { height: 30px; font-size: 12px; }
+    .bt-pick .bt-fixed[hidden] { display: none; }
+    .bt-preview { margin: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg2); font-size: 11.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; max-height: 160px; overflow: auto; }
+    .bt-note, .bt-none { font-size: 11.5px; }
+    .bt-opts { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+    .bt-opts label.chk { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dim); }
+    .bt-opts label.chk input { width: 14px; height: 14px; margin: 0; accent-color: var(--accent); }
+    .bt-empty { flex-direction: column; text-align: center; }
+    /* Buttons: the Items view of a list response */
+    .bt-ico { display: inline-grid; place-items: center; color: var(--accent); }
+    .bt-ico svg { width: 13px; height: 13px; }
+    .bt-items { display: flex; flex-direction: column; gap: 8px; padding: 10px 0 0; }
+    .bt-items-h { font-size: 11.5px; display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 0 12px; }
+    .bt-list { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+    .bt-row { display: grid; grid-template-columns: minmax(0, max-content) minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 6px 12px; border-top: 1px solid var(--line); min-height: 38px; }
+    .bt-row:first-child { border-top: 0; }
+    .bt-row:hover { background: var(--hover); }
+    .bt-id { font-size: 11.5px; color: var(--dim); max-width: 96px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bt-title { font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .bt-res .sb { font-size: 11px; }
+    .bt-acts { display: flex; gap: 4px; justify-content: flex-end; }
+    .bt-acts > .newwrap { display: inline-flex; }
+    button.bt-btn { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; border-radius: var(--r); border: 1px solid var(--accent-line); background: var(--accent-soft); color: var(--accent-fg, var(--accent)); font-size: 12px; font-weight: 500; white-space: nowrap; max-width: 150px; }
+    button.bt-btn > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+    button.bt-btn:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+    button.bt-btn.bt-more { padding: 0 6px; }
+    button.bt-btn svg { width: 12px; height: 12px; }
+    /* Buttons: Setup → Buttons rows */
+    .ov-row.bt-srow { grid-template-columns: 16px minmax(0, 1fr) auto auto auto; }
+    .bt-sname { display: flex; flex-direction: column; min-width: 0; }
+    .bt-n { font-size: 12.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bt-sub { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @container rlmain (max-width: 400px) {
+      .bt-row { grid-template-columns: minmax(0, 1fr) auto auto; }
+      .bt-row .bt-id { display: none; }
+      button.bt-btn { max-width: 110px; }
+      .btdlg .bt-fld { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    }
+    @container rlmain (max-width: 340px) { .rvtabs .tab { padding: 0 6px; } .rvtabs { gap: 0; } }
   `;
 
   // ---------- helpers
@@ -6878,9 +6930,456 @@
     try { f.srcdoc = ttPolicy ? ttPolicy.createHTML(doc) : doc; return f; } catch { /* Trusted Types without our policy */ }
     return h('div', { class: 'muted rv-empty' }, 'This page\'s security policy doesn\'t allow a preview here. Use Raw, or copy the HTML.');
   }
-  function responseView(res, { highlight = null, above = [], pretty: prettyNode = null, title = null, state = {}, tools = [], bare = false, baseUrl = null, saveVar = null } = {}) {
+  // ---------- Buttons: a request saved as a button on each item of a list response (the Items view).
+  // A button: { id, name, on: { method, key, tpl, label }, req: { method, url, headers, body, bodyKind },
+  //   fills: [{ slot, from }], ask, refresh, enabled }
+  //   slot: { where: 'path', index, name } | { where: 'query', key, name } | { where: 'body', path, name }
+  //   from: { kind: 'row', path } | { kind: 'list', key } | { kind: 'var', name } | { kind: 'fixed', value }
+  // `on` is the list call: its method and address (key), and the API docs path (tpl) when there is one,
+  // so a button also shows on page 2, or on another project's list of the same endpoint.
+  const BTN_KEY = '__apiPeek.buttons';
+  let btnState = (() => { try { const v = JSON.parse(localStorage.getItem(BTN_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch { return []; } })();
+  const buttonsApi = {
+    list: () => btnState,
+    count: () => btnState.length,
+    put(list) { btnState = list; try { localStorage.setItem(BTN_KEY, JSON.stringify(list)); } catch { /* storage blocked */ } if (dock.tab === 'rules') renderTab(); else renderTabSoft(); },
+    upsert(b) { buttonsApi.put(btnState.some((x) => x.id === b.id) ? btnState.map((x) => (x.id === b.id ? b : x)) : [...btnState, b]); },
+    remove(id) { buttonsApi.put(btnState.filter((x) => x.id !== id)); },
+    forCall(method, url) {
+      if (!btnState.length) return [];
+      const m = String(method || 'GET').toUpperCase();
+      let k; try { k = core.matchKey(url); } catch { return []; }
+      let tpl;
+      const tplOf = () => (tpl === undefined ? (tpl = (specApi?.current && specApi.match(m, url)?.path) || null) : tpl);
+      return btnState.filter((b) => b.enabled !== false && b.on.method === m && (b.on.key === k || (b.on.tpl && b.on.tpl === tplOf())));
+    },
+  };
+  const sameOn = (a, b) => !!a && !!b && a.method === b.method && ((a.key && a.key === b.key) || (!!a.tpl && a.tpl === b.tpl));
+
+  // The list inside a response: a top-level array of objects, or the first one under a wrapper
+  // ({ items: [...] }, { data: { content: [...] } } …). Returns { items, at } or null.
+  function listItemsOf(text) {
+    let v; try { v = JSON.parse(text); } catch { return null; }
+    const isRows = (a) => Array.isArray(a) && a.length > 0 && a.every((x) => x && typeof x === 'object' && !Array.isArray(x));
+    if (isRows(v)) return { items: v, at: '' };
+    const q = [[v, []]];
+    while (q.length) {
+      const [o, p] = q.shift();
+      if (!o || typeof o !== 'object' || Array.isArray(o) || p.length > 3) continue;
+      for (const [k, x] of Object.entries(o)) {
+        if (isRows(x)) return { items: x, at: [...p, k].join('.') };
+        if (x && typeof x === 'object' && !Array.isArray(x)) q.push([x, [...p, k]]);
+      }
+    }
+    return null;
+  }
+  const getPath = (o, p) => p.reduce((x, k) => (x == null ? undefined : x[k]), o);
+  // Field paths with a plain value (not objects or arrays) in the first few items: ['id'], ['assignee', 'id'] …
+  function leafPaths(items, max = 40) {
+    const out = []; const seen = new Set();
+    const walk = (x, p) => {
+      if (out.length >= max || p.length > 4) return;
+      if (x && typeof x === 'object' && !Array.isArray(x)) { for (const [k, y] of Object.entries(x)) walk(y, [...p, k]); return; }
+      if (Array.isArray(x) || !p.length) return;
+      const k = p.join('.');
+      if (!seen.has(k)) { seen.add(k); out.push(p); }
+    };
+    items.slice(0, 5).forEach((it) => walk(it, []));
+    return out;
+  }
+  const BRACES = /\{\{.+?\}\}/;
+  const looksId = (s) => /^\d+$/.test(s) || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-/i.test(s) || BRACES.test(s) || (/\d/.test(s) && /[a-z]/i.test(s) && /^[\w-]{8,}$/.test(s));
+  const singularId = (seg) => (seg ? `${String(seg).replace(/ies$/, 'y').replace(/s$/, '').replace(/[^\w]/g, '')}Id` : 'id');
+  const decSeg = (s) => { try { return decodeURIComponent(s); } catch { return s; } };
+  // Split a URL without new URL(), so {{variables}} stay as typed.
+  const urlParts = (url) => {
+    const m = /^([a-z][\w+.-]*:\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?$/i.exec(String(url || '')) || [];
+    return { origin: m[1] || '', path: m[2] || '', query: (m[3] || '').slice(1), hash: m[4] || '' };
+  };
+  const queryPairs = (q) => (q ? q.split('&').filter(Boolean).map((kv) => {
+    const i = kv.indexOf('=');
+    const dec = (s) => { try { return decodeURIComponent(s.replace(/\+/g, ' ')); } catch { return s; } };
+    return i < 0 ? [dec(kv), ''] : [dec(kv.slice(0, i)), dec(kv.slice(i + 1))];
+  }) : []);
+  const encKeep = (s) => (BRACES.test(s) ? s : encodeURIComponent(s));
+  const pathOnly = (u) => { try { return new URL(u, location.href).pathname; } catch { return urlParts(u).path; } };
+  // Names of the path's {params} by segment index, from the API docs (null without docs).
+  function pathParamNames(method, url) {
+    const op = specApi?.current ? specApi.match(method, url) : null;
+    if (!op) return null;
+    const segs = urlParts(url).path.split('/'); const t = op.path.split('/'); const off = segs.length - t.length;
+    const names = {};
+    t.forEach((s, i) => { const m = /^\{(.+)\}$/.exec(s); if (m && i + off >= 0) names[i + off] = m[1]; });
+    return names;
+  }
+  // What a list call offers a button: its path ids and query values ({{list.projectId}}, {{list.page}}).
+  function listFieldsOf(method, url) {
+    const { path, query } = urlParts(url);
+    const segs = path.split('/');
+    const names = pathParamNames(method, url);
+    const out = [];
+    segs.forEach((s, i) => {
+      const v = decSeg(s);
+      if (s && (names ? names[i] : looksId(v))) out.push({ key: (names && names[i]) || singularId(segs[i - 1]), value: v });
+    });
+    for (const [k, v] of queryPairs(query)) if (!out.some((f) => f.key === k)) out.push({ key: k, value: v });
+    return out;
+  }
+  // The parts of a request a button can fill: path ids, query values and body fields.
+  function slotsOf(req) {
+    const { path, query } = urlParts(req.url);
+    const segs = path.split('/');
+    const names = pathParamNames(req.method, req.url);
+    const out = [];
+    segs.forEach((s, i) => {
+      const v = decSeg(s);
+      if (!s || !(names ? names[i] || BRACES.test(v) : looksId(v))) return;
+      out.push({ slot: { where: 'path', index: i, name: (names && names[i]) || singularId(segs[i - 1]) }, value: v });
+    });
+    for (const [k, v] of queryPairs(query)) out.push({ slot: { where: 'query', key: k, name: k }, value: v });
+    if (req.body != null && req.bodyKind !== 'formdata') {
+      let o = null; try { o = JSON.parse(req.body); } catch { /* not JSON, or {{name}} outside quotes */ }
+      if (o && typeof o === 'object' && !Array.isArray(o)) for (const p of leafPaths([o], 30)) out.push({ slot: { where: 'body', path: p, name: p[p.length - 1] }, value: getPath(o, p) });
+    }
+    return out;
+  }
+  const slotKey = (s) => (s.where === 'path' ? `p:${s.index}` : s.where === 'query' ? `q:${s.key}` : `b:${s.path.join('.')}`);
+  const slotLabel = (s) => (s.where === 'path' ? `{${s.name}}` : s.where === 'query' ? `${s.key}` : s.path.join('.'));
+  const fromLabel = (f) => (f.kind === 'row' ? `item.${f.path.join('.')}` : f.kind === 'list' ? `list.${f.key}` : f.kind === 'var' ? `{{${f.name}}}` : 'fixed');
+  // A first guess at where each part comes from. Ids (path parts, …Id fields): a field of the items with the
+  // same value (the request was likely made from one of them), else one with the same name, else a part of the
+  // list call. Everything else keeps the value it has.
+  function guessFills(slots, items, listFields) {
+    const rowPaths = leafPaths(items);
+    const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+    return slots.map(({ slot, value }) => {
+      const sv = value == null ? '' : String(value);
+      const idish = slot.where === 'path' || /id$/i.test(slot.name);
+      const keep = { slot, from: { kind: 'fixed', value } };
+      if (BRACES.test(sv) || !idish) return keep;
+      const byName = rowPaths.find((p) => norm(p.join('')) === norm(slot.name)) || rowPaths.find((p) => norm(p[p.length - 1]) === norm(slot.name));
+      if (sv) {
+        const byVal = rowPaths.filter((p) => items.some((it) => String(getPath(it, p)) === sv));
+        if (byVal.length) {
+          const pick = byVal.find((p) => byName && p.join('.') === byName.join('.')) || byVal.find((p) => p.length === 1 && norm(p[0]) === 'id') || byVal[0];
+          return { slot, from: { kind: 'row', path: pick } };
+        }
+        const lf = listFields.find((f) => f.value === sv);
+        if (lf) return { slot, from: { kind: 'list', key: lf.key } };
+      }
+      if (byName) return { slot, from: { kind: 'row', path: byName } };
+      const lfn = listFields.find((f) => norm(f.key) === norm(slot.name));
+      if (lfn) return { slot, from: { kind: 'list', key: lfn.key } };
+      if (slot.where === 'path' && rowPaths.some((p) => p.length === 1 && p[0] === 'id') && !listFields.some((f) => f.value === sv)) return { slot, from: { kind: 'row', path: ['id'] } };
+      return keep;
+    });
+  }
+  // The request for one item: the button's request with its parts filled from the item, the list call or
+  // variables. Returns { req, missing } (missing: fields this item doesn't have).
+  function buttonRequest(b, item, listUrl) {
+    const lf = Object.fromEntries((listUrl ? listFieldsOf(b.on.method, listUrl) : []).map((f) => [f.key, f.value]));
+    const missing = [];
+    const u = urlParts(b.req.url);
+    const segs = u.path.split('/');
+    let pairs = queryPairs(u.query);
+    let obj = null; let orig = null;
+    if (b.req.body != null) { try { obj = JSON.parse(b.req.body); orig = JSON.parse(b.req.body); } catch { obj = null; } }
+    const varsInBody = [];
+    for (const { slot, from } of b.fills || []) {
+      let v = from.kind === 'row' ? getPath(item, from.path) : from.kind === 'list' ? lf[from.key] : from.kind === 'var' ? `{{${from.name}}}` : from.value;
+      if (v === undefined || (v === null && slot.where !== 'body')) {
+        if (from.kind === 'row') missing.push(from.path.join('.'));
+        else if (from.kind === 'list') missing.push(`list.${from.key}`);
+        continue;
+      }
+      if (from.kind === 'var' && slot.where === 'body') varsInBody.push(from.name);
+      // A value from the address is text: in a body field that was a number (or true/false), it goes in as one.
+      if (slot.where === 'body' && typeof v === 'string' && from.kind === 'list') {
+        const was = getPath(orig, slot.path);
+        if (typeof was === 'number' && v.trim() !== '' && !Number.isNaN(Number(v))) v = Number(v);
+        else if (typeof was === 'boolean' && /^(true|false)$/.test(v)) v = v === 'true';
+      }
+      const s = v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v);
+      if (slot.where === 'path') segs[slot.index] = encKeep(s);
+      else if (slot.where === 'query') pairs = pairs.map(([k, x]) => (k === slot.key ? [k, s] : [k, x]));
+      else if (obj && typeof obj === 'object') {
+        let o = obj; const p = slot.path;
+        for (let i = 0; i < p.length - 1; i++) { if (o[p[i]] == null || typeof o[p[i]] !== 'object') o[p[i]] = {}; o = o[p[i]]; }
+        o[p[p.length - 1]] = v;
+      }
+    }
+    const url = `${u.origin}${segs.join('/')}${pairs.length ? `?${pairs.map(([k, x]) => `${encKeep(k)}=${encKeep(x)}`).join('&')}` : ''}${u.hash}`;
+    let body = b.req.body;
+    if (obj) {
+      body = JSON.stringify(obj, null, 2);
+      // A variable goes in as itself, so {{orderId}} can stay a number (see varsApi.fillJson).
+      for (const n of varsInBody) body = body.split(`"{{${n}}}"`).join(`{{${n}}}`);
+    }
+    return { req: { ...b.req, url, body }, missing };
+  }
+  // A button's address with the parts it fills shown as {name}: GET /api/tasks/{taskId}.
+  const buttonPath = (b) => {
+    const u = urlParts(b.req.url); const segs = u.path.split('/');
+    for (const f of b.fills || []) if (f.slot.where === 'path' && f.from.kind !== 'fixed') segs[f.slot.index] = `{${f.slot.name}}`;
+    return `${b.req.method} ${segs.join('/')}`;
+  };
+  const itemTitle = (it) => {
+    for (const k of ['name', 'title', 'label', 'displayName', 'fullName', 'email', 'username', 'code', 'key', 'slug', 'description']) {
+      if (typeof it[k] === 'string' && it[k].trim()) return it[k];
+    }
+    return Object.values(it).find((v) => typeof v === 'string' && v.trim() && v.length < 80) || '';
+  };
+  const itemId = (it) => it.id ?? it.uuid ?? it._id ?? it.key ?? null;
+  // Send a button's request for one item, as Run does: to the active environment, as its user, with
+  // {{variables}} filled. Returns { res, req } or null (cancelled, or the item lacks a field).
+  async function runButton(b, item, listEntry) {
+    const { req, missing } = buttonRequest(b, item, listEntry?.url);
+    if (missing.length) { toast(`${b.name}: this item has no ${missing[0]}`, 'warn', 4500); return null; }
+    const env = envApi.active();
+    const texts = [req.url, req.body || '', ...Object.values(req.headers || {})];
+    const unknown = [...new Set(texts.flatMap((t) => varsApi.unknown(t, env)))].filter((n) => !n.startsWith('$'));
+    if (unknown.length) { toast(`${b.name}: {{${unknown[0]}}} has no value`, 'warn', 4500, { label: 'Variables', run: () => openVariables() }); return null; }
+    const jsonBody = req.body != null && (req.bodyKind === 'json' || core.isJson(req.body));
+    const filled = {
+      ...req,
+      url: varsApi.fill(req.url, env),
+      headers: Object.fromEntries(Object.entries(req.headers || {}).map(([k, v]) => [k, varsApi.fill(String(v), env)])),
+      body: req.body == null ? req.body : jsonBody ? varsApi.fillJson(req.body, env) : varsApi.fill(req.body, env),
+    };
+    if (b.ask) {
+      const ok = await confirmDlg({ title: `${b.name}?`, intro: `${filled.method} ${pathOnly(filled.url)}${env?.id != null ? ` on ${env.name}` : ''}`, ok: 'Send' });
+      if (!ok) return null;
+    }
+    const sendUrl = retarget(filled.url, env);
+    let res;
+    try { res = await core.sendCopy(sendAs(env, filled, sendUrl)); } catch (err) { res = { status: 'failed', ms: 0, text: String(err?.message || err) }; }
+    // The app's list shows the change: re-run what loaded it (as Apply to app does), quietly.
+    if (b.refresh && typeof res.status === 'number' && res.status < 400 && listEntry && !listEntry.manual) core.applyToApp(listEntry).catch(() => {});
+    return { res, req: { ...filled, url: sendUrl } };
+  }
+
+  // Lists a button can go on: recent GET calls whose response is a list, then API docs GET endpoints that
+  // return one. The likeliest first: the list the request's path starts with (/api/steps for /api/steps/42).
+  function listSourcesFor(req) {
+    const out = []; const seen = new Set();
+    for (let i = core.state.requests.length - 1; i >= 0 && out.length < 12; i--) {
+      const r = core.state.requests[i];
+      if (r.method !== 'GET' || r.responseText == null || typeof r.status !== 'number' || r.status >= 400) continue;
+      let key; try { key = core.matchKey(r.url); } catch { continue; }
+      if (seen.has(key)) continue;
+      const list = listItemsOf(r.responseText);
+      if (!list) continue;
+      seen.add(key);
+      const op = specApi?.current ? specApi.match('GET', r.url) : null;
+      out.push({ on: { method: 'GET', key, tpl: op?.path || null, label: `GET ${pathOnly(r.url)}` }, url: r.url, items: list.items, at: list.at, from: 'call', entry: r });
+    }
+    if (specApi?.current) {
+      for (const op of specApi.current.ops) {
+        if (op.method !== 'GET' || out.some((x) => x.on.tpl === op.path)) continue;
+        const r = op.responses['200'] || op.responses['2XX'] || op.responses.default;
+        let text = null;
+        if (r?.example != null) text = typeof r.example === 'string' ? r.example : JSON.stringify(r.example);
+        else if (r?.schema) { try { text = JSON.stringify(specApi.sample(r.schema)); } catch { /* no sample */ } }
+        const list = text ? listItemsOf(text) : null;
+        if (!list) continue;
+        out.push({ on: { method: 'GET', key: null, tpl: op.path, label: `GET ${op.path}` }, url: op.path, items: list.items, at: list.at, from: 'docs' });
+      }
+    }
+    const p = pathOnly(req.url);
+    const score = (s) => { const lp = (s.from === 'docs' ? s.on.tpl : pathOnly(s.url)).replace(/\/$/, ''); return lp && p.startsWith(lp) ? lp.length : 0; };
+    return out.map((s, i) => ({ s, i, sc: score(s) })).sort((a, b) => b.sc - a.sc || a.i - b.i).map((x) => x.s);
+  }
+
+  // "Add as a button" (from a request's ⋯ menu) and Edit (Setup → Buttons): a name, the list it goes on,
+  // where each part of the request comes from, and a preview for the first item.
+  function openButtonDlg({ req = null, btn = null } = {}) {
+    if (!dockEl) return;
+    dockEl.querySelector('.pdlg-wrap')?.remove();
+    const back = document.activeElement;
+    const base = btn ? btn.req : { method: req.method, url: req.url, headers: req.headers || {}, body: req.body ?? null, bodyKind: req.bodyKind || null };
+    const slots = slotsOf(base);
+    const sources = listSourcesFor(base);
+    if (btn && !sources.some((s) => sameOn(s.on, btn.on))) sources.unshift({ on: btn.on, url: btn.on.label.replace(/^\w+ /, ''), items: [], at: '', from: 'saved' });
+    let src = btn ? sources.find((s) => sameOn(s.on, btn.on)) : sources[0] || null;
+    let fills = null;
+    const fieldsFor = (s) => (s ? listFieldsOf('GET', s.url) : []);
+    const resetFills = () => {
+      const saved = btn && src && sameOn(src.on, btn.on) ? new Map(btn.fills.map((f) => [slotKey(f.slot), f])) : null;
+      const guess = src ? guessFills(slots, src.items, fieldsFor(src)) : slots.map(({ slot, value }) => ({ slot, from: { kind: 'fixed', value } }));
+      fills = guess.map((g) => saved?.get(slotKey(g.slot)) || g);
+    };
+    resetFills();
+    const verb = { DELETE: 'Delete', POST: 'Send', PUT: 'Update', PATCH: 'Update', GET: 'Open' }[base.method] || base.method;
+    const guessName = () => {
+      const segs = urlParts(base.url).path.split('/').filter((s) => s && !looksId(decSeg(s)));
+      const last = segs[segs.length - 1] || '';
+      const named = slots.some((s) => s.slot.where === 'path' && s.slot.index === urlParts(base.url).path.split('/').length - 1);
+      if (last && !named && base.method === 'POST') return last.replace(/[-_]+/g, ' ').replace(/^./, (c) => c.toUpperCase());
+      return `${verb} ${last ? last.replace(/ies$/, 'y').replace(/s$/, '').replace(/[-_]+/g, ' ') : ''}`.trim();
+    };
+    const { body, wrap, closeBtn } = dlgShell({ id: 'bt', title: btn ? 'Edit button' : 'Add as a button', cls: 'btdlg',
+      intro: 'A button on each item of a list. Pressing it sends this request with that item’s values.' });
+    const nameIn = h('input', { class: 'pf-tok bt-name', value: btn?.name || guessName(), 'aria-label': 'Button name', maxlength: '40', spellcheck: 'false' });
+    const srcSel = h('select', { class: 'bt-src', 'aria-label': 'On the items of' },
+      ...sources.map((s, i) => h('option', { value: String(i), selected: s === src },
+        `${s.on.label}${s.from === 'docs' ? ' · API docs' : s.from === 'saved' ? ' · not seen yet' : ` · ${plural(s.items.length, 'item')}`}`)));
+    srcSel.addEventListener('change', () => { src = sources[+srcSel.value]; resetFills(); drawFills(); drawPreview(); });
+    const fillBox = h('div', { class: 'bt-fills', role: 'table', 'aria-label': 'Fill from' });
+    const previewEl = h('pre', { class: 'bt-preview mono' });
+    const noteEl = h('div', { class: 'muted bt-note' });
+    const askIn = h('input', { type: 'checkbox', checked: btn ? !!btn.ask : base.method === 'DELETE' });
+    const refIn = h('input', { type: 'checkbox', checked: btn ? !!btn.refresh : base.method !== 'GET' });
+    const err = h('div', { class: 'valid bad', hidden: true });
+    const enc = (f) => (f.kind === 'row' ? `row:${JSON.stringify(f.path)}` : f.kind === 'list' ? `list:${f.key}` : f.kind === 'var' ? `var:${f.name}` : 'fixed');
+    const short = (v) => { const s = v == null ? 'null' : typeof v === 'object' ? JSON.stringify(v) : String(v); return s.length > 24 ? `${s.slice(0, 23)}…` : s; };
+    function drawFills() {
+      const rowPaths = src ? leafPaths(src.items) : [];
+      const lfs = fieldsFor(src);
+      const vars = varsApi.list().map((v) => v.name);
+      if (!fills.length) { fillBox.replaceChildren(h('div', { class: 'muted bt-none' }, 'Nothing to fill: this request is sent the same for every item.')); return; }
+      fillBox.replaceChildren(...fills.map((f, i) => {
+        const sel = h('select', { class: 'bt-from', 'aria-label': `${slotLabel(f.slot)} comes from` },
+          rowPaths.length ? h('optgroup', { label: 'This item' }, ...rowPaths.map((p) => h('option', { value: `row:${JSON.stringify(p)}` }, `${p.join('.')}  (${short(getPath(src.items[0], p))})`))) : null,
+          lfs.length ? h('optgroup', { label: 'The list call' }, ...lfs.map((x) => h('option', { value: `list:${x.key}` }, `list.${x.key}  (${short(x.value)})`))) : null,
+          vars.length ? h('optgroup', { label: 'Variables' }, ...vars.map((n) => h('option', { value: `var:${n}` }, `{{${n}}}`))) : null,
+          h('option', { value: 'fixed' }, 'Fixed value'));
+        sel.value = enc(f.from);
+        if (sel.value !== enc(f.from)) sel.value = 'fixed';
+        const orig = slots[i]?.value;
+        const fixedIn = h('input', { class: 'pf-tok mono bt-fixed', value: f.from.kind === 'fixed' ? (f.from.value == null ? 'null' : typeof f.from.value === 'object' ? JSON.stringify(f.from.value) : String(f.from.value)) : '', 'aria-label': `Fixed value for ${slotLabel(f.slot)}`, spellcheck: 'false', hidden: sel.value !== 'fixed' });
+        const typed = (t) => {
+          if (f.slot.where !== 'body') return t;
+          if (typeof orig === 'number' && t.trim() !== '' && !Number.isNaN(Number(t))) return Number(t);
+          if (typeof orig === 'boolean' && /^(true|false)$/.test(t)) return t === 'true';
+          if (t === 'null') return null;
+          return t;
+        };
+        sel.addEventListener('change', () => {
+          const v = sel.value;
+          fills[i] = { slot: f.slot, from: v.startsWith('row:') ? { kind: 'row', path: JSON.parse(v.slice(4)) } : v.startsWith('list:') ? { kind: 'list', key: v.slice(5) } : v.startsWith('var:') ? { kind: 'var', name: v.slice(4) } : { kind: 'fixed', value: orig } };
+          drawFills(); drawPreview();
+        });
+        fixedIn.addEventListener('input', () => { fills[i] = { slot: f.slot, from: { kind: 'fixed', value: typed(fixedIn.value) } }; drawPreview(); });
+        return h('div', { class: 'bt-fill', role: 'row' },
+          h('span', { class: 'bt-slot', role: 'cell' }, h('span', { class: 'mono' }, slotLabel(f.slot)), h('span', { class: 'muted bt-where' }, f.slot.where)),
+          h('span', { class: 'bt-arrow muted', 'aria-hidden': 'true' }, '←'),
+          h('span', { class: 'bt-pick', role: 'cell' }, sel, fixedIn));
+      }));
+    }
+    function drawPreview() {
+      if (!src || !src.items.length) {
+        previewEl.textContent = `${base.method} ${pathOnly(base.url)}`;
+        noteEl.textContent = src?.from === 'saved' ? 'This list hasn’t been called on this page yet: the preview fills in once it is.' : '';
+        return;
+      }
+      const b = { req: base, fills, on: src.on };
+      const { req: r } = buttonRequest(b, src.items[0], src.from === 'call' ? src.url : null);
+      let shown = `${r.method} ${(() => { const s = urlParts(r.url); return `${s.path}${s.query ? `?${s.query}` : ''}`; })()}`;
+      if (r.body != null && r.method !== 'GET') shown += `\n${String(r.body).length > 600 ? `${String(r.body).slice(0, 600)}…` : r.body}`;
+      previewEl.textContent = shown;
+      const lacking = src.items.filter((it) => buttonRequest(b, it, src.from === 'call' ? src.url : null).missing.length).length;
+      const t = itemTitle(src.items[0]); const id = itemId(src.items[0]);
+      noteEl.textContent = `For the first item${t ? ` “${t}”` : id != null ? ` (${id})` : ''}.${lacking ? ` ${plural(lacking, 'item')} of ${src.items.length} lack a field, so the button won’t send there.` : ''}`;
+    }
+    const fld = (lab, el) => h('label', { class: 'env-fld bt-fld' }, h('span', { class: 'env-fl' }, lab), el);
+    const close = () => { closeEnvDlg = null; wrap.remove(); back?.focus?.(); };
+    const save = () => {
+      const name = nameIn.value.trim();
+      if (!name) { err.hidden = false; err.textContent = 'Give the button a name.'; nameIn.focus(); return; }
+      if (!src) { err.hidden = false; err.textContent = 'Pick the list it goes on.'; return; }
+      const b = { id: btn?.id || `b${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, name, on: src.on, req: base,
+        fills: fills.filter((f) => !(f.from.kind === 'fixed' && f.from.value === slots.find((s) => slotKey(s.slot) === slotKey(f.slot))?.value)),
+        ask: askIn.checked, refresh: refIn.checked, enabled: btn ? btn.enabled !== false : true };
+      buttonsApi.upsert(b);
+      close();
+      toast(btn ? `Saved “${name}”` : `Added “${name}” to ${src.on.label}`, '', 5000, { label: 'Show', run: () => openButtons() });
+    };
+    closeBtn.addEventListener('click', close);
+    wrap.addEventListener('mousedown', (ev) => { if (ev.target === wrap) close(); });
+    wrap.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } });
+    closeEnvDlg = close;
+    if (!sources.length) {
+      body.append(h('div', { class: 'su-empty bt-empty' },
+        h('span', { class: 'muted' }, 'No list to put it on yet. Open the page where the app loads the list (a GET that returns items), or load API docs, then try again.'),
+        h('div', { class: 'row wa-askacts' }, h('button', { type: 'button', class: 'btn-sm', onclick: close }, 'Close'))));
+    } else {
+      body.append(
+        fld('Name', nameIn),
+        fld('On the items of', srcSel),
+        h('div', { class: 'bt-sec' }, h('div', { class: 'env-fl' }, 'Fill from'), fillBox),
+        h('div', { class: 'bt-sec' }, h('div', { class: 'env-fl' }, 'Preview'), previewEl, noteEl),
+        h('div', { class: 'bt-opts' },
+          h('label', { class: 'chk' }, askIn, h('span', {}, 'Ask before sending')),
+          h('label', { class: 'chk', title: 'After it succeeds, the app loads its list again (like Apply to app), so you see the change on the page' }, refIn, h('span', {}, 'Refresh the app’s list after'))),
+        err,
+        h('div', { class: 'row wa-askacts' }, h('button', { type: 'button', class: 'btn-sm primary', onclick: save }, btn ? 'Save' : 'Add button'), h('button', { type: 'button', class: 'linkbtn', onclick: close }, 'Cancel')));
+      drawFills(); drawPreview();
+    }
+    dockEl.append(wrap);
+    requestAnimationFrame(() => (sources.length ? nameIn : closeBtn).focus());
+  }
+  // Open Setup → Buttons.
+  function openButtons() {
+    varsUi.view = 'buttons';
+    try { localStorage.setItem('__apiPeek.setupView', 'buttons'); } catch { /* storage blocked */ }
+    dock.tab = 'rules'; ss.set('__apiPeek.tab', 'rules');
+    renderTab();
+  }
+
+  // The Items view of a list response: one row per item with the buttons made for this list.
+  function itemsView(list, btns, ctx) {
+    const st = ctx.state.btnRes || (ctx.state.btnRes = {});
+    const rows = list.items.slice(0, 200).map((it, i) => {
+      const id = itemId(it); const title = itemTitle(it);
+      const resEl = h('span', { class: 'bt-res' });
+      const showRes = () => {
+        const r = st[i];
+        if (!r) { resEl.replaceChildren(); return; }
+        if (r.busy) { resEl.replaceChildren(h('span', { class: 'muted' }, '…')); return; }
+        const s = r.status;
+        resEl.replaceChildren(h('span', { class: `sb ${typeof s === 'number' ? statusTone(s) : 's5'}`, title: `${r.name} · ${s}${r.ms != null ? ` · ${fmtDur(r.ms)}` : ''}${r.text ? `\n${String(r.text).slice(0, 300)}` : ''}` }, typeof s === 'number' ? String(s) : 'failed'));
+      };
+      const go = async (b) => {
+        st[i] = { busy: true }; showRes();
+        const out = await runButton(b, it, ctx.entry);
+        if (!out) { delete st[i]; showRes(); return; }
+        st[i] = { name: b.name, status: out.res.status, ms: out.res.ms, text: out.res.text };
+        showRes();
+        const ok = typeof out.res.status === 'number' && out.res.status < 400;
+        toast(`${b.name}${title ? ` · ${title}` : id != null ? ` · ${id}` : ''} · ${typeof out.res.status === 'number' ? out.res.status : 'failed'}`, ok ? '' : 'warn', 5000,
+          { label: 'Open', run: () => { const ne = core.addManual({ method: out.req.method, url: out.req.url, headers: out.req.headers, body: out.req.body, bodyKind: out.req.bodyKind }); dock.tab = 'requests'; ss.set('__apiPeek.tab', 'requests'); openDetail(ne); } });
+      };
+      const btnEl = (b) => {
+        const el = h('button', { type: 'button', class: 'bt-btn', title: `${buttonPath(b)}${b.ask ? ' · asks first' : ''}`, onclick: () => go(b) });
+        const ic = h('span', { class: 'bt-ico', 'aria-hidden': 'true' }); setHTML(ic, ICONS.bolt);
+        el.append(ic, h('span', {}, b.name));
+        return el;
+      };
+      const acts = btns.length > 2
+        ? [btnEl(btns[0]), dropMenu(`More buttons for ${title || id || `item ${i + 1}`}`, btns.slice(1).map((b) => ({ id: `bt-${b.id}`, label: b.name, icon: ICONS.bolt, sub: buttonPath(b), run: () => go(b) })),
+          { icon: ICONS.chevDown, btnClass: 'bt-btn bt-more', title: 'More buttons', align: 'right' })]
+        : btns.map(btnEl);
+      showRes();
+      return h('div', { class: 'bt-row', role: 'listitem' },
+        h('span', { class: 'bt-id mono', title: id != null ? String(id) : '' }, id != null ? String(id) : `#${i + 1}`),
+        h('span', { class: 'bt-title', title }, title || h('span', { class: 'muted' }, '(no name)')),
+        resEl,
+        h('span', { class: 'bt-acts' }, ...acts));
+    });
+    return h('div', { class: 'bt-items' },
+      h('div', { class: 'muted bt-items-h' }, `${plural(list.items.length, 'item')}${list.at.includes('.') ? ` in ${list.at}` : ''}${list.items.length > 200 ? ' · first 200 shown' : ''} · `,
+        h('button', { type: 'button', class: 'linkbtn', onclick: () => openButtons() }, 'Edit buttons')),
+      h('div', { class: 'bt-list', role: 'list' }, ...rows));
+  }
+
+  function responseView(res, { highlight = null, above = [], pretty: prettyNode = null, title = null, state = {}, tools = [], bare = false, baseUrl = null, saveVar = null, rows = null } = {}) {
     const isJsonBody = core.isJson(res.text || '');
     const canPreview = !isJsonBody && !!(res.text || '').trim() && isHtmlResponse(res);
+    // Buttons made for this list (Setup → Buttons) show in an Items view, which opens first.
+    const rowBtns = rows && isJsonBody && !highlight ? buttonsApi.forCall(rows.method, rows.url) : [];
+    const rowList = rowBtns.length ? listItemsOf(res.text) : null;
+    if (rowList && !state.view) state.view = 'items';
+    if (state.view === 'items' && !rowList) state.view = null;
     if (!state.view || (state.view === 'preview' && !canPreview)) state.view = highlight && prettyNode ? 'raw' : canPreview && !highlight ? 'preview' : 'pretty';
     if (state.wrap == null) state.wrap = !isJsonBody;
     const out = h('div', { class: 'rv-body' });
@@ -6900,14 +7399,15 @@
       },
     });
     { const i = h('span', { class: 'advico', 'aria-hidden': 'true' }); setHTML(i, ICONS.copy); copyBtn.append(i, copyLabel); }
-    const views = [['pretty', 'Pretty'], ['raw', 'Raw'], ...(canPreview ? [['preview', 'Preview']] : []), ['headers', [h('span', {}, 'Headers'), (res.headers || []).length ? h('span', { class: 'rvcnt' }, ` (${(res.headers || []).length})`) : null]]];
+    const views = [...(rowList ? [['items', [h('span', {}, 'Items'), h('span', { class: 'rvcnt' }, String(rowList.items.length))]]] : []), ['pretty', 'Pretty'], ['raw', 'Raw'], ...(canPreview ? [['preview', 'Preview']] : []), ['headers', [h('span', {}, 'Headers'), (res.headers || []).length ? h('span', { class: 'rvcnt' }, ` (${(res.headers || []).length})`) : null]]];
     function draw() {
       seg.replaceChildren(...views.map(([id, label]) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(state.view === id), class: `tab${state.view === id ? ' on' : ''}`, onclick: () => { state.view = id; draw(); } }, label)));
       wrapLabel.textContent = state.wrap ? 'No wrap' : 'Wrap';
       wrapBtn.title = state.wrap ? 'Don\'t wrap long lines' : 'Wrap long lines';
       wrapBtn.classList.toggle('on', !!state.wrap);
-      wrapBtn.hidden = state.view === 'headers' || state.view === 'preview' || (state.view === 'pretty' && !!prettyNode);
+      wrapBtn.hidden = state.view === 'headers' || state.view === 'preview' || state.view === 'items' || (state.view === 'pretty' && !!prettyNode);
       const text = res.text || '';
+      if (state.view === 'items' && rowList) { out.replaceChildren(itemsView(rowList, rowBtns, { state, entry: rows.entry })); return; }
       if (state.view === 'preview') { out.replaceChildren(previewFrame(text, baseUrl)); return; }
       if (state.view === 'headers') {
         out.replaceChildren((res.headers || []).length
@@ -8744,6 +9244,7 @@
           saveVar: (info) => openSaveVar({ ...info, method: sentM, url: sentU }),
           highlight: d.highlight, above: [auth], state: viewState, title: prob ? prob.title || 'Error' : null, bare: true, baseUrl: sentU,
           pretty: prob ? problemCard(one.res, prob, ctx) : null, tools: [srcSeg, cmpBtn],
+          rows: { method: sentM, url: sentU, entry: entry.manual ? null : entry },
         });
       }
       if (entry.simulated === 'network error' || entry.simulated === 'no response') {
@@ -10572,10 +11073,13 @@
         sub: bp ? `Breakpoint on: ${bp.once ? 'next call' : 'every call'}` : ['simulate', 'mock'].includes(d.lower) ? 'Open below' : null };
       const mockItem = (entry.mocked || d.copy?.mocked) && mockOf(d.copy?.mocked ? d.copy : entry)
         ? { id: 'editmock', label: 'Edit mock', icon: ICONS.cube, title: 'The response came from a mock endpoint', run: () => editMockFor(d.copy?.mocked ? d.copy : entry) } : null;
+      const btnItem = { id: 'add-btn', label: 'Add as a button…', icon: ICONS.bolt, title: 'A button on each item of a list: pressing it sends this request with that item’s values',
+        run: () => { if (!routeOk()) { say('Fix the address first.', 'warn'); return; } openButtonDlg({ req: current(runEnv(), { raw: true }) }); } };
       applyWas = canApply();
       const items = entry.manual ? [
         mockItem,
         dupItem,
+        btnItem,
         { ...copyMenu, sepBefore: true },
         { ...runMenu, sepBefore: false }, testMenu,
         { id: 'import', label: 'Import cURL…', title: 'Replace this request with a pasted curl command', icon: ICONS.download, sepBefore: true, run: () => { reqView.importing = { into: entry }; renderTab(); } },
@@ -10583,6 +11087,7 @@
       ] : [
         mockItem,
         dupItem,
+        btnItem,
         { ...copyMenu, sepBefore: true },
         { ...runMenu, sepBefore: false }, testMenu,
         { id: 'apply', label: 'Apply to app', disabled: !applyWas, sub: applyWas ? applyPlan() : 'Nothing to apply yet. Edit the request first', title: 'Save the change and make the app repeat this call, so the page shows the result.\nCalls from a button or field are re-run on the page; calls made while the page loads need a reload.', icon: ICONS.upload, sepBefore: true, run: applyToApp },
@@ -10840,6 +11345,7 @@
     info: svg('<circle cx="8" cy="8" r="6"/><path d="M8 7.3V11"/><path d="M8 5h.01"/>'),
     select: svg('<rect x="2.5" y="2.5" width="11" height="11" rx="2.5"/><path d="M5.3 8.2 7.2 10l3.5-4"/>'),
     check: svg('<path d="M3 8.5 6.5 12 13 4.5"/>'),
+    bolt: svg('<path d="M9.2 1.75 3.75 9h4l-1 5.25L12.25 7h-4l.95-5.25Z"/>'),
     spark: svg('<path d="M8 1.8l1.3 3.6 3.7 1.3-3.7 1.3L8 11.6 6.7 8 3 6.7l3.7-1.3Z"/><path d="M12.6 10.6l.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6Z"/>'),
     trash: svg('<path d="M2.8 4.3h10.4M6.3 4.3V2.8h3.4v1.5M4.2 4.3l.6 8.6c.1.7.6 1.2 1.3 1.2h3.8c.7 0 1.2-.5 1.3-1.2l.6-8.6M6.7 6.8v4.6M9.3 6.8v4.6"/>'),
     search: svg('<circle cx="7" cy="7" r="4.5"/><path d="M10.4 10.4 14 14"/><path d="M5 6h4M5 8h3"/>'),
@@ -13094,7 +13600,8 @@
     // ---------- Setup tab: a segmented control (Variables | Overrides), one view at a time; the last one
     // is remembered for this site. Arrow keys move between the two.
     const VIEW_KEY = '__apiPeek.setupView';
-    const getView = () => { try { return localStorage.getItem(VIEW_KEY) === 'overrides' ? 'overrides' : 'variables'; } catch { return 'variables'; } };
+    const VIEWS = ['variables', 'overrides', 'buttons'];
+    const getView = () => { try { const v = localStorage.getItem(VIEW_KEY); return VIEWS.includes(v) ? v : 'variables'; } catch { return 'variables'; } };
     let view = varsUi.view || getView();
     varsUi.view = null;
     const setView = (v, focus = false) => {
@@ -13107,12 +13614,13 @@
       ...core.rules.list().filter((r) => r.kind !== 'mock').map((x) => ({ kind: 'rule', x })),
       ...mocks().map((x) => ({ kind: 'mock', x }))];
     function segBar() {
-      const opts = [['variables', 'Variables', varsApi.count()], ['overrides', 'Overrides', allOverrides().length]];
+      const opts = [['variables', 'Variables', varsApi.count()], ['overrides', 'Overrides', allOverrides().length], ['buttons', 'Buttons', buttonsApi.count()]];
       return h('div', { class: 'seg', role: 'tablist', 'aria-label': 'Setup',
         onkeydown: (e) => {
           if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
           e.preventDefault();
-          const next = e.key === 'Home' ? 'variables' : e.key === 'End' ? 'overrides' : view === 'variables' ? 'overrides' : 'variables';
+          const i = VIEWS.indexOf(view);
+          const next = e.key === 'Home' ? VIEWS[0] : e.key === 'End' ? VIEWS[VIEWS.length - 1] : VIEWS[(i + (e.key === 'ArrowRight' ? 1 : VIEWS.length - 1)) % VIEWS.length];
           if (next !== view) setView(next, true);
         } },
       ...opts.map(([id, label, n]) => h('button', { type: 'button', role: 'tab', class: `seg-b${view === id ? ' on' : ''}`, 'data-view': id,
@@ -13270,13 +13778,51 @@
         h('div', { class: 'ov-list', role: 'list' }, ...items.map(overrideRow)));
     }
 
+    // ---------- Buttons view: requests saved as buttons on the items of a list (made from a request's ⋯ menu).
+    function buttonRow(b) {
+      const on = b.enabled !== false;
+      const inp = h('input', { type: 'checkbox', role: 'switch', checked: on, 'aria-label': `${b.name} on` });
+      inp.addEventListener('change', () => { buttonsApi.upsert({ ...b, enabled: inp.checked }); draw(true); });
+      const sw = h('label', { class: 'switch ov-sw', title: on ? 'On. Switch off to hide it without deleting it' : 'Off', onclick: (e) => e.stopPropagation() }, inp, h('span', { class: 'sw', 'aria-hidden': 'true' }));
+      const menu = dropMenu(`Actions for ${b.name}`, [
+        { id: 'edit', label: 'Edit', icon: ICONS.pencil, run: () => openButtonDlg({ btn: b }) },
+        { id: 'dup', label: 'Duplicate', icon: ICONS.dup, run: () => { buttonsApi.upsert({ ...b, id: `b${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, name: `${b.name} 2` }); draw(true); } },
+        { id: 'del', label: 'Delete', icon: ICONS.trash, danger: true, sepBefore: true, run: () => {
+          const before = buttonsApi.list();
+          buttonsApi.remove(b.id); draw(true);
+          toast(`Deleted “${b.name}”`, '', 5000, { label: 'Undo', run: () => { buttonsApi.put(before); draw(true); } });
+        } },
+      ], { icon: ICONS.more, btnClass: 'ibtn mk-more', title: 'More actions', align: 'right' });
+      const ic = h('span', { class: 'bt-ico', 'aria-hidden': 'true' }); setHTML(ic, ICONS.bolt);
+      const fillsTxt = (b.fills || []).filter((f) => f.from.kind !== 'fixed').map((f) => `${slotLabel(f.slot)} ← ${fromLabel(f.from)}`).join(', ');
+      return h('div', { class: `ov-row bt-srow link${on ? '' : ' off'}`, role: 'listitem', tabindex: '0',
+        title: `${buttonPath(b)}\nOn the items of ${b.on.label}${fillsTxt ? `\n${fillsTxt}` : ''}${b.ask ? '\nAsks before sending' : ''}\nClick to edit`,
+        onclick: (e) => { if (!e.target.closest('.newwrap, .ov-sw')) openButtonDlg({ btn: b }); },
+        onkeydown: (e) => { if (e.key === 'Enter' && e.target === e.currentTarget) openButtonDlg({ btn: b }); } },
+      ic,
+      h('span', { class: 'bt-sname' }, h('span', { class: 'bt-n' }, b.name), h('span', { class: 'muted mono bt-sub' }, `${buttonPath(b)} · on ${b.on.label.replace(/^GET /, '')}`)),
+      h('span', { class: 'ov-tags' }, b.ask ? h('span', { class: 'ov-tag' }, 'asks first') : null),
+      sw, menu);
+    }
+    function buttonsView() {
+      const list = buttonsApi.list();
+      if (!list.length) {
+        return h('section', { class: 'su-view', id: 'buttons', 'aria-label': 'Buttons' },
+          h('div', { class: 'su-empty' }, h('span', { class: 'muted' }, 'Turn a request into a button on each item of a list: open it and choose ⋯ → Add as a button.')));
+      }
+      const onN = list.filter((b) => b.enabled !== false).length;
+      return h('section', { class: 'su-view', id: 'buttons', 'aria-label': 'Buttons' },
+        h('div', { class: 'su-head' }, h('span', { class: 'muted' }, `${plural(list.length, 'button')} · ${onN} on · they show in a list response’s Items view`)),
+        h('div', { class: 'ov-list', role: 'list' }, ...list.map(buttonRow)));
+    }
+
     function draw(force = false) {
       // Captured calls redraw this tab; don't pull an open ⋯ menu out from under the pointer,
       // nor a variable being edited (its own buttons redraw with force).
       if (!force && box.querySelector('.dmenu:not([hidden])')) return;
       if (!force && box.querySelector('.var-edit')) return;
       const hadFocus = box.contains(dockEl?.getRootNode?.()?.activeElement) ? dockEl.getRootNode().activeElement : null;
-      box.replaceChildren(segBar(), view === 'variables' ? variablesView() : overridesView());
+      box.replaceChildren(segBar(), view === 'variables' ? variablesView() : view === 'buttons' ? buttonsView() : overridesView());
       if (hadFocus?.classList?.contains('seg-b')) box.querySelector(`.seg [data-view=${view}]`)?.focus();
     }
     mainEl.append(box);

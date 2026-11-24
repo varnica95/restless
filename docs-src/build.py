@@ -18,7 +18,7 @@ OUT = os.path.join(ROOT, 'docs')
 VER = json.load(open(os.path.join(ROOT, 'manifest.json')))['version']
 REPO = 'https://github.com/varnica95/restless'
 
-PAGES = ['getting-started', 'requests', 'request-screen', 'mocks', 'api-docs', 'environments', 'variables', 'testing-tools', 'settings', 'how-it-works']
+PAGES = ['getting-started', 'requests', 'request-screen', 'mocks', 'api-docs', 'environments', 'variables', 'buttons', 'testing-tools', 'settings', 'how-it-works']
 
 
 def read(name):
