@@ -346,17 +346,19 @@ Use `{{name}}` in a request's path, query params, headers or body, and RESTless 
 
 ### Buttons on list items
 
-Turn any request into a button on each item of a list, so you can run it for one row with a click: *Open task*, *Archive*, *Move to top*. Handy when you're building the backend and the app's own button doesn't exist yet.
+One-tap buttons on each item of a list (*Open task*, *Archive*), so you can try an endpoint on any row without building UI for it.
 
-1. Open the request: a captured call, one from **API Docs → Try it**, or your own. Make it work for one item (e.g. `POST /api/tasks/1/archive` with its body).
-2. **⋯ → Add as a button…** Give it a name and pick **On the items of**: a recent GET whose response is a list (top-level array, or under `items`, `data`, `content`…), or a GET endpoint from the API docs that returns one. The likeliest list is preselected (`/api/tasks` for `/api/tasks/1/archive`).
-3. **Fill from** lists the parts that can change per item: path ids, query values and body fields. Each one comes from **This item** (any field, nested too: `assignee.id`), **The list call** (its path ids and query values, e.g. `list.projectId` from `/api/tasks?projectId=42`), one of your **Variables**, or a **Fixed value**. RESTless guesses: an id whose value matches a field of the items (or has the same name) comes from the item, a value from the list's address from the list call, and everything else stays fixed. With API docs loaded, path parts take the docs' names (`{taskId}`).
-4. **Preview** shows the exact request for the first item, and says if some items lack a field (the button won't send there).
-5. Options: **Ask before sending** (on for DELETE) and **Refresh the app's list after** (on for anything but GET): after a success the app loads its list again, like *Apply to app*.
+**Make one (2 taps):**
+- **From a list:** open the list call in Requests → Response → **Items**. With no buttons yet, the first item has a dashed **+ Add button**. Tap it, then **Add button**. RESTless picks what it sends: a call you already made to one of these items (`/api/tasks/2/archive`), an API docs endpoint under the list, or else opening one (`GET /api/tasks/{id}`).
+- **From a request:** after a successful **Run** of a request with an id in its path, a note asks *Make this a button on each task?* Tap **Add**, then **Add button**. (**✕** hides it for that endpoint.) **⋯ → Add as a button…** does the same at any time.
 
-The buttons show in the list response's **Items** view (Requests → the list call → Response → **Items**, which opens first when a list has buttons): one row per item (its id and name) with the buttons; more than two collapse into a ▾. Pressing one sends the request like **Run** does (to the active environment, as its user, with `{{variables}}` filled), then shows the status on that row and a note with **Open**, which opens the exact request as your own. A button follows its list across pages and filters, and with API docs loaded across other ids in the path too (`/projects/7/tasks` and `/projects/8/tasks`).
+The sheet has a name (prefilled; leave it or change it), where it goes (*On each task of /api/tasks*) and one sentence of preview: *Pressing it on "Hyper" sends GET /api/tasks/1.* Values are matched for you: an id that equals a field of the items (or has its name) comes from the item, a value in the list's address from the list call, the rest stays as it is. Only what it couldn't match is shown (*Which field is this?*).
 
-Buttons are saved for this site and managed in **Setup → Buttons**.
+**Customize** has everything else: what it sends (from a list) or which list it goes on (from a request), every part and where it comes from (this item's field, the list call, a variable, or a fixed value), the full request, and two options: **Ask before sending** (on for DELETE) and **Refresh the app's list after** (on for anything but GET).
+
+After **Add button** you land on the list's Items, where the new button pulses on the first item, with a one-time tip: *Tap to try it on "Hyper"*. Pressing a button sends the request like **Run** (active environment and user, `{{variables}}` filled), shows the status on that row and a note with **Open** (the exact request). More than two buttons collapse into **▾**, which also has **Add a button…**.
+
+No list loaded yet? The sheet offers **Load the list now** (it loads `/api/tasks` for `/api/tasks/2`). **Setup → Buttons** is for managing them (switch, edit, duplicate, delete); empty, it has **Try an example**, which starts from your most recent list.
 
 ## How it works
 
