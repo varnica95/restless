@@ -3817,9 +3817,6 @@
     /* ================= 0.57: simpler Requests tab ================= */
     .srow2 { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .srow2 > .search { flex: 1 1 auto; min-width: 0; }
-    button.ibtn.rnew { flex: none; width: 34px; height: 34px; border: 1px solid var(--line2); border-radius: var(--r-lg); color: var(--dim); background: var(--bg2); }
-    button.ibtn.rnew:hover { color: var(--fg); border-color: var(--dim); }
-    button.ibtn.rnew svg { width: 16px; height: 16px; }
     @container rlmain (max-width: 440px) { .search .skbd { display: none; } }
     .req-toolbar.is-empty .srow2, .req-toolbar.is-empty .frow, .req-toolbar.is-empty .ltools { display: none; }
     /* view toggle: two icons */
@@ -5029,6 +5026,7 @@
     @container rlmain (max-width: 330px) {
       .lowhead .simbtn .rvlabel { display: none; }
     }
+    .sb.undoc { outline: 1px dashed currentColor; outline-offset: 1px; }
   `;
 
   // ---------- helpers
@@ -7879,8 +7877,12 @@
     const c = specApi.checkResponse(r.method, r.url, r.status, r.responseText, '');
     if (!c) return null;
     if (c.state === 'fail') return h('span', { class: 'tag bad', title: `${c.errors} problem(s) against the API docs schema` }, `schema ✕${c.errors}`);
-    if (c.state === 'undocumented') return h('span', { class: 'tag sim', title: `Status ${c.status} isn't in the API docs for this endpoint` }, 'undocumented');
     return null;
+  };
+  // Status not in the API docs: marked on the status pill itself (dashed outline) instead of a tag that crowds the path.
+  const undocumented = (r) => {
+    if (!specApi?.current || r.responseText == null || typeof r.status !== 'number' || r.simulated) return false;
+    return specApi.checkResponse(r.method, r.url, r.status, r.responseText, '')?.state === 'undocumented';
   };
 
   // ---------- Mock data for "send many": {{placeholders}} in field values
@@ -11851,10 +11853,10 @@
         onclick: () => { const was = specView[key]; specView.called = false; specView.uncalled = false; specView[key] = !was; drawList(); } }, `${n} ${label}`);
       stats.replaceChildren(...[
         h('span', {}, narrowed ? `${ops.length} of ${spec.ops.length} endpoints` : `${spec.ops.length} endpoint${spec.ops.length === 1 ? '' : 's'}`),
-        h('span', { class: 'sdot' }, '·'),
-        tog('called', 'called', usedN, 'Show only endpoints the app called on this page (click again to clear)'),
-        h('span', { class: 'sdot' }, '·'),
-        tog('uncalled', 'not called', spec.ops.length - usedN, 'Show only documented endpoints the app hasn\'t called yet (click again to clear)'),
+        usedN || specView.called ? [h('span', { class: 'sdot' }, '·'),
+          tog('called', 'called', usedN, 'Show only endpoints the app called on this page (click again to clear)')] : null,
+        spec.ops.length - usedN || specView.uncalled ? [h('span', { class: 'sdot' }, '·'),
+          tog('uncalled', 'not called', spec.ops.length - usedN, 'Show only documented endpoints the app hasn\'t called yet (click again to clear)')] : null,
         nDep ? [h('span', { class: 'sdot' }, '·'), h('button', { type: 'button', class: `cnt-tog${specView.deprecated ? ' on' : ''}`, 'aria-pressed': String(!!specView.deprecated), title: 'Show only deprecated endpoints (click again to clear)',
           onclick: () => { specView.deprecated = !specView.deprecated; drawList(); } }, `${nDep} deprecated`)] : null,
         h('span', { class: 'hspace' }),
@@ -12430,9 +12432,7 @@
     const search = h('div', { class: 'search' },
       findIco, filter, clearBtn,
       h('kbd', { class: 'skbd', title: `Press ${isMac ? '⌘K' : 'Ctrl+K'} or / to search` }, isMac ? '⌘ K' : 'Ctrl K'));
-    const newBtn = h('button', { type: 'button', class: 'ibtn rnew', title: 'New request', 'aria-label': 'New request', onclick: () => newRequest() });
-    setHTML(newBtn, ICONS.plus);
-    const searchRow = h('div', { class: 'srow2' }, search, newBtn);
+    const searchRow = h('div', { class: 'srow2' }, search);
 
     // ---- filters: Filters ▾ · Errors N · Clear, and the view switch on the right
     const chips = h('div', { class: 'fchips', role: 'group', 'aria-label': 'Filter requests' });
@@ -12493,7 +12493,11 @@
     // Every row uses the same columns, so status, size and time line up down the whole list:
     // [expand] [method + endpoint + tags] [count or clock] [status] [size] [time] [⋯]
     const cells = (r, group = null) => [
-      h('span', { class: 'rc-st' }, r.stub ? null : statusBadge(r.status)),
+      h('span', { class: 'rc-st' }, r.stub ? null : (() => {
+        const b = statusBadge(r.status);
+        if (b && undocumented(r)) { b.classList.add('undoc'); b.title = `Status ${r.status} isn't in the API docs for this endpoint`; }
+        return b;
+      })()),
       h('span', { class: 'rc-num rc-size' }, r.responseSize ? fmtSize(r.responseSize) : ''),
       h('span', { class: `rc-num rc-time${isSlow(r) ? ' slow' : ''}` }, r.durationMs != null ? fmtDur(r.durationMs) : ''),
       rowMoreBtn(r, group),
@@ -12982,7 +12986,6 @@
             h('span', { class: 'rc-tags' },
               stopped ? stoppedTag() : null,
               last.stub ? null : simTag(last),
-              every ? h('span', { class: 'tag dry', title: 'Calls arrive at a steady interval' }, `~${fmtEvery(every)}`) : null,
               last.stub ? null : single ? callTags(last, { noSim: !!simTag(last) }) : [schemaTag(last), g.calls.some((c) => c.manual) ? iconTag('', 'user', 'yours', 'Includes requests you made') : null,
                 isSlow(last) ? h('span', { class: 'tag slow', title: `The latest call took ${fmtDur(last.durationMs)} (1 s or more)` }, 'slow') : null,
                 isLarge(last) ? h('span', { class: 'tag slow', title: `The latest response is ${fmtSize(last.responseSize)} (1 MB or more)` }, 'large') : null])),
