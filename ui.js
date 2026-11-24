@@ -3228,6 +3228,7 @@
       .btdlg .bt-fld { grid-template-columns: minmax(0, 1fr); gap: 4px; }
     }
     @container rlmain (max-width: 340px) { .rvtabs .tab { padding: 0 6px; } .rvtabs { gap: 0; } }
+    .pdlg.pdlg2.waask, .pdlg.pdlg2.btdlg { min-height: 0; }
   `;
 
   // ---------- helpers
@@ -4556,7 +4557,7 @@
   function confirmDlg({ title, intro, tip = '', ok = 'OK' }) {
     if (!dockEl) return Promise.resolve(true);
     return new Promise((res) => {
-      const { body, wrap, closeBtn } = dlgShell({ id: 'cdlg', title, intro, tip: tip || intro, cls: 'waask' });
+      const { body, wrap, closeBtn } = dlgShell({ id: 'cdlg', title, intro, tip, cls: 'waask' });
       let settled = false;
       const done = (v) => { if (settled) return; settled = true; closeEnvDlg = null; wrap.remove(); res(v); };
       const go = h('button', { type: 'button', class: 'btn-sm primary', onclick: () => done(true) }, ok);
@@ -5378,6 +5379,7 @@
     const askIn = h('input', { type: 'checkbox', checked: btn ? !!btn.ask : base.method === 'DELETE' });
     const refIn = h('input', { type: 'checkbox', checked: btn ? !!btn.refresh : base.method !== 'GET' });
     const err = h('div', { class: 'valid bad', hidden: true });
+    nameIn.addEventListener('input', () => { err.hidden = true; });
     const enc = (f) => (f.kind === 'row' ? `row:${JSON.stringify(f.path)}` : f.kind === 'list' ? `list:${f.key}` : f.kind === 'var' ? `var:${f.name}` : 'fixed');
     const short = (v) => { const s = v == null ? 'null' : typeof v === 'object' ? JSON.stringify(v) : String(v); return s.length > 24 ? `${s.slice(0, 23)}…` : s; };
     function drawFills() {
