@@ -5016,6 +5016,19 @@
     .editbar .splitbtn > .newwrap > button.split-more, .editbar .splitbtn > .newwrap > button.split-more:hover { background: var(--accent-solid, var(--accent)); color: var(--on-accent, #fff); border: 0; border-left: 1px solid color-mix(in srgb, var(--on-accent, #fff) 30%, transparent); }
     .editbar .splitbtn > .newwrap > button.split-more:hover { filter: brightness(1.08); }
     .multimenu .msec[hidden] { display: none; }
+    /* response line: dots only, no bars */
+    .lowinfo .rq-m { padding-left: 0; border-left: 0; }
+    .hdr-note { margin: 8px 2px 0; font-size: 11.5px; color: var(--faint); line-height: 1.45; }
+    button.ibtn.hcopy { width: 24px; height: 24px; padding: 0; display: inline-grid; place-items: center; flex: none; opacity: 0; transition: opacity .1s; }
+    button.ibtn.hcopy svg { width: 13px; height: 13px; }
+    :hover > button.ibtn.hcopy, :focus-within > button.ibtn.hcopy, button.ibtn.hcopy:focus-visible { opacity: 1; }
+    @container rlmain (max-width: 420px) {
+      .lowinfo .fact + .fact + .fact { display: none; }
+      .lowhead .lowinfo { flex-wrap: nowrap; }
+    }
+    @container rlmain (max-width: 330px) {
+      .lowhead .simbtn .rvlabel { display: none; }
+    }
   `;
 
   // ---------- helpers
@@ -6983,12 +6996,14 @@
     return Object.entries(errors).slice(0, 100).map(([k, v]) => [k, Array.isArray(v) ? v.map((x) => (typeof x === 'string' ? x : JSON.stringify(x))) : [typeof v === 'string' ? v : JSON.stringify(v)]]);
   }
 
-  function copyChip(value, label = 'Copy') {
-    const b = h('button', { type: 'button', class: 'btn-sm', title: `Copy ${value}`, onclick: async (e) => {
+  // Copy icon for one value: shows on hover of its row (like the JSON line copy), so an error card has one visible Copy.
+  function copyChip(value) {
+    const b = h('button', { type: 'button', class: 'ibtn hcopy', 'aria-label': 'Copy value', title: `Copy ${value}`, onclick: async (e) => {
       e.stopPropagation();
-      try { await navigator.clipboard.writeText(String(value)); b.textContent = 'Copied'; } catch { b.textContent = 'Failed'; }
-      setTimeout(() => { b.textContent = label; }, 1200);
-    } }, label);
+      try { await navigator.clipboard.writeText(String(value)); setHTML(b, ICONS.check); b.title = 'Copied'; } catch { b.title = 'Copy failed'; }
+      setTimeout(() => { setHTML(b, ICONS.copy); b.title = `Copy ${value}`; }, 1200);
+    } });
+    setHTML(b, ICONS.copy);
     return b;
   }
 
@@ -8323,10 +8338,7 @@
         return h('button', { type: 'button', role: 'tab', 'aria-selected': String(d.tab === id), class: `tab${d.tab === id ? ' on' : ''}`, onclick: () => { d.tab = id; drawTabs(); drawPane(); drawBar(); } },
           label, n ? h('span', { class: 'tcount' }, `(${n})`) : null,
           id === 'body' && hasBody() && bodyText() != null ? h('span', { class: 'dot', title: 'This request has a body' }) : null,
-          id === 'headers' ? (() => {
-            const t = `${d.headersNote ? `${d.headersNote}\n\n` : ''}Only headers the app sets are shown. Cookies the browser adds itself can't be seen or changed here.`;
-            return h('span', { class: 'docind info', role: 'img', 'aria-label': t, title: t }, 'i');
-          })() : null);
+          null);
       }), h('span', { class: 'hspace' }), tabTools);
       drawLowerHead();
     }
@@ -8351,13 +8363,11 @@
       const isRun = !!(r && d.copy && r === d.copy);
       const ms = isRun ? r.ms : entry.durationMs;
       const size = isRun ? new Blob([r.text || '']).size : entry.responseSize;
-      const at = isRun ? (r.at || d.copyAt) : entry.startedAt;
       const sep = () => h('span', { class: 'sdot' }, '·');
       const facts = [
         r && r.status != null ? h('span', { class: `sb ${statusTone(r.status)}`, title: prob?.title || STATUS_LABEL[r.status] || '' }, statusText(r.status)) : null,
         ms != null && r ? h('span', { class: 'rq-m', title: isRun ? 'Time of your Run' : 'Time the app\'s call took' }, fmtDur(ms)) : null,
         size && r ? h('span', { class: 'rq-m', title: isRun ? 'Size of your Run\'s response' : 'Size of the response' }, fmtSize(size)) : null,
-        at && r ? h('span', { class: 'rq-m faint', title: new Date(at).toLocaleString() }, fmtAgo(at)) : null,
       ].filter(Boolean);
       // Entry to the Simulation card, when it's closed (it's always open while a simulation is set up).
       const simBtn = d.lower !== 'simulate' && !entry.manual && !entry.paused ? (() => {
@@ -8634,7 +8644,8 @@
                 copyBtn('copy', 'Copy value', () => p[1]),
               ],
             }),
-            warn);
+            warn,
+            h('p', { class: 'hdr-note' }, d.headersNote ? `${d.headersNote} ` : '', 'Only headers the app sets are shown. Cookies the browser adds can\'t be seen or changed here.'));
         }
         checkNames();
       };
