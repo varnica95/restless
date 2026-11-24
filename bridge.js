@@ -24,10 +24,11 @@ window.addEventListener('message', (e) => {
   }
   if (e.data.__apiPeek === 'openShortcuts') toWorker({ type: 'openShortcuts' });
   if (e.data.__apiPeek === 'savePrefs' && e.data.prefs) {
-    const p = e.data.prefs;
+    const p = { ...e.data.prefs };
+    if (p.position === 'top' || p.position === 'bottom') p.position = 'right';
     const num = (v, lo, hi) => (Number.isFinite(v) ? Math.round(Math.min(Math.max(v, lo), hi)) : null);
     const ok = ['push', 'overlay'].includes(p.dock) && ['light', 'dark', 'system'].includes(p.theme)
-      && ['right', 'left', 'top', 'bottom', 'float'].includes(p.position);
+      && ['right', 'left', 'float'].includes(p.position);
     if (ok) {
       const f = p.float && typeof p.float === 'object'
         ? { x: num(p.float.x, 0, 10000), y: num(p.float.y, 0, 10000), w: num(p.float.w, 200, 10000), h: num(p.float.h, 200, 10000) }

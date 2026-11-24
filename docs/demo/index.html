@@ -1991,8 +1991,6 @@
     .dock { position: fixed; z-index: 2147483647; display: flex; flex-direction: column; background: var(--bg); }
     .dock.pos-right { top: 0; right: 0; bottom: 0; border-left: 1px solid var(--line); box-shadow: -10px 0 32px var(--shadow); }
     .dock.pos-left { top: 0; left: 0; bottom: 0; border-right: 1px solid var(--line); box-shadow: 10px 0 32px var(--shadow); }
-    .dock.pos-top { top: 0; left: 0; right: 0; border-bottom: 1px solid var(--line); box-shadow: 0 10px 32px var(--shadow); }
-    .dock.pos-bottom { bottom: 0; left: 0; right: 0; border-top: 1px solid var(--line); box-shadow: 0 -10px 32px var(--shadow); }
     .dock.pos-float { border: 1px solid var(--line2); border-radius: 10px; overflow: hidden; box-shadow: 0 22px 60px var(--shadow); }
     .pos-float .dhead { cursor: move; user-select: none; }
     [hidden] { display: none !important; }
@@ -2379,8 +2377,6 @@
     .grip { position: absolute; z-index: 6; }
     .pos-right .grip { left: -4px; top: 0; bottom: 0; width: 8px; cursor: ew-resize; }
     .pos-left .grip { right: -4px; top: 0; bottom: 0; width: 8px; cursor: ew-resize; }
-    .pos-top .grip { bottom: -4px; left: 0; right: 0; height: 8px; cursor: ns-resize; }
-    .pos-bottom .grip { top: -4px; left: 0; right: 0; height: 8px; cursor: ns-resize; }
     .pos-float .grip { right: 0; bottom: 0; width: 16px; height: 16px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 55%, var(--line2) 55%, var(--line2) 65%, transparent 65%, transparent 75%, var(--line2) 75%, var(--line2) 85%, transparent 85%); }
     .grip:hover, .grip.on { background: var(--accent-line); }
     .menu.down { top: calc(100% + 6px); bottom: auto; }
@@ -2425,11 +2421,8 @@
     .mini.pos-right, .mini.pos-left { top: 38%; flex-direction: column; padding: 10px 5px; }
     .mini.pos-right { right: 0; border-right: 0; border-radius: 8px 0 0 8px; }
     .mini.pos-left { left: 0; border-left: 0; border-radius: 0 8px 8px 0; }
-    .mini.pos-top, .mini.pos-bottom { left: 50%; transform: translateX(-50%); padding: 5px 12px; }
-    .mini.pos-top { top: 0; border-top: 0; border-radius: 0 0 8px 8px; }
-    .mini.pos-bottom { bottom: 0; border-bottom: 0; border-radius: 8px 8px 0 0; }
     .mini.pos-float { right: 16px; bottom: 16px; padding: 6px 12px; border-radius: 999px; }
-    .mini.pos-top .vt, .mini.pos-bottom .vt, .mini.pos-float .vt { writing-mode: horizontal-tb !important; transform: none !important; }
+    .mini.pos-float .vt { writing-mode: horizontal-tb !important; transform: none !important; }
     .mini:hover { border-color: var(--accent); }
     .mini .vt { writing-mode: vertical-rl; transform: rotate(180deg); color: var(--accent); font-weight: 700; letter-spacing: .04em; }
     .mini .n { font-size: 10.5px; color: var(--on-accent); background: var(--accent); border-radius: 999px; padding: 0 5px; min-width: 18px; text-align: center; }
@@ -2723,8 +2716,6 @@
     .dock { background: var(--bg); }
     .dock.pos-right { box-shadow: -18px 0 40px -24px var(--shadow); }
     .dock.pos-left { box-shadow: 18px 0 40px -24px var(--shadow); }
-    .dock.pos-top { box-shadow: 0 18px 40px -24px var(--shadow); }
-    .dock.pos-bottom { box-shadow: 0 -18px 40px -24px var(--shadow); }
     .dock.pos-float { border-color: var(--line2); border-radius: var(--r-xl); box-shadow: var(--pop-shadow), 0 24px 64px -16px var(--shadow); }
     .grip { transition: background .15s var(--ease); }
     .grip:hover, .grip.on { background: var(--accent-line); }
@@ -2989,7 +2980,7 @@
     button.spec-op { border-bottom: 0; border-radius: var(--r); }
     button.spec-op:hover { background: var(--hover); }
     button.srvbtn { border-radius: var(--r); }
-    /* wide panels (top / bottom docks): one toolbar row */
+    /* wide panels (floating window): one toolbar row */
     @container rlmain (min-width: 760px) {
       .req-toolbar { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
       .req-toolbar > .search { flex: 1 1 300px; max-width: 520px; }
@@ -3118,17 +3109,6 @@
     .search .newwrap { display: inline-flex; align-items: center; height: 100%; }
     .frow > .vseg { margin-left: auto; }
     /* top / bottom docks are short: compact chrome so the list keeps its room */
-    .pos-top .dhead, .pos-bottom .dhead { height: 42px; }
-    .pos-top .brand, .pos-bottom .brand { font-size: 14px; }
-    .pos-top button.hbox, .pos-bottom button.hbox { height: 28px; }
-    .pos-top .nav, .pos-bottom .nav { padding-top: 4px; }
-    .pos-top .tab, .pos-bottom .tab { padding: 6px 12px 7px; font-size: 13px; }
-    .pos-top .main, .pos-bottom .main { padding-top: 10px; }
-    .pos-top .req-toolbar, .pos-bottom .req-toolbar { top: -10px; margin-top: -10px; padding-top: 10px; padding-bottom: 6px; }
-    .pos-top .search, .pos-bottom .search { height: 36px; }
-    .pos-top .footbar, .pos-bottom .footbar { min-height: 36px; }
-    .pos-top .rlist .lrow, .pos-bottom .rlist .lrow { min-height: 36px; }
-    .pos-top .rlist .lrow.lhead, .pos-bottom .rlist .lrow.lhead { min-height: 30px; }
     @container rlmain (min-width: 760px) {
       .req-toolbar > .rstats { flex-basis: auto; order: 3; white-space: nowrap; }
       .req-toolbar > .frow { order: 2; }
@@ -3335,7 +3315,6 @@
     .rtx:hover { background: var(--bg3); color: var(--fg); }
     .rtcount { flex: none; font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; padding-left: 4px; }
     input.num-sm { width: 72px; font-family: var(--font); }
-    .pos-top .reqtabs, .pos-bottom .reqtabs { height: 34px; }
     button.rtabi { flex: 0 1 auto; min-width: 92px; max-width: 190px; padding: 0 9px; }
     button.rtabi.on { padding-right: 4px; }
     button.rtabi:not(.on) .rtx { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); background: var(--bg3); box-shadow: -8px 0 8px var(--bg3); }
@@ -4076,8 +4055,6 @@
     .dhead.one .nav .tab { align-self: stretch; padding: 0 10px; border-radius: var(--r-lg) var(--r-lg) 0 0; margin-top: 7px; font-size: 13px; }
     .dhead.one .nav .tab .count { max-width: 4.5em; overflow: hidden; text-overflow: ellipsis; }
     .dhead.one .hmenus { display: inline-flex; align-items: center; gap: 6px; flex: none; min-width: 0; }
-    .pos-top .dhead.one, .pos-bottom .dhead.one { height: 44px; }
-    .pos-top .dhead.one .nav .tab, .pos-bottom .dhead.one .nav .tab { margin-top: 5px; }
     /* ⋯ menu with a dot while a rule or breakpoint is on */
     button.hbox.hmore .hmore-face { position: relative; display: inline-grid; place-items: center; }
     .hmore-dot { position: absolute; top: -5px; right: -6px; width: 7px; height: 7px; border-radius: 50%; background: var(--warn); box-shadow: 0 0 0 2px var(--bg2); }
@@ -4856,8 +4833,6 @@
     .nav.navrow .tab .tl { display: inline; }
     .nav.navrow .tab .ts { display: none; }
     .nav.navrow .tab.live .count { background: var(--warn-soft); color: var(--warn); }
-    .pos-top .nav.navrow, .pos-bottom .nav.navrow { height: 34px; }
-    .pos-top .nav.navrow .tab, .pos-bottom .nav.navrow .tab { height: 29px; }
     button.rtabi.flash { animation: rtflash 1.1s ease-out; }
     @keyframes rtflash { 0% { background: var(--accent-soft); border-color: var(--accent-line); color: var(--fg); } 100% { } }
     .dhead.one .brand-name { display: inline-block; }
@@ -5040,6 +5015,7 @@
     .splitbtn > .newwrap > button.split-more svg { width: 12px; height: 12px; }
     .editbar .splitbtn > .newwrap > button.split-more, .editbar .splitbtn > .newwrap > button.split-more:hover { background: var(--accent-solid, var(--accent)); color: var(--on-accent, #fff); border: 0; border-left: 1px solid color-mix(in srgb, var(--on-accent, #fff) 30%, transparent); }
     .editbar .splitbtn > .newwrap > button.split-more:hover { filter: brightness(1.08); }
+    .multimenu .msec[hidden] { display: none; }
   `;
 
   // ---------- helpers
@@ -5073,11 +5049,10 @@
   }
 
   const POSITIONS = [
-    ['right', 'dockRight', 'Dock right'], ['left', 'dockLeft', 'Dock left'], ['bottom', 'dockBottom', 'Dock bottom'], ['top', 'dockTop', 'Dock top'],
+    ['right', 'dockRight', 'Dock right'], ['left', 'dockLeft', 'Dock left'],
     ['float', 'dockFloat', 'Floating window'],
   ];
   const clampSide = (w) => (innerWidth < 600 ? innerWidth : Math.round(Math.min(Math.max(w || DEFAULT_PREFS.width, 320), Math.max(340, innerWidth - 160)))); // demo: full width on phones
-  const clampTall = (v) => Math.round(Math.min(Math.max(v || DEFAULT_PREFS.height, 200), Math.max(220, innerHeight - 100)));
   function floatRect(f = prefs.float || {}) {
     const w = Math.round(Math.min(Math.max(f.w || 520, 340), innerWidth - 16));
     const hh = Math.round(Math.min(Math.max(f.h || innerHeight * 0.7, 240), innerHeight - 16));
@@ -5126,8 +5101,6 @@
       drag((ev) => {
         if (p === 'right') live = { width: clampSide(innerWidth - ev.clientX) };
         else if (p === 'left') live = { width: clampSide(ev.clientX) };
-        else if (p === 'top') live = { height: clampTall(ev.clientY) };
-        else if (p === 'bottom') live = { height: clampTall(innerHeight - ev.clientY) };
         else live = { float: floatRect({ ...start, w: ev.clientX - start.x, h: ev.clientY - start.y }) };
         applyLayout();
       }, () => {
@@ -5165,7 +5138,6 @@
     const st = dockEl.style;
     st.cssText = '';
     if (p === 'left' || p === 'right') st.width = `${clampSide(live?.width ?? prefs.width)}px`;
-    else if (p === 'top' || p === 'bottom') st.height = `${clampTall(live?.height ?? prefs.height)}px`;
     else {
       const r = live?.float ?? floatRect();
       Object.assign(st, { left: `${r.x}px`, top: `${r.y}px`, width: `${r.w}px`, height: `${r.h}px` });
@@ -5185,17 +5157,13 @@
     if (!on) { pushStyle?.remove(); pushStyle = null; pushSize = 0; fitFixed(); return; }
     if (!pushStyle) { pushStyle = document.createElement('style'); pushStyle.id = 'api-peek-push'; }
     const r = dockEl.getBoundingClientRect();
-    const size = Math.round(p === 'left' || p === 'right'
-      ? r.width || clampSide(prefs.width)
-      : r.height || clampTall(prefs.height));
+    const size = Math.round(r.width || clampSide(prefs.width));
     pushSize = size;
-    const horiz = p === 'left' || p === 'right';
-    const sign = p === 'right' || p === 'bottom' ? -1 : 1;
-    const t = (d) => (horiz ? `${sign * d}px 0` : `0 ${sign * d}px`);
-    const dim = horiz ? 'width' : 'height'; const vu = horiz ? 'vw' : 'vh';
+    const sign = p === 'right' ? -1 : 1;
+    const t = (d) => `${sign * d}px 0`;
     pushStyle.textContent = `html { margin-${p}: ${size}px !important; }
       [data-rl-fix="edge"] { margin-${p}: calc(var(--rl-m, 0px) + ${size}px) !important; }
-      [data-rl-fix="full"] { margin-${p}: calc(var(--rl-m, 0px) + ${size}px) !important; max-${dim}: calc(100${vu} - ${size}px) !important; }
+      [data-rl-fix="full"] { margin-${p}: calc(var(--rl-m, 0px) + ${size}px) !important; max-width: calc(100vw - ${size}px) !important; }
       [data-rl-fix="move"] { translate: ${t(size)} !important; }
       [data-rl-fix="center"] { translate: ${t(Math.round(size / 2))} !important; }`;
     if (!pushStyle.isConnected) (document.head || document.documentElement).append(pushStyle);
@@ -5226,9 +5194,8 @@
       fixObserver.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'open', 'hidden', 'aria-hidden'] });
       fitFixed.iv = setInterval(fitFixed, 2000);
     }
-    const horiz = p === 'left' || p === 'right';
     const W = pushSize;
-    const vw = innerWidth; const vh = innerHeight;
+    const vw = innerWidth;
     // Measure everything as the app laid it out (our adjustments off), then apply.
     pushStyle.disabled = true;
     const plan = new Map();
@@ -5238,8 +5205,8 @@
       if (cs.position !== 'fixed' || cs.display === 'none') continue;
       const r = el.getBoundingClientRect();
       if (r.width < 2 || r.height < 2) continue;
-      const [a, b, len] = horiz ? [r.left, r.right, vw] : [r.top, r.bottom, vh];
-      const nearFar = p === 'right' || p === 'bottom'; // the panel is on the far side
+      const [a, b, len] = [r.left, r.right, vw];
+      const nearFar = p === 'right'; // the panel is on the far side
       const reaches = nearFar ? b > len - W + 1 : a < W - 1;
       if (!reaches) continue;
       let kind;
@@ -5248,7 +5215,7 @@
       else if (nearFar ? b >= len - 2 : a <= 2) kind = 'edge';
       else kind = cs.translate === 'none' ? 'move' : null;
       if (!kind) continue;
-      plan.set(el, { kind, m: parseFloat(cs[`margin${p[0].toUpperCase()}${p.slice(1)}`]) || 0, at: horiz ? r.left : r.top });
+      plan.set(el, { kind, m: parseFloat(cs[`margin${p[0].toUpperCase()}${p.slice(1)}`]) || 0, at: r.left });
     }
     pushStyle.disabled = false;
     fixed.forEach((el) => { if (!plan.has(el) || !el.isConnected) unfix(el); });
@@ -5261,7 +5228,7 @@
     plan.forEach(({ kind, at }, el) => {
       if (kind !== 'edge') return;
       const r = el.getBoundingClientRect();
-      if (Math.abs((horiz ? r.left : r.top) - at) < 1 && getComputedStyle(el).translate === 'none') el.setAttribute('data-rl-fix', 'move');
+      if (Math.abs(r.left - at) < 1 && getComputedStyle(el).translate === 'none') el.setAttribute('data-rl-fix', 'move');
     });
   }
 
@@ -10210,7 +10177,7 @@
     const SIM_CHIP = { off: 'Off', draft: 'Draft', live: 'Live · keeps applying', armed: 'Live · just once', used: 'Used' };
     const SIM_TIP = {
       off: 'The app gets the real response.',
-      draft: 'Set up, not live: the app still gets the real response.',
+      draft: 'Set up, not live: the app still gets the real response. Run previews what the app would get; nothing is sent.',
       live: 'The app gets this on every call to this endpoint.',
       armed: 'The app\'s next call to this endpoint gets this, then it switches off.',
       used: 'The app\'s next call got this. It gets the real response again.',
@@ -10440,7 +10407,8 @@
     // Run: send the edited request yourself and show the response below (the app doesn't see it).
     const runBtn = h('button', {
       type: 'button', class: 'runbtn',
-      title: entry.manual ? 'Send this request and see the response' : 'Send the edited request yourself and see the response. The app doesn\'t see it. With a Draft simulation, Run previews what the app would get; nothing is sent.',
+      title: entry.manual ? 'Send this request and see the response' : 'Send it yourself. The app doesn\'t see it',
+      onmouseenter: () => { if (!entry.manual) runBtn.title = simState() === 'draft' ? 'Preview what the app would get with your simulation. Nothing is sent' : 'Send it yourself. The app doesn\'t see it'; },
       onclick: async () => {
         if (!routeOk()) { say('Fix the path first.', 'warn'); return; }
         if (!headersOk()) { say('Fix the header names first.', 'warn'); return; }
@@ -10555,9 +10523,6 @@
         ...reqKids.map((k, i) => (i === 0 ? { ...k, section: 'Request' } : k)),
         ...resKids.map((k, i) => (i === 0 ? { ...k, section: 'Response' } : k)),
       ] };
-      const pauseItem = capturePaused(entry)
-        ? { id: 'mute', label: 'Show in list', icon: ICONS.eye, run: () => { setCapturePaused(entry, false); buildMenu(); } }
-        : { id: 'mute', label: 'Hide from list', icon: ICONS.eyeoff, title: 'Stop listing new calls to this endpoint. They still go out as usual', run: () => { setCapturePaused(entry, true); buildMenu(); } };
       const openTool = (id) => { d.lower = d.lower === id && !(id === 'simulate' && simState() !== 'off') ? 'response' : id; drawLower(); drawLowerHead(); drawBar(); requestAnimationFrame(() => toolCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' })); buildMenu(); };
       // Compact menu: a few direct actions, then three submenus (Copy as, Send copies, Change the app's call),
       // then Apply / Reload. Second lines only show state (Open, On); the rest is in tooltips.
@@ -10569,9 +10534,6 @@
       const nUsers = usersOf(runEnv()).length;
       const runAllItem = { id: 'run-all', label: 'Try with every user…', icon: ICONS.user, title: nUsers ? `Send it as each of the ${plural(nUsers, 'user')} in ${runEnv().name} and compare the statuses` : `${runEnv().name} has no users yet`, run: runAsEveryUser };
       const edgeItem = { id: 'edge', label: 'Test edge cases…', sub: d.lower === 'edge' ? 'Open · click to close' : null, icon: ICONS.spark, title: 'One field at a time: empty, too long, wrong type…', run: () => openTool('edge') };
-      const pkey = captureKey(entry);
-      const pinItem = { id: 'pin', label: core.pins.has(pkey) ? 'Unpin endpoint' : 'Pin endpoint', title: core.pins.has(pkey) ? 'Remove it from the top of Requests' : 'Keep it at the top of Requests', icon: ICONS.pin,
-        run: () => { const on = !core.pins.has(pkey); core.pins.set(pkey, on); toast(on ? 'Pinned to the top of Requests' : 'Unpinned', '', 2500, { label: 'Undo', run: () => core.pins.set(pkey, !on) }); } };
       const dupItem = { id: 'dup', label: 'Duplicate request', title: 'A copy you can edit and run on its own', icon: ICONS.dup, run: duplicate };
       // Two submenus by intent: send copies of this request yourself, or change what the app's own call does.
       const bpKids = entry.manual ? [] : [
@@ -10589,7 +10551,6 @@
       applyWas = canApply();
       const items = entry.manual ? [
         mockItem,
-        pinItem,
         dupItem,
         { ...copyMenu, sepBefore: true },
         { ...runMenu, sepBefore: false }, testMenu,
@@ -10597,8 +10558,6 @@
         { id: 'delete', label: 'Delete request', icon: ICONS.trash, danger: true, sepBefore: true, run: () => { core.state.requests = core.state.requests.filter((r) => r !== entry); core.refresh(); closeTab(d); } },
       ] : [
         mockItem,
-        pinItem,
-        pauseItem,
         dupItem,
         { ...copyMenu, sepBefore: true },
         { ...runMenu, sepBefore: false }, testMenu,
@@ -10894,8 +10853,6 @@
     list: svg('<path d="M5.5 4h8M5.5 8h8M5.5 12h8"/><circle cx="2.75" cy="4" r=".75" fill="currentColor"/><circle cx="2.75" cy="8" r=".75" fill="currentColor"/><circle cx="2.75" cy="12" r=".75" fill="currentColor"/>'),
     dockRight: svg('<rect x="1.75" y="2.75" width="12.5" height="10.5" rx="2"/><path d="M9.5 2.75v10.5" /><rect x="9.5" y="2.75" width="4.75" height="10.5" rx="0" fill="currentColor" stroke="none" opacity=".35"/>'),
     dockLeft: svg('<rect x="1.75" y="2.75" width="12.5" height="10.5" rx="2"/><path d="M6.5 2.75v10.5"/><rect x="1.75" y="2.75" width="4.75" height="10.5" fill="currentColor" stroke="none" opacity=".35"/>'),
-    dockBottom: svg('<rect x="1.75" y="2.75" width="12.5" height="10.5" rx="2"/><path d="M1.75 9.25h12.5"/><rect x="1.75" y="9.25" width="12.5" height="4" fill="currentColor" stroke="none" opacity=".35"/>'),
-    dockTop: svg('<rect x="1.75" y="2.75" width="12.5" height="10.5" rx="2"/><path d="M1.75 6.75h12.5"/><rect x="1.75" y="2.75" width="12.5" height="4" fill="currentColor" stroke="none" opacity=".35"/>'),
     dockFloat: svg('<rect x="1.75" y="1.75" width="9" height="7.5" rx="1.5"/><rect x="5.25" y="6.75" width="9" height="7.5" rx="1.5" fill="currentColor" fill-opacity=".18"/>'),
     sun: svg('<circle cx="8" cy="8" r="2.75"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.06 1.06M11.54 11.54l1.06 1.06M3.4 12.6l1.06-1.06M11.54 4.46l1.06-1.06"/>'),
     moon: svg('<path d="M13.2 9.6A5.5 5.5 0 0 1 6.4 2.8a5.5 5.5 0 1 0 6.8 6.8Z"/>'),
@@ -11448,7 +11405,7 @@
     const dockedRow = row('When docked', null, whenDocked,
       { tip: 'Push aside moves the page over so the panel doesn’t cover it. Overlay floats the panel on top of the page. Fixed parts of the page (drawers, dialogs, top bars) are moved too. If something still ends up under the panel, use Overlay.' });
     const syncDocked = () => { dockedRow.hidden = prefs.position === 'float'; };
-    const position = seg([['left', 'Left'], ['right', 'Right'], ['top', 'Top'], ['bottom', 'Bottom'], ['float', 'Floating']], prefs.position,
+    const position = seg([['left', 'Left'], ['right', 'Right'], ['float', 'Floating']], prefs.position,
       (id) => { set({ position: id }); syncDocked(); }, 'Position');
     syncDocked();
     const badgeSw = sw(prefs.badgeCount !== false, 'Request count on the toolbar icon', (on) => set({ badgeCount: on }));
@@ -11468,8 +11425,7 @@
         h('div', { class: 'kbd-row' }, k,
           h('button', { type: 'button', class: 'link', title: 'Opens chrome://extensions/shortcuts', onclick: () => window.postMessage({ __apiPeek: 'openShortcuts' }, '*') }, 'Change ↗'))));
 
-    // Advanced: Preserve log, Max open tabs, stored data, reset
-    const keepSw = sw(preserveOn(), 'Keep after reload', (on) => { setPreserve(on); saved(on ? 'Keep after reload on' : 'Keep after reload off'); });
+    // Advanced: Max open tabs, icon count, recorded clicks, reset
     const tabsIn = h('input', { type: 'number', min: 1, max: 20, step: 1, value: maxTabs(), class: 'num-sm', 'aria-label': 'Max open tabs (1 to 20)' });
     tabsIn.addEventListener('change', () => {
       const v = Math.min(Math.max(Math.round(Number(tabsIn.value) || DEFAULT_PREFS.maxTabs), 1), 20);
@@ -11493,18 +11449,12 @@
       if (confirming) resetBox.querySelector('.sbtn2')?.focus();
     };
     drawReset(false);
-    // This site: everything that's saved for just this site.
-    const recSw = sw(core.capture.on(), 'Record this site', (on) => { setCapture(on); saved(on ? 'Recording this site' : 'Recording off'); });
-    const site = h('section', { class: 'st-sec' }, head(`This site · ${location.host}`),
-      row('Record this site', 'Off: nothing here is recorded or changed. Same as the Recording switch above the request list.', recSw),
-      row('Keep after reload', 'Keep the request list across reloads and navigation (like Preserve log in DevTools).', keepSw,
-        { tip: 'Older calls get a history icon. Saved for this site; the log itself stays in this browser tab, up to 300 calls.' }),
-      row('Recorded clicks', 'Which element made which call.', forgetBtn));
     const adv = h('details', { class: 'st-sec sadv' },
       h('summary', {}, h('span', { class: 'st-head' }, 'Advanced')),
       row('Max open tabs (1–20)', 'The least recently used tab closes past the limit.', tabsIn),
       row('Request count on icon', 'Show how many requests were captured on the RESTless toolbar icon.', badgeSw,
         { tip: 'Applies to every site. Paused calls (‖2) and Offline (OFF) still show on the icon when this is off.' }),
+      row(`Recorded clicks on ${location.host}`, 'Which button or field made which call, used by Apply to app.', forgetBtn),
       resetBox);
     adv.open = ss.get('__apiPeek.advOpen', '') === '1';
     adv.addEventListener('toggle', () => ss.set('__apiPeek.advOpen', adv.open ? '1' : ''));
@@ -11516,7 +11466,7 @@
       row('Import', 'From a RESTless settings file. You choose what to bring in.',
         h('button', { type: 'button', class: 'sbtn2 io-imp', onclick: importSettingsFile }, 'Import…')));
 
-    mainEl.append(h('div', { class: 'settings2' }, h('div', { class: 'st-title' }, h('h2', {}, 'Settings'), savedEl), look, keys, site, io, adv));
+    mainEl.append(h('div', { class: 'settings2' }, h('div', { class: 'st-title' }, h('h2', {}, 'Settings'), savedEl), look, keys, io, adv));
     if (flashOnRender) { saved(flashOnRender); flashOnRender = null; }
   }
   let flashOnRender = null;
@@ -12181,6 +12131,10 @@
       const sec = it.section ? h('div', { class: 'mhead msec', 'aria-hidden': 'true' }, it.section) : null;
       return { it, b, count, sec };
     });
+    // A section heading shows while any of its rows does.
+    let secOf = null;
+    rows.forEach((r) => { if (r.sec) secOf = { el: r.sec, rows: [] }; if (secOf) secOf.rows.push(r.b); r.group = secOf; });
+    const groups = [...new Set(rows.map((r) => r.group).filter(Boolean))];
     const clearBtn = h('button', { type: 'button', class: 'mclear', onclick: (e) => { e.stopPropagation(); items.forEach((it) => { if (it.isOn()) it.toggle(); }); sync(); onChange?.(); els[0]?.focus(); } }, 'Clear');
     const els = rows.map((r) => r.b);
     if (heading) list.append(h('div', { class: 'mhead mhead-row', 'aria-hidden': 'true' }, h('span', {}, heading), clearBtn));
@@ -12194,6 +12148,7 @@
         if (count.textContent !== c) count.textContent = c;
       }
       clearBtn.hidden = !items.some((it) => it.isOn());
+      for (const g of groups) { const v = g.rows.some((b) => !b.hidden); if (g.el.hidden === v) g.el.hidden = !v; }
     }
     function close(refocus = false) { if (list.hidden) return; list.hidden = true; btn.setAttribute('aria-expanded', 'false'); if (refocus) btn.focus(); }
     const open = (i = 0) => {
@@ -12617,10 +12572,8 @@
         }
         if (focus) requestAnimationFrame(() => subEls[0]?.focus());
       }
-      const pk = groupOf(r);
       const mainItems = [
         r.mocked && mockOf(r) ? item('editmock', 'Edit mock', 'cube', () => editMockFor(r), { title: 'This call was answered by a mock endpoint' }) : null,
-        core.pins.has(pk) ? item('pin', 'Unpin', 'pin', () => togglePin(pk, false)) : item('pin', 'Pin to top', 'pin', () => togglePin(pk, true), { title: 'Keep this endpoint at the top of the list' }),
         r.pinStub ? null : r.manual ? null : isStopped(r)
           ? item('mute', 'Show in list', 'eye', () => setStopped(r, false))
           : item('mute', 'Hide from list', 'eyeoff', () => setStopped(r, true), { title: 'Stop listing new calls to this endpoint. They still go out as usual' }),
@@ -12748,6 +12701,7 @@
       { id: 'stopped', label: 'Hidden endpoints', sub: 'Endpoints you hid from the list; show them again from ⋯',
         isOn: () => reqView.stopped, toggle: () => { reqView.stopped = !reqView.stopped; }, count: () => core.mute.list().length },
     ];
+    onlyItems.forEach((it) => { it.visible = () => it.count() > 0; }); // only filters that match something
     const menuItems = [...methodItems, ...onlyItems];
     const chevEl = () => { const c = h('span', { class: 'smode-chev', 'aria-hidden': 'true' }); setHTML(c, ICONS.chev); return c; };
     const fCount = h('span', { class: 'fcount', hidden: true });
@@ -13433,6 +13387,7 @@
     }
     if (kind === 'prefs' && e.data.prefs) {
       prefs = { ...DEFAULT_PREFS, ...e.data.prefs };
+      if (!['left', 'right', 'float'].includes(prefs.position)) prefs.position = 'right'; // Top / Bottom were removed in 0.97
       prefListeners.forEach((fn) => fn());
     }
   });

@@ -12,7 +12,7 @@ lead: Every API call your app makes, grouped by endpoint.
 
 ## Keep what matters
 
-- **Pin** an endpoint to keep it at the top: hover the row and click the pin, or use **⋯ → Pin to top**.
+- **Pin** an endpoint to keep it at the top: hover the row and click the pin. Click it again to unpin.
 - **⋯** above the list has **Select…** (hide, show or export several), **Export…** and **Keep after reload** (keeps calls when the page reloads; a dot on ⋯ shows it's on). The bin next to it clears the list.
 - **Select** (the checkbox icon above the list) to pause or resume capturing several endpoints at once, or export them.
 - **Middle-click** a request to open it in a new tab and stay on the list.

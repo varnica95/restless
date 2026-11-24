@@ -25,13 +25,13 @@ To update: `git pull` (or download again), then click ↻ on RESTless in `chrome
 
 RESTless doesn't capture anything on a site until you allow it. Open the panel and the Requests tab says **Recording is off for this site**, with **Record this site** (from now on) and **Record and reload** (so the calls made while the page loads are captured too). The choice is remembered per site (origin). While off, the site's `fetch`/XHR calls go straight to the browser: nothing is recorded, and rewrite rules, breakpoints and users (Send to / Send as) don't apply. Turn it off with the **Recording** switch above the list (the list stays; nothing new is recorded or changed until you turn it back on). Your own requests (new request, API Docs, Inspect) work either way.
 
-Everything happens in one panel. It docks to the right edge by default; it can also dock left, top or bottom, or float as a window.
+Everything happens in one panel. It docks to the right edge by default; it can also dock left or float as a window.
 
 | Action | What you get |
 |---|---|
 | Toolbar icon or **Ctrl+Y** (**Control+Y** on Mac too) | Show / hide the panel |
 | Toolbar icon badge | The number of requests captured on this page (turn it off in **Settings → Advanced → Request count on icon**); turns orange (`‖2`) when calls are paused at a breakpoint and red `OFF` while the tab is offline, even with the count off |
-| Settings → Appearance → Position | Dock right, left, bottom or top, or Floating window |
+| Settings → Appearance → Position | Dock right or left, or Floating window |
 | Drag the panel's inner edge | Resize (remembered across sites). Floating: drag the header to move, the bottom-right corner to resize |
 | **Esc** (inside the panel) | Go back one screen, or minimize |
 
@@ -102,7 +102,7 @@ For a **401** or **403** response, the Response tab says what the token looked l
 
 The search on the Requests tab looks in the method and URL, and in request and response bodies, at once. URL matches filter the list as you type; below them, **In bodies** lists the calls whose request or response body contains the text (labelled *request* or *response*), with the JSON path of each match (`items[1].name = "Hyperloop study"`). Open one and its Response tab highlights the matches. Body results update 200 ms after you stop typing. Only the latest 5 calls per endpoint keep their body, so older calls can't be searched. **Ctrl+K** (**⌘K** on Mac) or **/** focuses the search when the panel was last clicked; Esc clears it.
 
-**Filters ▾** has two sections: **Methods** (only the ones with calls, each with its count) and **Show only** (**Your requests**, **Changed by you**, **Duplicate calls**, **Slow (≥ 1 s)**, **Large (≥ 1 MB)**, **Hidden endpoints**); the button shows how many are on. **Errors N** (4xx, 5xx and network failures) is its own chip, shown when there are any. **Clear** resets the search and every filter.
+**Filters ▾** has two sections: **Methods** (only the ones with calls, each with its count) and **Show only** (**Your requests**, **Changed by you**, **Duplicate calls**, **Slow (≥ 1 s)**, **Large (≥ 1 MB)**, **Hidden endpoints**). Only the ones that match at least one call are listed, so the menu stays short. The button shows how many are on. **Errors N** (4xx, 5xx and network failures) is its own chip, shown when there are any. **Clear** resets the search and every filter.
 
 ### Mock endpoints
 
@@ -126,7 +126,7 @@ Answer calls to an endpoint that doesn't exist yet (or that you want to fake), w
 
 Pin the endpoints you keep coming back to and they stay at the top of the Requests list.
 
-- **Pin**: hover a row and click the pin (just left of ⋯), or **⋯ → Pin to top**; on the request screen, **⋯ → Pin endpoint**. Unpin the same way. Each shows *Pinned GET /api/tasks* with **Undo**.
+- **Pin to top**: hover a row and click the pin (just left of ⋯). Click it again to unpin. Each shows *Pinned GET /api/tasks* with **Undo**.
 - You pin an **endpoint** (method and path), not one call: its new calls appear under the pinned row as they arrive.
 - **Pinned** is a section at the top (with a count; click it to fold it), then **All requests**. A pinned endpoint moves up instead of showing twice. In the Timeline view the list stays in time order.
 - Pins are saved per site, so they stay after a reload and after **Clear**. A pinned endpoint with no calls yet shows *No calls yet*; clicking it opens a new request to it.
@@ -192,7 +192,7 @@ The request tabs you have open come back when the page reloads, in this browser 
 
 ### Keep after reload
 
-Turn on **Keep after reload** (**⋯ → Keep after reload** above the list, or **Settings → This site**; a dot on ⋯ shows it's on) and the captured requests stay when the page reloads or navigates within the site, like DevTools. Older calls are dimmed and listed under one **Before reload** line (in the grouped view: endpoints not called again since the reload; inside an expanded group, between its new and older calls). The request screen tags them **before reload**; a call still in flight when the page left shows as `interrupted`. The switch is saved per site; the log itself is kept per tab (`sessionStorage`), at most 300 calls, and very large bodies are dropped first. The trash button clears it.
+Turn on **Keep after reload** (**⋯ → Keep after reload** above the list; a dot on ⋯ shows it's on) and the captured requests stay when the page reloads or navigates within the site, like DevTools. Older calls are dimmed and listed under one **Before reload** line (in the grouped view: endpoints not called again since the reload; inside an expanded group, between its new and older calls). The request screen tags them **before reload**; a call still in flight when the page left shows as `interrupted`. The switch is saved per site; the log itself is kept per tab (`sessionStorage`), at most 300 calls, and very large bodies are dropped first. The trash button clears it.
 
 
 ### TypeScript types
@@ -216,15 +216,15 @@ Click any request to open it; it opens in a request tab. Esc (or the **Requests*
 
 **Header**: one row: method (dropdown) · URL (editable, with the environment chip and a copy-URL button; without environments, a captured call's host shows muted in front of the path) · **Run** · **⋯**. At 400 px or narrower, Run and ⋯ move to a second row. The tab strip's `n/5` counter only appears once you're one tab away from the limit.
 
-- **Run** sends the edited request yourself and shows the response below; the app doesn't see it (this was *Send copy*). On a paused call it reads **Continue**, with **Send unchanged** and **Drop** in the bar under it.
+- **Run** sends the edited request yourself and shows the response below; the app doesn't see it (this was *Send copy*). Its tooltip is one line; with a Draft simulation it says Run previews instead. On a paused call it reads **Continue**, with **Send unchanged** and **Drop** in the bar under it.
 - **⋯** is a short menu with three submenus (› opens them beside the menu; on a narrow panel they open just under the item):
-  - **Pin endpoint** / **Unpin endpoint**, **Hide from list** / **Show in list** (captured calls; see Requests), **Duplicate request** (becomes your own request, tagged *yours*).
+  - **Duplicate request** (becomes your own request, tagged *yours*). Pinning and hiding are list actions: they're on the row (pin icon, row ⋯ → Hide from list).
   - **Copy as ›**: *Request* (**URL**, **cURL**, **Fetch**, **Request body**, **Body as TypeScript**) and *Response* (**Response body**, **TypeScript**), copied as you see them here (with your edits, and the response that's showing).
   - **Send copies ›** (you send them; the app doesn't see these): **Run in bulk…**, **Try with every user…**, **Test edge cases…**.
   - **Change the app's call ›** (app's own calls only): **Simulate response…**, **Break on next call**, **Break on every call** (ticked when set; click again to turn off). While a breakpoint is on, the item's second line says so (*Breakpoint on: next call*) and the ⋯ button turns purple.
   - **Apply to app** (see below): one action; its subtitle says what it will do, e.g. *Re-runs “Search” on the page · keeps applying* or *Reloads the page · just once*.
   - Second lines only show state (*Open*, *Breakpoint on*); explanations are in the tooltips. Arrow keys move through the menu, → opens a submenu, ← or Esc goes back.
-  - Your own requests have **Import cURL…** and **Delete request** instead of Hide from list, the breakpoints and the app items; Simulate response is greyed out for them.
+  - Your own requests have **Import cURL…** and **Delete request** instead of the breakpoints and the app items; Simulate response is greyed out for them.
 
 **Edited bar**: when the request differs from the app's original call, one bar appears under the URL row: **● Edited** (hover for the list), **Reset** (back to the request as the app made it; a simulation keeps its own state in its card), the **Keep applying** / **Just once** switch and **Save**; once saved, **Saved · keeps applying · View in Setup**. Messages (Copied, Applied, a failed request…) appear as one compact line below it. There is no separate status row: status, time, size and age are in the Response header.
 
@@ -319,15 +319,14 @@ Actions, in the request screen's header next to **‹ All requests**:
 
 Changes save right away; a small **✓ Saved** confirms each one. Each row has its label on the left, the control on the right and a short description below.
 
-- **Appearance**: **Theme** (Light, Dark (default) or System), **Position** (Left, Right (default), Top, Bottom or Floating), **When docked** (Push aside (default) or Overlay; the ⓘ explains; hidden while Floating). Push aside also moves the page's fixed parts that would sit under the panel, which a margin on the page can't reach: full-width bars and backdrops get narrower, drawers, side sheets and toasts against that side move over, and centred dialogs move to the middle of what's left. Elements that animate their own position are only moved through their margin, so their animations keep working. It's rechecked as the page changes, and everything goes back when the panel closes or switches to Overlay.
+- **Appearance**: **Theme** (Light, Dark (default) or System), **Position** (Left, Right (default) or Floating; a panel docked top or bottom in an older version moves to the right), **When docked** (Push aside (default) or Overlay; the ⓘ explains; hidden while Floating). Push aside also moves the page's fixed parts that would sit under the panel, which a margin on the page can't reach: full-width bars and backdrops get narrower, drawers, side sheets and toasts against that side move over, and centred dialogs move to the middle of what's left. Elements that animate their own position are only moved through their margin, so their animations keep working. It's rechecked as the page changes, and everything goes back when the panel closes or switches to Overlay.
 - **Shortcut**: **Show / hide** with the current key (default **Ctrl+Y**, Control+Y on Mac too) and **Change ↗** (opens `chrome://extensions/shortcuts`; managed by Chrome, so it works on any page; "Not set" if another extension took it). Chrome keeps a shortcut you already had when the extension updates; the new default applies to new installs, or set it under Change ↗.
 - **Import & export**: one JSON file, `restless_settings_<date>_<time>.json` (e.g. `restless_settings_2026-11-18_09-41-07.json`).
   - **Export…** opens a dialog with what's here, counted: **Environments and users** (*3 environments (with Default) · 4 users*), with **Include tokens** under it (on; *Anyone with the file can send requests as these users*; off saves users without their tokens), **Rules** (rules, mock endpoints and breakpoints), **API docs** (the loaded docs, or their link when they were too big to keep), **Stopped endpoints** (Stop capturing) and **Pinned endpoints**. Empty parts are greyed out. The file name is shown before **Export**. Captured requests and the panel's own settings aren't included.
   - **Import…** picks a file and shows what's in it (*exported Nov 18, 2026, 09:41*, and from which site when it's another), each part ticked, and **How**: **Add to what's here** (default: environments with the same id or URL, users with the same id, and rules for the same endpoint are updated; a user whose token is already in that environment isn't added twice; nothing is removed) or **Replace what's here** (each ticked part is replaced by the file's). API docs always replace the current docs. Users imported without a token show *no token*; Edit adds it. **Import** shows *Imported 2 environments, 4 users, 2 rules, API docs, 1 stopped endpoint* with **Undo**, which puts everything back as it was. A file that isn't a RESTless settings file is refused with a message.
-- **This site · host**: **Record this site** (the same switch as **Recording** above the list), **Keep after reload** (the ⓘ has the details) and **Recorded clicks → Forget recorded clicks**.
-- **Advanced** (collapsed): **Max open tabs (1–20)** (default 5), **Request count on icon**, and **Reset to defaults**, which asks first, then restores the settings above and turns Keep after reload off for this site. Rules, profiles, environments, captured requests and the capture switch are kept.
+- **Advanced** (collapsed): **Max open tabs (1–20)** (default 5), **Request count on icon**, **Recorded clicks on host → Forget recorded clicks** (which button made which call, used by Apply to app), and **Reset to defaults**, which asks first, then restores the settings above and turns Keep after reload off for this site. Rules, profiles, environments, captured requests and the capture switch are kept.
 
-The recording switch for the site is in **This site**, and also above the request list (**Recording / Off**) and on the *Recording is off* screen.
+The recording switch for the site is above the request list (**Recording / Off**) and on the *Recording is off* screen. Keep after reload is in the list's **⋯**.
 
 Appearance settings sync through Chrome and apply on every site.
 
