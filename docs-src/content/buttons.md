@@ -52,6 +52,17 @@ A button belongs to the list's path, with ids as "any id": it shows on page 2, w
 
 The dialog offers **Load the list now**. In **Setup → Buttons**, **Try an example** starts from your most recent list.
 
+## Many buttons
+
+Each row shows one button: the one you used last, or the one you keep there. **▾** next to it, with the number of others, lists the rest grouped by method (**Open**, **Change**, **Delete**), each with its path. With more than 7 there's a search box.
+
+## Review and send
+
+To send different values just once: **▾ → Review and send…**, the eye next to any button in **▾**, or **Shift+click** the button. The box shows the request for that item with its values filled in, and the request body. Change what you need, then **Send** (Ctrl+Enter). **Reset** puts the item's values back. Nothing is saved to the button.
+
+- Values the button asks for each time are fields in the same box.
+- **Review before sending** in the button's dialog opens this box on every press.
+
 ## Manage them
 
-**Buttons ▾** above the items: **Edit**, **Delete** or **Add a button…**. **Setup → Buttons** lists every button: click one to edit it, **⋯** to delete it.
+**Buttons (20) ▾** above the items lists every button, with search: click one to edit it, the **pin** keeps it on the rows, the **bin** deletes it, and **Add a button…** is at the end. **Setup → Buttons** lists every button: click one to edit it, **⋯** to delete it.

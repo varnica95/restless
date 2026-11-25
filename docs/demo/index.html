@@ -5188,6 +5188,41 @@
     button.ibtn.bt-ro-x svg { width: 11px; height: 11px; }
     .bt-ro-b { max-height: 240px; overflow: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); font-size: 11.5px; }
     .bt-ro-empty { font-size: 11.5px; }
+    /* Buttons: one per row + ▾ menu */
+    button.bt-btn.bt-more { gap: 3px; padding: 0 6px; }
+    .bt-more-n { font-size: 10.5px; font-weight: 600; opacity: .8; }
+    .bt-menu { position: absolute; z-index: 30; display: flex; flex-direction: column; gap: 6px; padding: 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); box-shadow: 0 12px 30px rgba(0,0,0,.3); max-height: 360px; }
+    .bt-menu-q { height: 30px; font-size: 12px; font-family: inherit; flex: none; }
+    .bt-menu-l { display: flex; flex-direction: column; overflow-y: auto; min-height: 0; }
+    .bt-menu-g { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .02em; color: var(--dim); padding: 6px 6px 2px; }
+    .bt-menu-sep { height: 1px; background: var(--line); margin: 4px 2px; }
+    .bt-menu-none { font-size: 12px; padding: 6px; }
+    .bt-mi-row { display: flex; align-items: center; gap: 2px; border-radius: 6px; }
+    .bt-mi-row:hover, .bt-mi-row:focus-within { background: var(--hover); }
+    button.bt-mi { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 5px 6px; border: 0; background: transparent; color: var(--fg); text-align: left; cursor: pointer; border-radius: 6px; font-size: 12.5px; }
+    .bt-mi-m { flex: none; width: 34px; font-family: var(--mono, ui-monospace, monospace); font-size: 10px; font-weight: 700; }
+    .bt-mi-m.m-get { color: var(--m-get, #3fb27f); } .bt-mi-m.m-post { color: var(--m-post, #d9a441); } .bt-mi-m.m-put, .bt-mi-m.m-patch { color: var(--m-put, #5b9bd5); } .bt-mi-m.m-delete { color: var(--bad, #e5484d); }
+    .bt-mi-t { display: flex; flex-direction: column; min-width: 0; }
+    .bt-mi-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bt-mi-s { font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bt-mi-ic { display: inline-grid; place-items: center; width: 34px; color: var(--accent); flex: none; }
+    .bt-mi-ic svg { width: 13px; height: 13px; }
+    button.bt-mi.bt-mi-rev { color: var(--accent-fg, var(--accent)); }
+    button.ibtn.bt-mi-side { width: 26px; height: 26px; padding: 0; display: inline-grid; place-items: center; flex: none; opacity: .65; }
+    button.ibtn.bt-mi-side:hover, button.ibtn.bt-mi-side.on { opacity: 1; }
+    button.ibtn.bt-mi-side.on { color: var(--accent); }
+    button.ibtn.bt-mi-side.danger:hover { color: var(--bad, #e5484d); }
+    button.ibtn.bt-mi-side svg { width: 13px; height: 13px; }
+    /* Review and send */
+    .btrev .bt-rev-body { width: 100%; min-height: 120px; max-height: 260px; font-size: 11.5px; line-height: 1.5; resize: vertical; margin-top: 6px; box-sizing: border-box; }
+    .btrev .bt-pval .pf-tok { width: 100%; height: 30px; font-size: 12px; }
+    .btrev .bt-pval .pf-tok:disabled { opacity: .5; }
+    .bt-rev-note { font-size: 11px; margin-top: 4px; }
+    .bt-rev-note[hidden] { display: none; }
+    .bt-foot .linkbtn + .linkbtn { margin-left: 10px; }
+    .bt-revopt { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dim); margin-top: -4px; }
+    .bt-revopt input { width: 14px; height: 14px; margin: 0; accent-color: var(--accent); }
+    @container rlmain (max-width: 360px) { button.bt-btn { max-width: 96px; } }
   `;
 
   // ---------- helpers
@@ -7094,7 +7129,7 @@
   const buttonsApi = {
     list: () => btnState,
     count: () => btnState.length,
-    put(list) { btnState = list; try { localStorage.setItem(BTN_KEY, JSON.stringify(list)); } catch { /* storage blocked */ } if (dock.tab === 'rules') renderTab(); else renderTabSoft(); },
+    put(list) { closeBtnMenu(); btnState = list; try { localStorage.setItem(BTN_KEY, JSON.stringify(list)); } catch { /* storage blocked */ } if (dock.tab === 'rules') renderTab(); else renderTabSoft(); },
     upsert(b) { buttonsApi.put(btnState.some((x) => x.id === b.id) ? btnState.map((x) => (x.id === b.id ? b : x)) : [...btnState, b]); },
     remove(id) { buttonsApi.put(btnState.filter((x) => x.id !== id)); },
     forCall(method, url) {
@@ -7235,14 +7270,18 @@
     if (t) {
       for (const p of leafPaths([t.obj], 30)) {
         let v = getPath(t.obj, p);
-        let item = null; let ask = null;
-        if (typeof v === 'string' && t.marks[v]) {
+        let item = null; let ask = null; let quoted = false;
+        // "{{item.name}}" in quotes: taken from the item, always as text.
+        const q = typeof v === 'string' && !t.marks[v] ? (/^\{\{\s*item\.([\w$.-]+)\s*\}\}$/.exec(v) || null) : null;
+        const qa = typeof v === 'string' && !t.marks[v] ? ASK_ONE.exec(v) : null;
+        if (q) { item = q[1].split('.'); quoted = true; } else if (qa) { ask = qa[1]; quoted = true; } else if (typeof v === 'string' && BRACES.test(v) && !t.marks[v]) { /* text with a {{variable}} in it */ }
+        if (!quoted && typeof v === 'string' && t.marks[v]) {
           const m = /^\{\{\s*item\.([\w$.-]+)\s*\}\}$/.exec(t.marks[v]); const a = ASK_ONE.exec(t.marks[v]);
           if (!m && !a) continue;
           if (m) item = m[1].split('.'); else ask = a[1];
           v = t.marks[v];
         }
-        out.push({ key: `b:${p.join('.')}`, where: 'body', path: p, name: p[p.length - 1], value: v, item, ask });
+        out.push({ key: `b:${p.join('.')}`, where: 'body', path: p, name: p[p.length - 1], value: v, item, ask, quoted });
       }
     }
     return out;
@@ -7293,7 +7332,8 @@
       else if (t) {
         let o = t.obj; const p = pt.path;
         for (let i = 0; i < p.length - 1; i++) o = o[p[i]];
-        if (pt.item) { const m = `\u0000${n++}`; marks[m] = tok(pt); o[p[p.length - 1]] = m; } else o[p[p.length - 1]] = plain(pt);
+        if (pt.item && pt0.quoted) o[p[p.length - 1]] = tok(pt); // stays a quoted text value
+        else if (pt.item) { const m = `\u0000${n++}`; marks[m] = tok(pt); o[p[p.length - 1]] = m; } else o[p[p.length - 1]] = plain(pt);
       }
     }
     let body = req.body;
@@ -7346,11 +7386,11 @@
   const itemId = (it) => it?.id ?? it?.uuid ?? it?._id ?? it?.key ?? null;
   // Send a button's request for one item, as Run does: to the active environment, as its user, with
   // {{variables}} filled. Returns { res, req } or null (cancelled, or the item lacks a field).
-  async function runButton(b, item, listEntry) {
-    const { req: req0, missing } = fillItem(b.req, item);
+  async function runButton(b, item, listEntry, { req: reviewed = null } = {}) {
+    const { req: req0, missing } = reviewed ? { req: reviewed, missing: [] } : fillItem(b.req, item);
     if (missing.length) { toast(`${b.name}: this item has no ${missing[0]}`, 'warn', 4500); return null; }
-    // Values it asks for each time: the box is also the "are you sure" for a DELETE.
-    const asks = askNames(req0);
+    // Values it asks for each time: the box is also the "are you sure" for a DELETE. A reviewed request was both.
+    const asks = reviewed ? [] : askNames(req0);
     let req = req0;
     if (asks.length) {
       const t = itemTitle(item); const id = itemId(item);
@@ -7369,7 +7409,7 @@
       headers: Object.fromEntries(Object.entries(req.headers || {}).map(([k, v]) => [k, varsApi.fill(String(v), env)])),
       body: req.body == null ? req.body : jsonBody ? varsApi.fillJson(req.body, env) : varsApi.fill(req.body, env),
     };
-    if (asksFirst(b) && !asks.length) {
+    if (asksFirst(b) && !asks.length && !reviewed) {
       const ok = await confirmDlg({ title: `${b.name}?`, intro: `${filled.method} ${pathOnly(filled.url)}${env?.id != null ? ` on ${env.name}` : ''}`, ok: 'Send' });
       if (!ok) return null;
     }
@@ -7500,6 +7540,7 @@
     const nameIn = h('input', { class: 'pf-tok bt-name', value: btn?.name || (base ? nameFor(base, src) : ''), 'aria-label': 'Button name', maxlength: '40', spellcheck: 'false', placeholder: 'Update step' });
     nameIn.addEventListener('input', () => { named = true; });
     const srcBox = h('div', { class: 'bt-srcbox' });
+    const reviewIn = h('input', { type: 'checkbox', checked: !!btn?.review });
     const reqBox = h('div', { class: 'bt-reqbox' });
     const noteEl = h('div', { class: 'bt-notes' });
     const short = (v, n = 28) => { const s = v == null ? 'null' : typeof v === 'object' ? JSON.stringify(v) : String(v); return s.length > n ? `${s.slice(0, n - 1)}…` : s; };
@@ -7723,7 +7764,7 @@
     const save = () => {
       if (!src || !base) return;
       const name = nameIn.value.trim() || nameFor(base, src);
-      const b = { id: btn?.id || `b${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, name, on: src.on, req: templateFrom(base, parts) };
+      const b = { id: btn?.id || `b${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, name, on: src.on, req: templateFrom(base, parts), ...(reviewIn.checked ? { review: true } : {}) };
       close();
       if (btn) { buttonsApi.upsert(b); return; }
       btnFocus = { id: b.id, at: Date.now() };
@@ -7750,6 +7791,7 @@
       body.append(
         h('label', { class: 'bt-field' }, h('span', { class: 'bt-lab' }, 'Button name'), nameIn),
         srcBox, reqBox, noteEl,
+        h('label', { class: 'bt-revopt', title: 'Each press shows the request with its values filled in, to change before it’s sent' }, reviewIn, h('span', {}, 'Review before sending')),
         h('div', { class: 'bt-foot' },
           h('button', { type: 'button', class: 'btn-sm primary bt-save', onclick: save }, btn ? 'Save' : 'Add button'),
           btn ? h('button', { type: 'button', class: 'btn-sm danger bt-del', onclick: () => { close(); deleteButton(btn); } }, 'Delete')
@@ -7758,6 +7800,157 @@
     }
     dockEl.append(wrap);
     requestAnimationFrame(() => (sources.length ? (btn ? nameIn : body.querySelector('.bt-save')) : body.querySelector('.btn-sm.primary') || closeBtn)?.focus());
+  }
+  // ---------- Many buttons: each row shows one (the one you keep on rows, else the last one you pressed) and a ▾
+  // with the rest, grouped by what they do, searchable once there are more than 7.
+  const MAIN_KEY = '__apiPeek.btnMain';
+  const mainMap = () => { try { return JSON.parse(localStorage.getItem(MAIN_KEY) || '{}'); } catch { return {}; } };
+  const setMain = (path, v) => { const m = mainMap(); if (v) m[path] = v; else delete m[path]; try { localStorage.setItem(MAIN_KEY, JSON.stringify(m)); } catch { /* storage blocked */ } };
+  function mainButton(btns, path, freshId) {
+    const fresh = freshId && btns.find((b) => b.id === freshId);
+    const m = mainMap()[path];
+    const kept = m && btns.find((b) => b.id === m.id);
+    return (m?.pinned && kept) || fresh || kept || btns[0];
+  }
+  const methodGroup = (m) => (m === 'GET' || m === 'HEAD' ? 'Open' : m === 'DELETE' ? 'Delete' : 'Change');
+  let btnMenuEl = null; let btnMenuOff = null;
+  function closeBtnMenu(refocus = false) {
+    const a = btnMenuEl?._anchor;
+    btnMenuEl?.remove(); btnMenuEl = null; btnMenuOff?.(); btnMenuOff = null;
+    if (refocus) a?.focus?.();
+  }
+  // entries: [{ b, run(ev), side: [{ icon, label, run, on }] }]; top: entries above the groups (no search).
+  function openBtnMenu(anchor, { label, entries, top = [], bottom = [] }) {
+    if (btnMenuEl?._anchor === anchor) { closeBtnMenu(); return; }
+    closeBtnMenu();
+    const search = entries.length > 7 ? h('input', { class: 'pf-tok bt-menu-q', placeholder: `Search ${entries.length} buttons`, 'aria-label': 'Search buttons', spellcheck: 'false' }) : null;
+    const listEl = h('div', { class: 'bt-menu-l', role: 'menu', 'aria-label': label });
+    const item = (e) => {
+      const main = h('button', { type: 'button', class: `bt-mi${e.cls ? ` ${e.cls}` : ''}`, role: 'menuitem', title: e.title || (e.b ? buttonPath(e.b) : ''),
+        onclick: (ev) => { closeBtnMenu(); e.run(ev); } });
+      if (e.b) main.append(h('span', { class: `bt-mi-m m-${e.b.req.method.toLowerCase()}` }, e.b.req.method === 'DELETE' ? 'DEL' : e.b.req.method), h('span', { class: 'bt-mi-t' }, h('span', { class: 'bt-mi-n' }, e.b.name), h('span', { class: 'muted mono bt-mi-s' }, urlParts(e.b.req.url).path.replace(ITEM_RX, (m, p) => `{${p}}`).replace(ASK_RX, (m, n) => `{${n}?}`))));
+      else { const ic = h('span', { class: 'bt-mi-ic', 'aria-hidden': 'true' }); if (e.icon) setHTML(ic, e.icon); main.append(ic, h('span', { class: 'bt-mi-n' }, e.label)); }
+      const side = (e.side || []).map((s) => {
+        const sb = h('button', { type: 'button', class: `ibtn bt-mi-side${s.on ? ' on' : ''}${s.danger ? ' danger' : ''}`, 'aria-label': s.label, title: s.label, onclick: (ev) => { ev.stopPropagation(); closeBtnMenu(); s.run(ev); } });
+        setHTML(sb, s.icon);
+        return sb;
+      });
+      return h('div', { class: 'bt-mi-row' }, main, ...side);
+    };
+    const draw = () => {
+      const q = (search?.value || '').trim().toLowerCase();
+      const hits = entries.filter((e) => !q || e.b.name.toLowerCase().includes(q) || e.b.req.url.toLowerCase().includes(q));
+      const groups = ['Open', 'Change', 'Delete'].map((g) => [g, hits.filter((e) => methodGroup(e.b.req.method) === g)]).filter(([, l]) => l.length);
+      const kids = [];
+      if (!q) kids.push(...top.map(item));
+      for (const [g, l] of groups) { if (groups.length > 1 || top.length) kids.push(h('div', { class: 'bt-menu-g', role: 'presentation' }, g)); kids.push(...l.map(item)); }
+      if (q && !hits.length) kids.push(h('div', { class: 'muted bt-menu-none' }, `No button matches “${search.value.trim()}”.`));
+      if (!q && bottom.length) kids.push(h('div', { class: 'bt-menu-sep', role: 'separator' }), ...bottom.map(item));
+      listEl.replaceChildren(...kids);
+    };
+    search?.addEventListener('input', draw);
+    const menu = h('div', { class: 'bt-menu' }, search, listEl);
+    menu._anchor = anchor;
+    menu.addEventListener('keydown', (e) => {
+      const its = [...menu.querySelectorAll('.bt-mi')];
+      const i = its.indexOf(menu.ownerDocument.activeElement === menu ? null : (e.composedPath?.()[0]));
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeBtnMenu(true); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); (its[i + 1] || its[0])?.focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); (i > 0 ? its[i - 1] : search || its[its.length - 1])?.focus(); }
+      else if (e.key === 'Enter' && e.composedPath?.()[0] === search) { e.preventDefault(); its[0]?.click(); }
+    });
+    draw();
+    dockEl.append(menu);
+    btnMenuEl = menu;
+    // Under the ▾, right-aligned, inside the panel (above it when there's no room below).
+    const d = dockEl.getBoundingClientRect(); const a = anchor.getBoundingClientRect();
+    const w = Math.min(290, d.width - 16);
+    menu.style.width = `${w}px`;
+    menu.style.left = `${Math.max(8, Math.min(a.right - d.left - w, d.width - w - 8))}px`;
+    const below = a.bottom - d.top + 4;
+    menu.style.top = `${below}px`;
+    const mh = menu.offsetHeight;
+    if (below + mh > d.height - 8 && a.top - d.top - mh - 4 > 8) menu.style.top = `${a.top - d.top - mh - 4}px`;
+    else if (below + mh > d.height - 8) menu.style.maxHeight = `${d.height - below - 8}px`;
+    const away = (ev) => { if (!btnMenuEl) return; const path = ev.composedPath(); if (!path.includes(menu) && !path.includes(anchor)) closeBtnMenu(); };
+    dockEl.addEventListener('mousedown', away, true);
+    btnMenuOff = () => dockEl.removeEventListener('mousedown', away, true);
+    requestAnimationFrame(() => (search || menu.querySelector('.bt-mi'))?.focus());
+  }
+
+  // ---------- Review and send: the request for this item, every value filled in and editable for this run only.
+  function reviewButton(b, item) {
+    return new Promise((res) => {
+      dockEl.querySelector('.pdlg-wrap')?.remove();
+      const back = document.activeElement;
+      const t = itemTitle(item); const id = itemId(item);
+      const { body, wrap, closeBtn } = dlgShell({ id: 'btrev', title: b.name, intro: `on ${t ? `“${t}”` : id != null ? String(id) : 'this item'} · changes apply to this run only`, cls: 'btdlg btrev' });
+      let last = {}; try { last = JSON.parse(localStorage.getItem(ASK_KEY) || '{}'); } catch { /* none */ }
+      const all = partsOf(b.req);
+      const segs = urlParts(b.req.url).path.split('/');
+      const pname = (p) => (p.where === 'body' ? p.path.join('.') : p.where === 'query' ? p.name : p.ask || (segs[p.index - 1] && !looksId(decSeg(segs[p.index - 1])) ? `${segs[p.index - 1].replace(/ies$/, 'y').replace(/s$/, '').replace(/[^\w]/g, '')}Id` : 'id'));
+      // Fields for what changes per press (from the item, or asked) and the address's other parts.
+      const shownParts = all.filter((p) => p.item || p.ask || p.where !== 'body');
+      const startOf = (p) => { const v = p.item ? getPath(item, p.item) : p.ask ? (last[`${b.id}:${p.ask}`] ?? '') : p.value; return v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v); };
+      const inputs = new Map(shownParts.map((p) => [p.key, h('input', { class: 'pf-tok mono', value: startOf(p), 'aria-label': pname(p), spellcheck: 'false' })]));
+      const lineEl = h('div', { class: 'bt-sum mono' });
+      const ta = h('textarea', { class: 'pf-tok mono bt-rev-body', spellcheck: 'false', 'aria-label': 'Request body', rows: '8' });
+      let bodyEdited = false;
+      const noteEl = h('div', { class: 'muted bt-rev-note', hidden: true }, 'Body edited by hand: the body fields above no longer change it.');
+      // This run's request: the button's, with each field's value put in as a fixed value.
+      const build = () => {
+        const parts = all.map((p) => {
+          const inp = inputs.get(p.key);
+          if (!inp) return p;
+          const v = p.where === 'body' ? parseTyped(inp.value) : inp.value;
+          return { ...p, item: null, ask: null, wasAsk: true, value: v, fallback: v };
+        });
+        const tpl = templateFrom(b.req, parts);
+        const { req } = fillItem(tpl, item);
+        if (bodyEdited) req.body = ta.value;
+        return req;
+      };
+      const refresh = () => {
+        const r = build();
+        const u = urlParts(r.url);
+        lineEl.replaceChildren(h('span', { class: `bt-m m-${r.method.toLowerCase()}` }, r.method), h('span', { class: 'bt-sum-p', title: `${u.path}${u.query ? `?${u.query}` : ''}` }, `${u.path}${u.query ? `?${u.query}` : ''}`));
+        if (!bodyEdited) ta.value = r.body ?? '';
+        for (const p of shownParts) if (p.where === 'body') inputs.get(p.key).disabled = bodyEdited;
+        noteEl.hidden = !bodyEdited;
+      };
+      for (const inp of inputs.values()) inp.addEventListener('input', refresh);
+      ta.addEventListener('input', () => { bodyEdited = true; refresh(); });
+      let settled = false;
+      const done = (v) => { if (settled) return; settled = true; closeEnvDlg = null; wrap.remove(); back?.focus?.(); res(v); };
+      const send = () => {
+        const asks = shownParts.filter((p) => p.ask);
+        for (const p of asks) last[`${b.id}:${p.ask}`] = inputs.get(p.key).value;
+        if (asks.length) { try { localStorage.setItem(ASK_KEY, JSON.stringify(last)); } catch { /* storage blocked */ } }
+        done(build());
+      };
+      const reset = () => { for (const p of shownParts) inputs.get(p.key).value = startOf(p); bodyEdited = false; refresh(); };
+      closeBtn.addEventListener('click', () => done(null));
+      wrap.addEventListener('mousedown', (ev) => { if (ev.target === wrap) done(null); });
+      wrap.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(); } });
+      closeEnvDlg = () => done(null);
+      const hasBody = b.req.method !== 'GET' && b.req.body != null && String(b.req.body).trim();
+      body.append(
+        h('div', { class: 'bt-reqbox' }, h('span', { class: 'bt-lab' }, 'Request'), lineEl,
+          shownParts.length ? h('div', { class: 'bt-params', role: 'table', 'aria-label': 'Values for this run' },
+            ...shownParts.map((p) => h('div', { class: 'bt-param', role: 'row' },
+              h('span', { class: 'bt-pname', role: 'rowheader' }, h('span', { class: 'mono' }, pname(p)), h('span', { class: 'muted bt-pwhere' }, `${p.where}${p.item ? ` · item.${p.item.join('.')}` : p.ask ? ' · asked' : ''}`)),
+              h('span', { class: 'bt-parrow muted', 'aria-hidden': 'true' }, '→'),
+              h('span', { class: 'bt-pval', role: 'cell' }, inputs.get(p.key))))) : null,
+          hasBody ? h('details', { class: 'bt-json', open: true }, h('summary', {}, 'Request body'), ta, noteEl) : null),
+        h('div', { class: 'bt-foot' },
+          h('button', { type: 'button', class: 'btn-sm primary bt-save', onclick: send }, 'Send'),
+          h('span', { class: 'hspace' }),
+          h('button', { type: 'button', class: 'linkbtn', onclick: reset }, 'Reset'),
+          h('button', { type: 'button', class: 'linkbtn', onclick: () => done(null) }, 'Cancel')));
+      refresh();
+      dockEl.append(wrap);
+      requestAnimationFrame(() => { const f = [...inputs.values()][0]; (f || body.querySelector('.bt-save'))?.focus(); f?.select?.(); });
+    });
   }
   function deleteButton(b) {
     const before = buttonsApi.list();
@@ -7840,11 +8033,15 @@
         drawOpen();
       };
       const openRun = (rq) => { const ne = core.addManual({ method: rq.method, url: rq.url, headers: rq.headers, body: rq.body, bodyKind: rq.bodyKind }); dock.tab = 'requests'; ss.set('__apiPeek.tab', 'requests'); openDetail(ne); };
-      const go = async (b) => {
+      const go = async (b, ev = null, review = false) => {
         if (fresh) btnFocus = null;
         seenCoach();
+        if (!mainMap()[src.on.path]?.pinned) setMain(src.on.path, { id: b.id });
+        // Review and send: from the ▾, with Shift+click, or always for a button set to.
+        let reviewed = null;
+        if (review || b.review || ev?.shiftKey) { reviewed = await reviewButton(b, it); if (!reviewed) return; }
         st[i] = { busy: true }; showRes();
-        const out = await runButton(b, it, ctx.entry);
+        const out = await runButton(b, it, ctx.entry, { req: reviewed });
         if (!out) { delete st[i]; showRes(); return; }
         const ok = typeof out.res.status === 'number' && out.res.status < 400;
         // An error opens by itself; a success shows its status, which opens the response.
@@ -7854,20 +8051,24 @@
           { label: 'Open', run: () => openRun(out.req) });
       };
       const btnEl = (b) => {
-        const el = h('button', { type: 'button', class: `bt-btn${fresh && fresh.id === b.id && i === 0 ? ' pulse' : ''}`, title: `${buttonPath(b)}${asksFirst(b) ? ' · asks first' : ''}`, onclick: () => go(b) });
+        const el = h('button', { type: 'button', class: `bt-btn${fresh && fresh.id === b.id && i === 0 ? ' pulse' : ''}`, title: `${buttonPath(b)}${b.review ? ' · reviews first' : asksFirst(b) ? ' · asks first' : ''}${b.review ? '' : '\nShift+click to review it first'}`, onclick: (ev) => go(b, ev) });
         const ic = h('span', { class: 'bt-ico', 'aria-hidden': 'true' }); setHTML(ic, ICONS.bolt);
         el.append(ic, h('span', {}, b.name));
         return el;
       };
-      // The one just added first, so it's the one you see when they don't all fit.
-      const ordered = fresh ? [...btns.filter((b) => b.id === fresh.id), ...btns.filter((b) => b.id !== fresh.id)] : btns;
+      // One button on the row (kept, else last pressed, else the one just added) and ▾ with Review and the rest.
+      const main = btns.length ? mainButton(btns, src.on.path, fresh?.id) : null;
+      const more = main ? h('button', { type: 'button', class: 'bt-btn bt-more', 'aria-haspopup': 'menu', 'aria-label': `More for ${title || id || `item ${i + 1}`}`, title: btns.length > 1 ? `Review, or the other ${plural(btns.length - 1, 'button')}` : 'Review and send' }) : null;
+      if (more) {
+        setHTML(more, ICONS.chevDown);
+        if (btns.length > 1) more.append(h('span', { class: 'bt-more-n' }, String(btns.length - 1)));
+        more.addEventListener('click', () => openBtnMenu(more, { label: `Buttons for ${title || id || `item ${i + 1}`}`,
+          top: [{ label: `Review and send “${main.name}”…`, icon: ICONS.eye || ICONS.pencil, cls: 'bt-mi-rev', run: () => go(main, null, true) }],
+          entries: btns.filter((b) => b !== main).map((b) => ({ b, run: (ev) => go(b, ev), side: [{ icon: ICONS.eye || ICONS.pencil, label: `Review and send “${b.name}”`, run: () => go(b, null, true) }] })) }));
+      }
       const acts = !btns.length
         ? (i === 0 ? [h('button', { type: 'button', class: 'bt-ghost', onclick: () => openButtonDlg({ list: src }) }, '+ Add button')] : [])
-        : ordered.length > 2
-          ? [btnEl(ordered[0]), dropMenu(`More buttons for ${title || id || `item ${i + 1}`}`,
-            ordered.slice(1).map((b) => ({ id: `bt-${b.id}`, label: b.name, icon: ICONS.bolt, sub: buttonPath(b), run: () => go(b) })),
-            { icon: ICONS.chevDown, btnClass: 'bt-btn bt-more', title: 'More buttons', align: 'right' })]
-          : ordered.map(btnEl);
+        : [btnEl(main), more];
       rowEl = h('div', { class: `bt-row${!btns.length && i === 0 ? ' bt-row-ghost' : ''}`, role: 'listitem' },
         h('span', { class: 'bt-id mono', title: id != null ? String(id) : '' }, id != null ? String(id) : `#${i + 1}`),
         h('span', { class: 'bt-title', title }, title || h('span', { class: 'muted' }, '(no name)')),
@@ -7881,13 +8082,17 @@
     const coach = fresh && !coachSeen ? h('div', { class: 'bt-coach', role: 'status' },
       h('span', {}, `Tap to try it on ${firstName}`),
       h('button', { type: 'button', class: 'linkbtn', onclick: seenCoach }, 'Got it')) : null;
-    // Manage: each button of this list, with Edit and Delete.
-    const manage = btns.length ? dropMenu('Manage buttons', [
-      ...btns.map((b) => ({ id: `m-${b.id}`, label: b.name, icon: ICONS.bolt, sub: buttonPath(b), children: [
-        { id: 'edit', label: 'Edit', icon: ICONS.pencil, run: () => openButtonDlg({ btn: b }) },
-        { id: 'del', label: 'Delete', icon: ICONS.trash, danger: true, run: () => deleteButton(b) }] })),
-      { id: 'add', label: 'Add a button…', icon: ICONS.plus, sepBefore: true, run: () => openButtonDlg({ list: src }) },
-    ], { icon: document.createTextNode('Buttons ▾'), btnClass: 'linkbtn bt-manage', title: 'Add, edit or delete buttons', align: 'right' }) : null;
+    // Buttons ▾: every button of this list: click to edit; keep it on the rows, or delete it.
+    const manage = btns.length ? h('button', { type: 'button', class: 'linkbtn bt-manage', 'aria-haspopup': 'menu', title: 'Edit, keep on rows, delete or add buttons' }, `Buttons (${btns.length}) ▾`) : null;
+    manage?.addEventListener('click', () => {
+      const kept = mainMap()[src.on.path];
+      openBtnMenu(manage, { label: 'Manage buttons',
+        entries: btns.map((b) => ({ b, title: `Edit “${b.name}”`, run: () => openButtonDlg({ btn: b }), side: [
+          { icon: ICONS.pin, label: kept?.pinned && kept.id === b.id ? `Stop keeping “${b.name}” on the rows` : `Keep “${b.name}” on the rows`, on: kept?.pinned && kept.id === b.id,
+            run: () => { setMain(src.on.path, kept?.pinned && kept.id === b.id ? { id: b.id } : { id: b.id, pinned: true }); renderTabSoft(); } },
+          { icon: ICONS.trash, label: `Delete “${b.name}”`, danger: true, run: () => deleteButton(b) }] })),
+        bottom: [{ label: 'Add a button…', icon: ICONS.plus, run: () => openButtonDlg({ list: src }) }] });
+    });
     const listEl = h('div', { class: 'bt-list', role: 'list' }, ...(coach ? [rows[0], coach, ...rows.slice(1)] : rows));
     box = h('div', { class: 'bt-items' },
       h('div', { class: 'muted bt-items-h' }, h('span', { class: 'bt-count' }, `${plural(list.items.length, itemNoun(src))}${list.at.includes('.') ? ` in ${list.at}` : ''}${list.items.length > 200 ? ' · first 200 shown' : ''}`), manage),
