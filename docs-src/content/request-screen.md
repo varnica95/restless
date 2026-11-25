@@ -8,6 +8,8 @@ lead: Change any call and send it again, compare answers, or make the app see so
 
 Change the method, path, query, headers or body, then press **Run**. Only you see the answer; the app isn’t affected.
 
+**for ▾**, under the URL, shows when a call was made for one item of a list you've loaded (`POST /api/tasks/2/archive` after `GET /api/tasks`). Pick another item and its values go in: the id in the path, `…Id` fields, and text that came from the item (`"note": "Hyperloop study"`). Then **Run**. **Reset** goes back to the item the app used. It doesn't change the app's own calls.
+
 Hover a JSON line to copy its **Value** or **Key + value**. Paste a `"key": value` into a body and it lands formatted, commas included.
 
 Want the app to use your change? **⋯ → Apply to app** (or **Save ▾ → Save and apply to app**) makes it repeat the call: it re-runs the button or field that made it, or reloads the page for calls made while loading. The menu says which.

@@ -5223,6 +5223,21 @@
     .bt-revopt { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dim); margin-top: -4px; }
     .bt-revopt input { width: 14px; height: 14px; margin: 0; accent-color: var(--accent); }
     @container rlmain (max-width: 360px) { button.bt-btn { max-width: 96px; } }
+    /* Request screen: for ▾ (send this for another item of its list) */
+    .rq-for { display: flex; margin-top: 6px; min-width: 0; }
+    button.rq-for-btn { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; min-width: 0; height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: 7px; background: transparent; color: var(--fg); font-size: 12px; cursor: pointer; font-family: inherit; }
+    button.rq-for-btn:hover, button.rq-for-btn[aria-expanded="true"] { border-color: var(--accent); }
+    .rq-for-l { color: var(--dim); flex: none; }
+    .rq-for-n { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .rq-for-id { font-size: 11px; flex: none; }
+    .rq-for-src { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1 1 auto; }
+    .rq-for-chev { display: inline-grid; place-items: center; flex: none; color: var(--dim); }
+    .rq-for-chev svg { width: 12px; height: 12px; }
+    @container rlmain (max-width: 400px) { .rq-for-src { display: none; } }
+    button.bt-mi.sel { color: var(--accent); }
+    button.bt-mi.sel .bt-mi-n { font-weight: 600; }
+    .bt-mi-id { margin-left: auto; font-size: 11px; flex: none; padding-left: 8px; }
+    .rq-for-note { font-size: 11.5px; }
   `;
 
   // ---------- helpers
@@ -7820,16 +7835,20 @@
     if (refocus) a?.focus?.();
   }
   // entries: [{ b, run(ev), side: [{ icon, label, run, on }] }]; top: entries above the groups (no search).
-  function openBtnMenu(anchor, { label, entries, top = [], bottom = [] }) {
+  function openBtnMenu(anchor, { label, entries, top = [], bottom = [], noun = 'buttons', width = 290 }) {
     if (btnMenuEl?._anchor === anchor) { closeBtnMenu(); return; }
     closeBtnMenu();
-    const search = entries.length > 7 ? h('input', { class: 'pf-tok bt-menu-q', placeholder: `Search ${entries.length} buttons`, 'aria-label': 'Search buttons', spellcheck: 'false' }) : null;
+    const search = entries.length > 7 ? h('input', { class: 'pf-tok bt-menu-q', placeholder: `Search ${entries.length} ${noun}`, 'aria-label': `Search ${noun}`, spellcheck: 'false' }) : null;
     const listEl = h('div', { class: 'bt-menu-l', role: 'menu', 'aria-label': label });
     const item = (e) => {
       const main = h('button', { type: 'button', class: `bt-mi${e.cls ? ` ${e.cls}` : ''}`, role: 'menuitem', title: e.title || (e.b ? buttonPath(e.b) : ''),
         onclick: (ev) => { closeBtnMenu(); e.run(ev); } });
       if (e.b) main.append(h('span', { class: `bt-mi-m m-${e.b.req.method.toLowerCase()}` }, e.b.req.method === 'DELETE' ? 'DEL' : e.b.req.method), h('span', { class: 'bt-mi-t' }, h('span', { class: 'bt-mi-n' }, e.b.name), h('span', { class: 'muted mono bt-mi-s' }, urlParts(e.b.req.url).path.replace(ITEM_RX, (m, p) => `{${p}}`).replace(ASK_RX, (m, n) => `{${n}?}`))));
-      else { const ic = h('span', { class: 'bt-mi-ic', 'aria-hidden': 'true' }); if (e.icon) setHTML(ic, e.icon); main.append(ic, h('span', { class: 'bt-mi-n' }, e.label)); }
+      else if (e.sub != null || e.meta != null) {
+        // A plain entry (an item of a list): its name, a second line and something on the right (its id).
+        if (e.sel) { main.classList.add('sel'); main.setAttribute('aria-current', 'true'); }
+        main.append(h('span', { class: 'bt-mi-t' }, h('span', { class: 'bt-mi-n' }, e.label), e.sub ? h('span', { class: 'muted bt-mi-s' }, e.sub) : null), e.meta != null ? h('span', { class: 'muted mono bt-mi-id' }, e.meta) : null);
+      } else { const ic = h('span', { class: 'bt-mi-ic', 'aria-hidden': 'true' }); if (e.icon) setHTML(ic, e.icon); main.append(ic, h('span', { class: 'bt-mi-n' }, e.label)); }
       const side = (e.side || []).map((s) => {
         const sb = h('button', { type: 'button', class: `ibtn bt-mi-side${s.on ? ' on' : ''}${s.danger ? ' danger' : ''}`, 'aria-label': s.label, title: s.label, onclick: (ev) => { ev.stopPropagation(); closeBtnMenu(); s.run(ev); } });
         setHTML(sb, s.icon);
@@ -7839,12 +7858,13 @@
     };
     const draw = () => {
       const q = (search?.value || '').trim().toLowerCase();
-      const hits = entries.filter((e) => !q || e.b.name.toLowerCase().includes(q) || e.b.req.url.toLowerCase().includes(q));
-      const groups = ['Open', 'Change', 'Delete'].map((g) => [g, hits.filter((e) => methodGroup(e.b.req.method) === g)]).filter(([, l]) => l.length);
+      const text = (e) => (e.b ? `${e.b.name} ${e.b.req.url}` : `${e.label} ${e.sub || ''} ${e.meta ?? ''}`).toLowerCase();
+      const hits = entries.filter((e) => !q || text(e).includes(q));
+      const groups = entries.some((e) => e.b) ? ['Open', 'Change', 'Delete'].map((g) => [g, hits.filter((e) => methodGroup(e.b.req.method) === g)]).filter(([, l]) => l.length) : [['', hits]];
       const kids = [];
       if (!q) kids.push(...top.map(item));
-      for (const [g, l] of groups) { if (groups.length > 1 || top.length) kids.push(h('div', { class: 'bt-menu-g', role: 'presentation' }, g)); kids.push(...l.map(item)); }
-      if (q && !hits.length) kids.push(h('div', { class: 'muted bt-menu-none' }, `No button matches “${search.value.trim()}”.`));
+      for (const [g, l] of groups) { if (g && (groups.length > 1 || top.length)) kids.push(h('div', { class: 'bt-menu-g', role: 'presentation' }, g)); kids.push(...l.map(item)); }
+      if (q && !hits.length) kids.push(h('div', { class: 'muted bt-menu-none' }, `Nothing matches “${search.value.trim()}”.`));
       if (!q && bottom.length) kids.push(h('div', { class: 'bt-menu-sep', role: 'separator' }), ...bottom.map(item));
       listEl.replaceChildren(...kids);
     };
@@ -7864,7 +7884,7 @@
     btnMenuEl = menu;
     // Under the ▾, right-aligned, inside the panel (above it when there's no room below).
     const d = dockEl.getBoundingClientRect(); const a = anchor.getBoundingClientRect();
-    const w = Math.min(290, d.width - 16);
+    const w = Math.min(width, d.width - 16);
     menu.style.width = `${w}px`;
     menu.style.left = `${Math.max(8, Math.min(a.right - d.left - w, d.width - w - 8))}px`;
     const below = a.bottom - d.top + 4;
@@ -7875,7 +7895,48 @@
     const away = (ev) => { if (!btnMenuEl) return; const path = ev.composedPath(); if (!path.includes(menu) && !path.includes(anchor)) closeBtnMenu(); };
     dockEl.addEventListener('mousedown', away, true);
     btnMenuOff = () => dockEl.removeEventListener('mousedown', away, true);
-    requestAnimationFrame(() => (search || menu.querySelector('.bt-mi'))?.focus());
+    requestAnimationFrame(() => { (search || menu.querySelector('.bt-mi.sel') || menu.querySelector('.bt-mi'))?.focus(); menu.querySelector('.bt-mi.sel')?.scrollIntoView({ block: 'nearest' }); });
+  }
+
+  // ---------- For item ▾: a call to one item of a list (POST /api/tasks/2/archive) sent for another item of it.
+  // Which values came from that item: path ids, …Id fields, and text equal to one of its fields ("note": its name).
+  // Returns { src, map: [{ key, where, index?, name?, path?, item, quoted? }], cur } or null.
+  function forItemMap(entry) {
+    if (!entry?.url || !/^https?:/i.test(entry.url)) return null;
+    const req = { method: entry.method, url: entry.url, headers: entry.headers || {}, body: entry.body == null ? null : String(entry.body) };
+    const p = anyIdPath(pathOnly(req.url));
+    const parts = partsOf(req);
+    if (!parts.length) return null;
+    for (const src of listSourcesFor(req)) {
+      if (src.entry === entry || !p.startsWith(`${src.on.path}/`)) continue;
+      const ids = guessParts(parts, src.items).filter((x) => x.item && x.sure && (x.where === 'path' || /id$/i.test(x.name || '')));
+      if (!ids.length) continue;
+      const cur = src.items.findIndex((it) => ids.every((x) => String(getPath(it, x.item)) === String(x.value)));
+      if (cur < 0) continue;
+      const it0 = src.items[cur]; const leaves = leafPaths([it0], 60);
+      const text = parts.filter((x) => !ids.some((y) => y.key === x.key) && x.where !== 'path' && typeof x.value === 'string' && x.value.trim().length >= 3 && !BRACES.test(x.value))
+        .map((x) => { const hit = leaves.filter((lp) => typeof getPath(it0, lp) === 'string' && getPath(it0, lp) === x.value); return hit.length === 1 ? { ...x, item: hit[0], quoted: true } : null; })
+        .filter(Boolean);
+      return { src, map: [...ids, ...text], cur, segs: urlParts(req.url).path.split('/').length };
+    }
+    return null;
+  }
+  // Puts one item's values into a request screen's draft ({ path, params, body }), where they came from.
+  function draftForItem(draft, fi, item) {
+    const txt = (v) => (v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v));
+    const pre = /^[a-z][\w+.-]*:\/\/[^/]+/i.exec(draft.path || '')?.[0] || '';
+    const segs = (draft.path || '').slice(pre.length).split('/');
+    for (const x of fi.map) {
+      const v = getPath(item, x.item);
+      if (x.where === 'path' && x.index < segs.length && segs.length === fi.segs) segs[x.index] = encodeURIComponent(txt(v));
+      else if (x.where === 'query') draft.params = draft.params.map((q) => (q[0] === x.name ? Object.assign([q[0], txt(v), ...q.slice(2)], { off: q.off }) : q));
+    }
+    draft.path = pre + segs.join('/');
+    const bodyParts = fi.map.filter((x) => x.where === 'body');
+    if (bodyParts.length && draft.body != null && parseTemplateBody(draft.body)) {
+      const t = templateFrom({ url: 'http://x/', body: String(draft.body) }, bodyParts);
+      draft.body = fillItem(t, item).req.body;
+    }
   }
 
   // ---------- Review and send: the request for this item, every value filled in and editable for this run only.
@@ -9492,10 +9553,27 @@
       entry.asProfile ? h('span', { class: 'tag prof', title: `Sent as the user "${entry.asProfile}" (Send to / Send as)` }, `as ${entry.asProfile}`) : null,
       entry.prev ? h('span', { class: 'tag prev', title: 'Captured before the page reloaded' }, 'before reload') : null,
     ].filter(Boolean);
+    // for ▾: this call was made for one item of a list; pick another item and its values go in.
+    if (d.forFor !== entry) { d.forFor = entry; d.forFi = forItemMap(entry); d.forItem = null; }
+    const fi = d.forFi;
+    const forRow = fi ? (() => {
+      const items = fi.src.items; const at = d.forItem ?? fi.cur; const it = items[at];
+      const label = (x, i) => itemTitle(x) || (itemId(x) != null ? `${itemNoun(fi.src)} ${itemId(x)}` : `${itemNoun(fi.src)} ${i + 1}`);
+      const btn = h('button', { type: 'button', class: 'rq-for-btn', 'aria-haspopup': 'menu', title: `Send this for another ${itemNoun(fi.src)} of ${fi.src.on.label}: its values go into the path and body` },
+        h('span', { class: 'rq-for-l' }, 'for'), h('span', { class: 'rq-for-n' }, label(it, at)),
+        itemId(it) != null ? h('span', { class: 'muted mono rq-for-id' }, `id ${itemId(it)}`) : null,
+        h('span', { class: 'muted rq-for-src' }, `· ${fi.src.on.label}`));
+      const chev = h('span', { class: 'rq-for-chev', 'aria-hidden': 'true' }); setHTML(chev, ICONS.chevDown); btn.append(chev);
+      btn.addEventListener('click', () => openBtnMenu(btn, { label: `Send for which ${itemNoun(fi.src)}`, noun: `${itemNoun(fi.src)}s`, width: 340,
+        entries: items.map((x, i) => ({ label: label(x, i), sub: [x.status, x.owner, x.type].filter((v) => typeof v === 'string').join(' · ') || null, meta: itemId(x) ?? '',
+          sel: i === at, run: () => { if (i === at) return; draftForItem(draft, fi, x); d.forItem = i === fi.cur ? null : i; d.forSig = sig(); d.copy = null; d.status = null; renderTab(); } })) }));
+      return h('div', { class: 'rq-for' }, btn);
+    })() : null;
     const head = h('div', { class: 'rq-head' },
       h('div', { class: 'rq-bar' }, (() => { const c = h('span', { class: 'mselchev', 'aria-hidden': 'true' }); setHTML(c, ICONS.chev); return h('span', { class: 'mselwrap' }, methodSel, c); })(), urlBox, runSlot, menuSlot),
       pathErr,
       pathVars,
+      forRow,
       metaRight,
       original,
       d.notice ? h('div', { class: 'rq-note notice' }, h('span', { style: 'flex:1' }, d.notice),
@@ -11403,6 +11481,7 @@
       draft.params = p0.map(([k, v]) => [k, v]);
       draft.headers = Object.entries(entry.headers || {});
       draft.body = entry.bodyKind === 'json' ? pretty(entry.body) : entry.body;
+      d.forItem = null;
       renderTab();
     }
     function keepSwitch() {
@@ -11584,7 +11663,15 @@
       if (simSaveBox) drawSimFoot();
       metaRight.hidden = !c.list.length;
       if (!c.list.length) metaRight.replaceChildren();
-      else if (savedNow) {
+      else if (d.forItem != null && d.forSig === sig()) {
+        // Only another item picked in for ▾: a one-off send, not a change to the app's calls (no Save).
+        const it = d.forFi?.src.items[d.forItem];
+        metaRight.replaceChildren(
+          h('span', { class: 'chg', title: 'Run sends it for this item. The app’s own calls stay as they are.' }, h('span', { class: 'chgdot', 'aria-hidden': 'true' }), `For ${itemTitle(it) || `id ${itemId(it)}`}`),
+          h('button', { type: 'button', class: 'linkbtn', title: `Back to ${itemTitle(d.forFi.src.items[d.forFi.cur]) || 'the item the app sent it for'}`, onclick: resetDraft }, 'Reset'),
+          h('span', { class: 'hspace' }),
+          h('span', { class: 'muted rq-for-note' }, 'Run to send'));
+      } else if (savedNow) {
         metaRight.replaceChildren(
           h('span', { class: 'chg saved', title: d.savedLasting ? 'Every matching call is rewritten until you remove the rule' : 'The next matching call is rewritten' },
             h('span', { class: 'chgdot', 'aria-hidden': 'true' }), d.savedLasting ? 'Saved · keeps applying' : 'Saved · just once'),
