@@ -5146,6 +5146,16 @@
       .bt-param { grid-template-columns: minmax(0, 1fr); gap: 4px; }
       .bt-parrow { display: none; }
     }
+    /* Buttons tab (next to Query · Headers · Body) */
+    .tab.tab-btns { display: inline-flex; align-items: center; gap: 5px; }
+    .tab.tab-btns .tab-ic { display: inline-grid; place-items: center; color: var(--accent); }
+    .tab.tab-btns .tab-ic svg { width: 12px; height: 12px; }
+    .bt-pane .bt-items { padding-top: 6px; }
+    .bt-pane .bt-items-h { padding: 0 2px; }
+    .bt-pane .bt-list { border: 1px solid var(--line); border-radius: var(--r); }
+    .bt-pane .bt-row { padding: 6px 10px; }
+    .bt-pane-empty { font-size: 12px; padding: 10px 2px; }
+    @container rlmain (max-width: 380px) { .tab.tab-btns .tab-l { display: none; } }
   `;
 
   // ---------- helpers
@@ -6996,7 +7006,7 @@
     try { f.srcdoc = ttPolicy ? ttPolicy.createHTML(doc) : doc; return f; } catch { /* Trusted Types without our policy */ }
     return h('div', { class: 'muted rv-empty' }, 'This page\'s security policy doesn\'t allow a preview here. Use Raw, or copy the HTML.');
   }
-  // ---------- Buttons: a request with {{item.x}} placeholders, shown on each item of a list (the Items view).
+  // ---------- Buttons: a request with {{item.x}} placeholders, shown on each item of a list (the request's Buttons tab).
   // A button: { id, name, on: { path, label }, req: { method, url, headers, body, bodyKind } }
   //   on.path: the list's path with ids as {} ('/api/tasks', '/api/tasks/{}/steps'), so it shows on every
   //   page, filter and parent id of that list.
@@ -7337,7 +7347,7 @@
   // method and path, then Parameters (each value with where it comes from: a field of the item, or a custom
   // value), and the full Request body folded away. Tapping a value opens From data / Custom value.
   // Ways in: from a request (⋯ → Add as a button…, the hint after a Run) it picks the list; from a list
-  // (+ Add button in Items, Try an example) it picks what to send.
+  // (+ Add button in the Buttons tab, Try an example) it picks what to send.
   let btnFocus = null; // { id, at }: the button just added, pulsed on the first item
   const COACH_KEY = '__apiPeek.btnCoach';
   function openButtonDlg({ req = null, btn = null, list = null } = {}) {
@@ -7621,7 +7631,7 @@
     return true;
   }
 
-  // The Items view of a list response: one row per item with this list's buttons. With none yet, the first
+  // The Buttons tab of a list call: one row per item with this list's buttons. With none yet, the first
   // row offers + Add button. A button just added pulses there, with a one-time tip.
   function itemsView(list, btns, ctx) {
     const st = ctx.state.btnRes || (ctx.state.btnRes = {});
@@ -7693,15 +7703,10 @@
     return box;
   }
 
-  function responseView(res, { highlight = null, above = [], pretty: prettyNode = null, title = null, state = {}, tools = [], bare = false, baseUrl = null, saveVar = null, rows = null } = {}) {
+  function responseView(res, { highlight = null, above = [], pretty: prettyNode = null, title = null, state = {}, tools = [], bare = false, baseUrl = null, saveVar = null } = {}) {
     const isJsonBody = core.isJson(res.text || '');
     const canPreview = !isJsonBody && !!(res.text || '').trim() && isHtmlResponse(res);
-    // Buttons made for this list (Setup → Buttons) show in an Items view, which opens first.
-    const rowBtns = rows && isJsonBody && !highlight ? buttonsApi.forCall(rows.method, rows.url) : [];
-    const rowList = rows && isJsonBody && !highlight && String(rows.method).toUpperCase() === 'GET' ? listItemsOf(res.text) : null;
-    // A list opens on Items when it has buttons, or one was just added to it.
-    if (rowList && (!state.view && rowBtns.length || (btnFocus && rowBtns.some((b) => b.id === btnFocus.id) && state.focusFor !== btnFocus.id))) { state.view = 'items'; if (btnFocus) state.focusFor = btnFocus.id; }
-    if (state.view === 'items' && !rowList) state.view = null;
+    if (state.view === 'items') state.view = null; // the Items view moved to the request's Buttons tab
     if (!state.view || (state.view === 'preview' && !canPreview)) state.view = highlight && prettyNode ? 'raw' : canPreview && !highlight ? 'preview' : 'pretty';
     if (state.wrap == null) state.wrap = !isJsonBody;
     const out = h('div', { class: 'rv-body' });
@@ -7721,15 +7726,14 @@
       },
     });
     { const i = h('span', { class: 'advico', 'aria-hidden': 'true' }); setHTML(i, ICONS.copy); copyBtn.append(i, copyLabel); }
-    const views = [...(rowList ? [['items', [h('span', {}, 'Items'), h('span', { class: 'rvcnt' }, String(rowList.items.length))]]] : []), ['pretty', 'Pretty'], ['raw', 'Raw'], ...(canPreview ? [['preview', 'Preview']] : []), ['headers', [h('span', {}, 'Headers'), (res.headers || []).length ? h('span', { class: 'rvcnt' }, ` (${(res.headers || []).length})`) : null]]];
+    const views = [['pretty', 'Pretty'], ['raw', 'Raw'], ...(canPreview ? [['preview', 'Preview']] : []), ['headers', [h('span', {}, 'Headers'), (res.headers || []).length ? h('span', { class: 'rvcnt' }, ` (${(res.headers || []).length})`) : null]]];
     function draw() {
       seg.replaceChildren(...views.map(([id, label]) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(state.view === id), class: `tab${state.view === id ? ' on' : ''}`, onclick: () => { state.view = id; draw(); } }, label)));
       wrapLabel.textContent = state.wrap ? 'No wrap' : 'Wrap';
       wrapBtn.title = state.wrap ? 'Don\'t wrap long lines' : 'Wrap long lines';
       wrapBtn.classList.toggle('on', !!state.wrap);
-      wrapBtn.hidden = state.view === 'headers' || state.view === 'preview' || state.view === 'items' || (state.view === 'pretty' && !!prettyNode);
+      wrapBtn.hidden = state.view === 'headers' || state.view === 'preview' || (state.view === 'pretty' && !!prettyNode);
       const text = res.text || '';
-      if (state.view === 'items' && rowList) { out.replaceChildren(itemsView(rowList, rowBtns, { state, entry: rows.entry, url: rows.url })); return; }
       if (state.view === 'preview') { out.replaceChildren(previewFrame(text, baseUrl)); return; }
       if (state.view === 'headers') {
         out.replaceChildren((res.headers || []).length
@@ -9119,7 +9123,25 @@
       ['params', 'Query', () => activeParams().length],
       ['headers', 'Headers', () => activeHeaders().length],
       ['body', 'Body', () => null],
+      ...(listInfo() ? [['buttons', 'Buttons', () => listInfo()?.btns.length || 0]] : []),
     ];
+    // Buttons: a GET whose response is a list gets a Buttons tab, with its items and their buttons.
+    let listMemo = { key: null, val: null };
+    function listInfo() {
+      const s0 = shownResponse();
+      if (!s0 || String(s0.m).toUpperCase() !== 'GET' || typeof s0.res.status !== 'number' || s0.res.status >= 400) return null;
+      const key = `${s0.u}|${s0.res.text?.length}|${buttonsApi.count()}|${buttonsApi.list().map((b) => b.id).join()}`;
+      if (listMemo.key === key) return listMemo.val;
+      const list = s0.res.text ? listItemsOf(s0.res.text) : null;
+      listMemo = { key, val: list ? { list, btns: buttonsApi.forCall('GET', s0.u), url: s0.u } : null };
+      return listMemo.val;
+    }
+    function buttonsPane() {
+      setTabTools();
+      const li = listInfo();
+      if (!li) return h('div', { class: 'muted bt-pane-empty' }, 'This response has no list of items.');
+      return h('div', { class: 'bt-pane' }, itemsView(li.list, li.btns, { state: d.btnState || (d.btnState = {}), entry: entry.manual ? null : entry, url: li.url }));
+    }
     // The response shown on the Response tab (your copy / your send, or what the app got), with the request that produced it.
     function shownResponse() {
       const useCopy = d.copy && (d.respSource === 'copy' || !d.respSource || entry.responseText == null);
@@ -9158,8 +9180,16 @@
       return h('span', { class: `docind ${level} withlabel`, role: 'img', 'aria-label': tip, title: tip }, h('span', { class: 'di-sym' }, sym), h('span', { class: 'di-label' }, word));
     }
     function drawTabs() {
+      // A button just added to this list: open its tab (once).
+      if (btnFocus && d.focusFor !== btnFocus.id && listInfo()?.btns.some((b) => b.id === btnFocus.id)) { d.tab = 'buttons'; d.focusFor = btnFocus.id; }
+      if (d.tab === 'buttons' && !listInfo()) d.tab = 'params';
       tabsEl.replaceChildren(...tabList().map(([id, label, count]) => {
         const n = count();
+        if (id === 'buttons') {
+          const ic = h('span', { class: 'tab-ic', 'aria-hidden': 'true' }); setHTML(ic, ICONS.bolt);
+          return h('button', { type: 'button', role: 'tab', 'aria-selected': String(d.tab === id), class: `tab tab-btns${d.tab === id ? ' on' : ''}`, title: 'Buttons on each item of this list', 'aria-label': n ? `Buttons (${n})` : 'Buttons', onclick: () => { d.tab = id; drawTabs(); drawPane(); drawBar(); } },
+            ic, h('span', { class: 'tab-l' }, label), n ? h('span', { class: 'tcount' }, `(${n})`) : null);
+        }
         return h('button', { type: 'button', role: 'tab', 'aria-selected': String(d.tab === id), class: `tab${d.tab === id ? ' on' : ''}`, onclick: () => { d.tab = id; drawTabs(); drawPane(); drawBar(); } },
           label, n ? h('span', { class: 'tcount' }, `(${n})`) : null,
           id === 'body' && hasBody() && bodyText() != null ? h('span', { class: 'dot', title: 'This request has a body' }) : null,
@@ -9567,7 +9597,6 @@
           highlight: d.highlight, above: [auth, src === 'copy' && typeof one.res.status === 'number' && one.res.status < 400 && !d.copy?.preview
             ? (() => { try { const rq = current(runEnv(), { raw: true }); return buttonHint(rq, () => openButtonDlg({ req: rq })); } catch { return null; } })() : null], state: viewState, title: prob ? prob.title || 'Error' : null, bare: true, baseUrl: sentU,
           pretty: prob ? problemCard(one.res, prob, ctx) : null, tools: [srcSeg, cmpBtn],
-          rows: { method: sentM, url: sentU, entry: entry.manual ? null : entry },
         });
       }
       if (entry.simulated === 'network error' || entry.simulated === 'no response') {
@@ -10813,7 +10842,7 @@
     const fieldCtx = { locate: locateField, show: showField, add: addField };
 
     function drawConfig() {
-      pane.replaceChildren(({ params: paramsPane, body: bodyPane, headers: headersPane })[d.tab]());
+      pane.replaceChildren(({ params: paramsPane, body: bodyPane, headers: headersPane, buttons: buttonsPane })[d.tab]());
     }
     // d.lower: 'response' (no tool), 'simulate' or 'mock'. The tool shows as a card above the response.
     // While comparing, the request form folds to one line (method, path and query, Edit, Run).

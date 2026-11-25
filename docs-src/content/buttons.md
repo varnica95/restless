@@ -15,7 +15,7 @@ Pressing it on a step fills each placeholder from that step's object in the list
 
 ## Make one
 
-**From a list:** open the list call in **Requests**, then **Items** in its response. Tap the dashed **+ Add button** on the first item, then **Add button**.
+**From a list:** open the list call in **Requests**, then its **⚡ Buttons** tab (next to Query · Headers · Body). Tap the dashed **+ Add button** on the first item, then **Add button**.
 
 **From a request:** after a successful **Run** of `/api/tasks/1` (any request with an id in its path), tap **Add** on *Make this a button on each task?*, then **Add button**. Or use **⋯ → Add as a button…**
 
@@ -32,7 +32,7 @@ Switching between the two keeps both until you close the dialog.
 
 ## Try it
 
-You land on the list's **Items**. The new button pulses on the first item. Tap it: the status shows on that row, and **Open** in the note opens the exact request.
+You land on the list's **Buttons** tab. The new button pulses on the first item. Tap it: the status shows on that row, and **Open** in the note opens the exact request.
 
 - **DELETE** buttons ask before sending.
 - Any button that isn't a GET makes the app load its list again after it works.
