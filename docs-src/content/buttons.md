@@ -27,6 +27,7 @@ Tap a value:
 
 - **From data**: a field of each item (`item.id`, `item.number`, `item.title`…), with a sample.
 - **Custom value**: type it, e.g. `123`. In a JSON body `5` stays a number, `true` a boolean; anything else is text.
+- **Ask each time**: the button asks for it when you press it, with the last answer filled in. Saved as `{{ask.status}}`.
 
 Switching between the two keeps both until you close the dialog.
 
@@ -38,7 +39,7 @@ Switching between the two keeps both until you close the dialog.
 
 ## Try it
 
-You land on the list's **Buttons** tab. The new button pulses on the first item. Tap it: the status shows on that row, and **Open** in the note opens the exact request.
+You land on the list's **Buttons** tab. The new button pulses on the first item. Tap it: the status shows on that row, and **Open** in the note opens the exact request. Click the status to see the response under the row; an error opens by itself.
 
 - **DELETE** buttons ask before sending.
 - Any button that isn't a GET makes the app load its list again after it works.

@@ -3319,6 +3319,23 @@
     .bt-pval > button.bt-chip:not(.inline) { width: auto; flex: 1; min-width: 0; }
     .bt-pwhere .bt-opt { font-size: 10.5px; gap: 3px; vertical-align: -1px; }
     .bt-pwhere .bt-opt input { width: 11px; height: 11px; }
+    /* Buttons: Ask each time */
+    button.bt-chip.ask { background: color-mix(in srgb, var(--accent) 8%, transparent); border: 1px dashed var(--accent-line); color: var(--fg); }
+    button.bt-chip.ask .bt-chip-ic { font-weight: 700; color: var(--accent); width: 12px; }
+    button.bt-pop-opt.bt-pop-ask { margin-top: 2px; border-top: 1px solid var(--line); border-radius: 0 0 6px 6px; padding-top: 7px; }
+    .btask .pdlg-body { display: flex; flex-direction: column; gap: 10px; }
+    .btask .bt-field .pf-tok { height: 32px; }
+    .btask .wa-askacts .btn-sm.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    /* Buttons: the response under a row */
+    button.sb.bt-res-b { cursor: pointer; border: 0; font: inherit; font-size: 11px; }
+    button.sb.bt-res-b:hover, button.sb.bt-res-b.on { outline: 1px solid currentColor; outline-offset: 1px; }
+    .bt-ro { border-top: 1px dashed var(--line); background: var(--bg2); padding: 6px 10px 8px; }
+    .bt-ro-h { display: flex; align-items: center; gap: 8px; font-size: 11.5px; margin-bottom: 6px; }
+    .bt-ro-h .sb { font-size: 11px; }
+    button.ibtn.bt-ro-x { width: 22px; height: 22px; padding: 0; display: inline-grid; place-items: center; }
+    button.ibtn.bt-ro-x svg { width: 11px; height: 11px; }
+    .bt-ro-b { max-height: 240px; overflow: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); font-size: 11.5px; }
+    .bt-ro-empty { font-size: 11.5px; }
   `;
 
   // ---------- helpers
@@ -5235,6 +5252,71 @@
     },
   };
   const asksFirst = (b) => b.req.method === 'DELETE';
+  // {{ask.status}}: a value the button asks for each time it's pressed (the last one is suggested).
+  const ASK_ONE = /^\{\{\s*ask\.([\w$.-]+)\s*\}\}$/;
+  const ASK_RX = /\{\{\s*ask\.([\w$.-]+)\s*\}\}/g;
+  const askNames = (req) => [...new Set([req.url, req.body || '', ...Object.values(req.headers || {})].flatMap((t) => [...String(t).matchAll(ASK_RX)].map((m) => m[1])))];
+  // A typed value: in a JSON body 42 is a number, true/false a boolean, null null, "42" text.
+  const parseTyped = (s) => {
+    const t = String(s).trim();
+    if (/^-?\d+(\.\d+)?$/.test(t) && t.length < 16) return Number(t);
+    if (t === 'true' || t === 'false') return t === 'true';
+    if (t === 'null') return null;
+    if (/^".*"$/.test(t)) { try { return JSON.parse(t); } catch { /* keep as typed */ } }
+    return s;
+  };
+  // Put the answers in: as text in the path, query and headers; in a JSON body unquoted as typed JSON, inside a
+  // string as text.
+  function fillAsk(req, answers) {
+    const u = urlParts(req.url);
+    const path = u.path.split('/').map((s) => decSeg(s).replace(ASK_RX, (m, n) => encodeURIComponent(String(answers[n] ?? '')))).join('/');
+    const pairs = queryPairs(u.query).map(([k, x]) => [k, x.replace(ASK_RX, (m, n) => String(answers[n] ?? ''))]);
+    const url = `${u.origin}${path}${pairs.length ? `?${pairs.map(([k, x]) => `${encKeep(k)}=${encKeep(x)}`).join('&')}` : ''}${u.hash}`;
+    const headers = Object.fromEntries(Object.entries(req.headers || {}).map(([k, v]) => [k, String(v).replace(ASK_RX, (m, n) => String(answers[n] ?? ''))]));
+    let body = req.body;
+    if (body != null) {
+      const s = String(body); let out = ''; let inStr = false; let i = 0;
+      while (i < s.length) {
+        const c = s[i];
+        if (c === '\\' && inStr) { out += s.slice(i, i + 2); i += 2; continue; }
+        if (c === '"') { inStr = !inStr; out += c; i++; continue; }
+        if (c === '{' && s[i + 1] === '{') {
+          const m = /^\{\{\s*ask\.([\w$.-]+)\s*\}\}/.exec(s.slice(i));
+          if (m) { const a = answers[m[1]] ?? ''; out += inStr ? JSON.stringify(String(a)).slice(1, -1) : JSON.stringify(parseTyped(a)); i += m[0].length; continue; }
+        }
+        out += c; i++;
+      }
+      body = out;
+    }
+    return { ...req, url, headers, body };
+  }
+  const ASK_KEY = '__apiPeek.btnAsk';
+  // The "asks when pressed" box: one field per value, the last answer filled in. Returns the answers or null.
+  function askValues(b, names, itemName) {
+    let last = {}; try { last = JSON.parse(localStorage.getItem(ASK_KEY) || '{}'); } catch { /* none */ }
+    return new Promise((res) => {
+      dockEl.querySelector('.pdlg-wrap')?.remove();
+      const back = document.activeElement;
+      const { body, wrap, closeBtn } = dlgShell({ id: 'btask', title: b.name, intro: `${b.req.method} ${urlParts(b.req.url).path.replace(ITEM_RX, '…').replace(ASK_RX, (m, n) => `{${n}}`)}${itemName ? ` · on ${itemName}` : ''}`, cls: 'waask btask' });
+      const inputs = names.map((n) => h('input', { class: 'pf-tok mono', value: last[`${b.id}:${n}`] ?? '', 'aria-label': n, spellcheck: 'false', 'data-n': n }));
+      let settled = false;
+      const done = (v) => { if (settled) return; settled = true; closeEnvDlg = null; wrap.remove(); back?.focus?.(); res(v); };
+      const send = () => {
+        const out = Object.fromEntries(inputs.map((i) => [i.dataset.n, i.value]));
+        for (const [n, v] of Object.entries(out)) last[`${b.id}:${n}`] = v;
+        try { localStorage.setItem(ASK_KEY, JSON.stringify(last)); } catch { /* storage blocked */ }
+        done(out);
+      };
+      inputs.forEach((i) => i.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } }));
+      closeBtn.addEventListener('click', () => done(null));
+      wrap.addEventListener('mousedown', (ev) => { if (ev.target === wrap) done(null); });
+      closeEnvDlg = () => done(null);
+      body.append(...names.map((n, k) => h('label', { class: 'bt-field' }, h('span', { class: 'bt-lab mono' }, n), inputs[k])),
+        h('div', { class: 'row wa-askacts' }, h('button', { type: 'button', class: 'btn-sm primary', onclick: send }, 'Send'), h('button', { type: 'button', class: 'linkbtn', onclick: () => done(null) }, 'Cancel')));
+      dockEl.append(wrap);
+      requestAnimationFrame(() => { inputs[0]?.focus(); inputs[0]?.select(); });
+    });
+  }
   // A button's address as shown: GET /api/tasks/{{item.id}}.
   const buttonPath = (b) => `${b.req.method} ${urlParts(b.req.url).path}`;
 
@@ -5287,23 +5369,28 @@
     path.split('/').forEach((s, i) => {
       const v = decSeg(s);
       if (!s || !looksId(v)) return;
-      const m = /^\{\{\s*item\.([\w$.-]+)\s*\}\}$/.exec(v);
-      if (BRACES.test(v) && !m) return; // another {{variable}}: leave it
-      out.push({ key: `p:${i}`, where: 'path', index: i, value: v, item: m ? m[1].split('.') : null });
+      const m = /^\{\{\s*item\.([\w$.-]+)\s*\}\}$/.exec(v); const a = ASK_ONE.exec(v);
+      if (BRACES.test(v) && !m && !a) return; // another {{variable}}: leave it
+      out.push({ key: `p:${i}`, where: 'path', index: i, value: v, item: m ? m[1].split('.') : null, ask: a ? a[1] : null });
     });
     for (const [k, v] of queryPairs(query)) {
       // {{item.x?}}: an optional query value, left out when the item has none.
-      const m = /^\{\{\s*item\.([\w$.-]+)(\?)?\s*\}\}$/.exec(v);
-      if (BRACES.test(v) && !m) continue;
-      out.push({ key: `q:${k}`, where: 'query', name: k, value: v, item: m ? m[1].split('.') : null, optional: !!m?.[2] });
+      const m = /^\{\{\s*item\.([\w$.-]+)(\?)?\s*\}\}$/.exec(v); const a = ASK_ONE.exec(v);
+      if (BRACES.test(v) && !m && !a) continue;
+      out.push({ key: `q:${k}`, where: 'query', name: k, value: v, item: m ? m[1].split('.') : null, optional: !!m?.[2], ask: a ? a[1] : null });
     }
     const t = parseTemplateBody(req.body);
     if (t) {
       for (const p of leafPaths([t.obj], 30)) {
         let v = getPath(t.obj, p);
-        let item = null;
-        if (typeof v === 'string' && t.marks[v]) { const m = /^\{\{\s*item\.([\w$.-]+)\s*\}\}$/.exec(t.marks[v]); if (!m) continue; item = m[1].split('.'); v = t.marks[v]; }
-        out.push({ key: `b:${p.join('.')}`, where: 'body', path: p, name: p[p.length - 1], value: v, item });
+        let item = null; let ask = null;
+        if (typeof v === 'string' && t.marks[v]) {
+          const m = /^\{\{\s*item\.([\w$.-]+)\s*\}\}$/.exec(t.marks[v]); const a = ASK_ONE.exec(t.marks[v]);
+          if (!m && !a) continue;
+          if (m) item = m[1].split('.'); else ask = a[1];
+          v = t.marks[v];
+        }
+        out.push({ key: `b:${p.join('.')}`, where: 'body', path: p, name: p[p.length - 1], value: v, item, ask });
       }
     }
     return out;
@@ -5315,7 +5402,7 @@
     const rowPaths = leafPaths(items);
     const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
     return parts.map((pt) => {
-      if (pt.item) return { ...pt, sure: true };
+      if (pt.item || pt.ask) return { ...pt, sure: true };
       const sv = pt.value == null ? '' : String(pt.value);
       const name = pt.name || '';
       const idish = pt.where === 'path' || /id$/i.test(name);
@@ -5338,9 +5425,12 @@
     let pairs = queryPairs(u.query);
     const t = parseTemplateBody(req.body);
     const marks = { ...(t?.marks || {}) }; let n = Object.keys(marks).length;
-    const tok = (pt) => `{{item.${pt.item.join('.')}${pt.where === 'query' && pt.optional ? '?' : ''}}}`;
-    const plain = (pt) => (pt.item && BRACES.test(String(pt.value)) ? pt.fallback ?? pt.value : pt.value);
-    for (const pt of parts) {
+    const tok0 = (pt) => (pt.ask ? `{{ask.${pt.ask}}}` : `{{item.${pt.item.join('.')}${pt.where === 'query' && pt.optional ? '?' : ''}}}`);
+    const plain = (pt) => ((pt.item || pt.ask || pt.wasAsk) && BRACES.test(String(pt.value)) ? pt.fallback ?? pt.value : pt.value);
+    for (const pt0 of parts) {
+      // A part that asks is written like one taken from the item: a placeholder.
+      const pt = pt0.ask ? { ...pt0, item: [] } : pt0;
+      const tok = () => tok0(pt0);
       if (pt.where === 'path') segs[pt.index] = pt.item ? tok(pt) : encodeURIComponent(String(plain(pt)));
       else if (pt.where === 'query') {
         const v = pt.item ? tok(pt) : String(plain(pt) ?? '');
@@ -5405,8 +5495,17 @@
   // Send a button's request for one item, as Run does: to the active environment, as its user, with
   // {{variables}} filled. Returns { res, req } or null (cancelled, or the item lacks a field).
   async function runButton(b, item, listEntry) {
-    const { req, missing } = fillItem(b.req, item);
+    const { req: req0, missing } = fillItem(b.req, item);
     if (missing.length) { toast(`${b.name}: this item has no ${missing[0]}`, 'warn', 4500); return null; }
+    // Values it asks for each time: the box is also the "are you sure" for a DELETE.
+    const asks = askNames(req0);
+    let req = req0;
+    if (asks.length) {
+      const t = itemTitle(item); const id = itemId(item);
+      const answers = await askValues(b, asks, t ? `“${t}”` : id != null ? String(id) : '');
+      if (!answers) return null;
+      req = fillAsk(req0, answers);
+    }
     const env = envApi.active();
     const texts = [req.url, req.body || '', ...Object.values(req.headers || {})];
     const unknown = [...new Set(texts.flatMap((t) => varsApi.unknown(t, env)))].filter((n) => !n.startsWith('$'));
@@ -5418,7 +5517,7 @@
       headers: Object.fromEntries(Object.entries(req.headers || {}).map(([k, v]) => [k, varsApi.fill(String(v), env)])),
       body: req.body == null ? req.body : jsonBody ? varsApi.fillJson(req.body, env) : varsApi.fill(req.body, env),
     };
-    if (asksFirst(b)) {
+    if (asksFirst(b) && !asks.length) {
       const ok = await confirmDlg({ title: `${b.name}?`, intro: `${filled.method} ${pathOnly(filled.url)}${env?.id != null ? ` on ${env.name}` : ''}`, ok: 'Send' });
       if (!ok) return null;
     }
@@ -5555,17 +5654,10 @@
     const first = () => src?.items?.[0];
     const fieldDesc = (p) => { const it = first(); return it ? short(getPath(it, p), 32) : ''; };
     // The value a part has when it's not taken from the item.
-    const plainOf = (pt) => (pt.item || BRACES.test(String(pt.value)) ? (first() && pt.item ? getPath(first(), pt.item) : pt.orig) : pt.value);
+    const plainOf = (pt) => (pt.item || pt.ask || BRACES.test(String(pt.value)) ? (first() && pt.item ? getPath(first(), pt.item) : BRACES.test(String(pt.orig)) ? '' : pt.orig) : pt.value);
     const shown = (v) => (typeof v === 'string' ? v : v === undefined ? '' : JSON.stringify(v));
     // A custom value as typed: in a JSON body 42 is a number, true/false a boolean, null null, "42" text.
-    const parseCustom = (s) => {
-      const t = String(s).trim();
-      if (/^-?\d+(\.\d+)?$/.test(t) && t.length < 16) return Number(t);
-      if (t === 'true' || t === 'false') return t === 'true';
-      if (t === 'null') return null;
-      if (/^".*"$/.test(t)) { try { return JSON.parse(t); } catch { /* keep as typed */ } }
-      return s;
-    };
+    const parseCustom = parseTyped;
     const typeName = (v) => (typeof v === 'number' ? 'Number' : typeof v === 'boolean' ? 'True/false' : v === null ? 'null' : v === '' ? 'Empty text' : 'Text');
     // What a part is called: its body field, query name, the API docs' path name, or "taskId" for /tasks/{id}.
     const docNames = (() => { try { const op = specApi?.current && base ? specApi.match(base.method, base.url) : null; if (!op) return null; const segs = urlParts(base.url).path.split('/'); const t = op.path.split('/'); const off = segs.length - t.length; const out = {}; t.forEach((s, i) => { const m = /^\{(.+)\}$/.exec(s); if (m) out[i + off] = m[1]; }); return out; } catch { return null; } })();
@@ -5584,19 +5676,24 @@
       if (popFor === anchor) { closePop(); return; }
       closePop();
       const fields = src ? leafPaths(src.items) : [];
-      const curCustom = pt.lastCustom ?? (pt.item ? shown(BRACES.test(String(pt.orig)) ? plainOf(pt) : pt.orig) : shown(pt.value));
+      const curCustom = pt.lastCustom ?? (pt.item || pt.ask ? shown(BRACES.test(String(pt.orig)) ? plainOf(pt) : pt.orig) : shown(pt.value));
       const input = h('input', { class: 'pf-tok mono bt-cv', value: curCustom, 'aria-label': `Custom value for ${partName(pt)}`, placeholder: pt.where === 'body' ? '123, "text", true' : '123', spellcheck: 'false' });
       const hint = h('span', { class: 'muted bt-cv-type' });
       const showHint = () => { hint.textContent = pt.where === 'body' ? typeName(parseCustom(input.value)) : 'Text'; };
       const setCustom = () => {
         const v = pt.where === 'body' ? parseCustom(input.value) : input.value;
         if (pt.item) pt.lastItem = pt.item;
-        pt.item = null; pt.value = v; pt.fallback = v; pt.lastCustom = input.value; pt.sure = true; pt.touched = true;
+        pt.item = null; pt.ask = null; pt.value = v; pt.fallback = v; pt.lastCustom = input.value; pt.sure = true; pt.touched = true;
         closePop(); draw();
       };
       const pickField = (p) => {
         if (!pt.item) pt.lastCustom = input.value;
-        pt.item = p; pt.sure = true; pt.touched = true;
+        pt.item = p; pt.ask = null; pt.sure = true; pt.touched = true;
+        closePop(); draw();
+      };
+      const pickAsk = () => {
+        if (pt.item) pt.lastItem = pt.item; else if (!pt.ask) pt.lastCustom = input.value;
+        pt.item = null; pt.ask = partName(pt).replace(/[^\w$.-]/g, '_'); pt.wasAsk = true; pt.sure = true; pt.touched = true; pt.optional = false;
         closePop(); draw();
       };
       input.addEventListener('input', showHint);
@@ -5612,7 +5709,9 @@
           : h('div', { class: 'muted bt-pop-empty' }, 'No data yet: this list hasn’t loaded on the page.'),
         h('div', { class: 'bt-pop-h' }, 'Custom value'),
         h('div', { class: 'bt-pop-cv' }, input, h('button', { type: 'button', class: 'btn-sm bt-cv-set', onclick: setCustom }, 'Use')),
-        hint);
+        hint,
+        h('button', { type: 'button', class: `bt-pop-opt bt-pop-ask${pt.ask ? ' on' : ''}`, role: 'option', 'aria-selected': String(!!pt.ask), onclick: pickAsk },
+          h('span', { class: 'bt-pop-k' }, 'Ask each time'), h('span', { class: 'muted bt-pop-d' }, 'You type it when you press the button')));
       pop.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closePop(true); } });
       popFor = anchor;
       card.append(pop);
@@ -5637,11 +5736,11 @@
     // A part's value as a field-like chip: item.id (from data), 123 (custom), or amber when it needs a source.
     function valueChip(pt, { inline = false } = {}) {
       const v = plainOf(pt);
-      const label = pt.item ? `item.${pt.item.join('.')}` : pt.where === 'body' && typeof v === 'string' ? `"${short(v, inline ? 40 : 26)}"` : short(shown(v), 26) || '""';
-      const b = h('button', { type: 'button', class: `bt-chip${pt.item ? ' data' : ' custom'}${pt.sure === false ? ' unsure' : ''}${inline ? ' inline' : ''}`, 'aria-haspopup': 'dialog',
-        title: pt.sure === false ? 'Not sure where this comes from: choose a field, or enter a value' : pt.item ? `From each item: ${pt.item.join('.')}` : `Custom value: ${shown(v)}`,
+      const label = pt.ask ? (inline ? `ask: ${pt.ask}` : 'Ask each time') : pt.item ? `item.${pt.item.join('.')}` : pt.where === 'body' && typeof v === 'string' ? `"${short(v, inline ? 40 : 26)}"` : short(shown(v), 26) || '""';
+      const b = h('button', { type: 'button', class: `bt-chip${pt.ask ? ' ask' : pt.item ? ' data' : ' custom'}${pt.sure === false ? ' unsure' : ''}${inline ? ' inline' : ''}`, 'aria-haspopup': 'dialog',
+        title: pt.sure === false ? 'Not sure where this comes from: choose a field, or enter a value' : pt.ask ? 'Asked each time you press the button' : pt.item ? `From each item: ${pt.item.join('.')}` : `Custom value: ${shown(v)}`,
         onclick: (e) => { e.stopPropagation(); openPop(b, pt); } });
-      if (!inline) { const ic = h('span', { class: 'bt-chip-ic', 'aria-hidden': 'true' }); setHTML(ic, pt.item ? ICONS.bolt : ICONS.pencil); b.append(ic); }
+      if (!inline) { const ic = h('span', { class: 'bt-chip-ic', 'aria-hidden': 'true' }); if (pt.ask) ic.textContent = '?'; else setHTML(ic, pt.item ? ICONS.bolt : ICONS.pencil); b.append(ic); }
       b.append(h('span', { class: 'bt-chip-t' }, label));
       if (!inline) { const ch = h('span', { class: 'bt-chip-ch', 'aria-hidden': 'true' }); setHTML(ch, ICONS.chevDown); b.append(ch); }
       return b;
@@ -5664,6 +5763,7 @@
     }
     // + Add query parameter: a name; its value comes from the item's field of that name when there is one.
     let adding = false;
+    let jsonOpen = false; // Request body stays as you left it when the dialog redraws
     function addQueryRow() {
       if (!adding) return h('button', { type: 'button', class: 'linkbtn bt-addq', onclick: () => { adding = true; drawRequest(); requestAnimationFrame(() => reqBox.querySelector('.bt-addq-in')?.focus()); } }, '+ Add query parameter');
       const inp = h('input', { class: 'pf-tok mono bt-addq-in', placeholder: 'name, e.g. status', 'aria-label': 'Query parameter name', spellcheck: 'false' });
@@ -5725,7 +5825,8 @@
       // The full body, with every value tappable: what Parameters doesn't list is here.
       const t = base.method !== 'GET' ? parseTemplateBody(base.body) : null;
       if (t || (base.body != null && base.method !== 'GET' && String(base.body).trim())) {
-        const det = h('details', { class: 'bt-json' }, h('summary', {}, 'Request body', hidden ? h('span', { class: 'muted' }, ` · ${plural(hidden, 'more field')}`) : null));
+        const det = h('details', { class: 'bt-json', open: jsonOpen }, h('summary', {}, 'Request body', hidden ? h('span', { class: 'muted' }, ` · ${plural(hidden, 'more field')}`) : null));
+        det.addEventListener('toggle', () => { jsonOpen = det.open; });
         const box = h('div', { class: 'bt-json-b mono' });
         if (t) {
           const lines = [];
@@ -5856,24 +5957,49 @@
     const rows = list.items.slice(0, 200).map((it, i) => {
       const id = itemId(it); const title = itemTitle(it);
       const resEl = h('span', { class: 'bt-res' });
+      let rowEl = null; let openEl = null;
+      // What came back, under the row: status, time, the body (pretty when it's JSON), and Open.
+      const drawOpen = () => {
+        openEl?.remove(); openEl = null;
+        const r = st[i];
+        if (!r || r.busy || !r.open || !rowEl) return;
+        let text = r.text == null ? '' : String(r.text);
+        if (core.isJson(text)) { try { text = JSON.stringify(JSON.parse(text), null, 2); } catch { /* as is */ } }
+        if (text.length > 20000) text = `${text.slice(0, 20000)}\n…`;
+        const close = h('button', { type: 'button', class: 'ibtn bt-ro-x', 'aria-label': 'Hide the response', title: 'Hide', onclick: () => { r.open = false; drawOpen(); showRes(); } });
+        setHTML(close, ICONS.x);
+        openEl = h('div', { class: 'bt-ro', role: 'region', 'aria-label': `${r.name} response for ${title || id || `item ${i + 1}`}` },
+          h('div', { class: 'bt-ro-h' },
+            h('span', { class: `sb ${typeof r.status === 'number' ? statusTone(r.status) : 's5'}` }, typeof r.status === 'number' ? String(r.status) : 'failed'),
+            h('span', { class: 'muted' }, `${r.name}${r.ms != null ? ` · ${fmtDur(r.ms)}` : ''}`),
+            h('span', { class: 'hspace' }),
+            r.req ? h('button', { type: 'button', class: 'linkbtn', onclick: () => openRun(r.req) }, 'Open') : null, close),
+          text.trim() ? h('div', { class: 'bt-ro-b' }, codeView(text, { wrap: true })) : h('div', { class: 'muted bt-ro-empty' }, 'No body.'));
+        rowEl.after(openEl);
+      };
       const showRes = () => {
         const r = st[i];
-        if (!r) { resEl.replaceChildren(); return; }
+        if (!r) { resEl.replaceChildren(); drawOpen(); return; }
         if (r.busy) { resEl.replaceChildren(h('span', { class: 'muted' }, '…')); return; }
         const s = r.status;
-        resEl.replaceChildren(h('span', { class: `sb ${typeof s === 'number' ? statusTone(s) : 's5'}`, title: `${r.name} · ${s}${r.ms != null ? ` · ${fmtDur(r.ms)}` : ''}${r.text ? `\n${String(r.text).slice(0, 300)}` : ''}` }, typeof s === 'number' ? String(s) : 'failed'));
+        resEl.replaceChildren(h('button', { type: 'button', class: `sb bt-res-b ${typeof s === 'number' ? statusTone(s) : 's5'}${r.open ? ' on' : ''}`, 'aria-expanded': String(!!r.open),
+          title: r.open ? 'Hide the response' : `${r.name} · ${s}${r.ms != null ? ` · ${fmtDur(r.ms)}` : ''}: show the response`,
+          onclick: () => { r.open = !r.open; showRes(); } }, typeof s === 'number' ? String(s) : 'failed'));
+        drawOpen();
       };
+      const openRun = (rq) => { const ne = core.addManual({ method: rq.method, url: rq.url, headers: rq.headers, body: rq.body, bodyKind: rq.bodyKind }); dock.tab = 'requests'; ss.set('__apiPeek.tab', 'requests'); openDetail(ne); };
       const go = async (b) => {
         if (fresh) btnFocus = null;
         seenCoach();
         st[i] = { busy: true }; showRes();
         const out = await runButton(b, it, ctx.entry);
         if (!out) { delete st[i]; showRes(); return; }
-        st[i] = { name: b.name, status: out.res.status, ms: out.res.ms, text: out.res.text };
-        showRes();
         const ok = typeof out.res.status === 'number' && out.res.status < 400;
+        // An error opens by itself; a success shows its status, which opens the response.
+        st[i] = { name: b.name, status: out.res.status, ms: out.res.ms, text: out.res.text, req: out.req, open: !ok };
+        showRes();
         toast(`${b.name}${title ? ` · ${title}` : id != null ? ` · ${id}` : ''} · ${typeof out.res.status === 'number' ? out.res.status : 'failed'}`, ok ? '' : 'warn', 5000,
-          { label: 'Open', run: () => { const ne = core.addManual({ method: out.req.method, url: out.req.url, headers: out.req.headers, body: out.req.body, bodyKind: out.req.bodyKind }); dock.tab = 'requests'; ss.set('__apiPeek.tab', 'requests'); openDetail(ne); } });
+          { label: 'Open', run: () => openRun(out.req) });
       };
       const btnEl = (b) => {
         const el = h('button', { type: 'button', class: `bt-btn${fresh && fresh.id === b.id && i === 0 ? ' pulse' : ''}`, title: `${buttonPath(b)}${asksFirst(b) ? ' · asks first' : ''}`, onclick: () => go(b) });
@@ -5890,12 +6016,14 @@
             ordered.slice(1).map((b) => ({ id: `bt-${b.id}`, label: b.name, icon: ICONS.bolt, sub: buttonPath(b), run: () => go(b) })),
             { icon: ICONS.chevDown, btnClass: 'bt-btn bt-more', title: 'More buttons', align: 'right' })]
           : ordered.map(btnEl);
-      showRes();
-      return h('div', { class: `bt-row${!btns.length && i === 0 ? ' bt-row-ghost' : ''}`, role: 'listitem' },
+      rowEl = h('div', { class: `bt-row${!btns.length && i === 0 ? ' bt-row-ghost' : ''}`, role: 'listitem' },
         h('span', { class: 'bt-id mono', title: id != null ? String(id) : '' }, id != null ? String(id) : `#${i + 1}`),
         h('span', { class: 'bt-title', title }, title || h('span', { class: 'muted' }, '(no name)')),
         resEl,
         h('span', { class: 'bt-acts' }, ...acts));
+      showRes();
+      if (st[i]?.open) requestAnimationFrame(() => drawOpen()); // the row is in the list by then
+      return rowEl;
     });
     const firstName = itemTitle(list.items[0]) ? `“${itemTitle(list.items[0])}”` : itemId(list.items[0]) != null ? `${itemNoun(src)} ${itemId(list.items[0])}` : `the first ${itemNoun(src)}`;
     const coach = fresh && !coachSeen ? h('div', { class: 'bt-coach', role: 'status' },
