@@ -19,7 +19,16 @@ Pressing it on a step fills each placeholder from that step's object in the list
 
 **From a request:** after a successful **Run** of `/api/tasks/1` (any request with an id in its path), tap **Add** on *Make this a button on each task?*, then **Add button**. Or use **⋯ → Add as a button…**
 
-The dialog shows the request with its placeholders highlighted and what pressing it does: *Pressing it on "Hyper" sends GET /api/tasks/1.* Tap a highlighted value to take it from another field, or to **Keep** it the same for every item. An **amber** value is one RESTless couldn't place: check it.
+The dialog has the **Button name**, the **Data source** (the list it goes on) and the **Request**: its method and path, then **Parameters**, each value with where it comes from (`stepId → item.id`). The full body is folded under **Request body**. An **amber** value is one RESTless couldn't place: check it.
+
+## Choose a value
+
+Tap a value:
+
+- **From data**: a field of each item (`item.id`, `item.number`, `item.title`…), with a sample.
+- **Custom value**: type it, e.g. `123`. In a JSON body `5` stays a number, `true` a boolean; anything else is text.
+
+Switching between the two keeps both until you close the dialog.
 
 ## Try it
 
