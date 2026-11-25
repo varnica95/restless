@@ -3304,6 +3304,21 @@
     .bt-pane .bt-row { padding: 6px 10px; }
     .bt-pane-empty { font-size: 12px; padding: 10px 2px; }
     @container rlmain (max-width: 380px) { .tab.tab-btns .tab-l { display: none; } }
+    /* Buttons: query parameters (optional, remove, add) */
+    .bt-pval { gap: 6px; align-items: center; }
+    .bt-ptools { display: inline-flex; align-items: center; gap: 2px; flex: none; }
+    .bt-opt { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--dim); white-space: nowrap; cursor: pointer; }
+    .bt-opt input { width: 13px; height: 13px; margin: 0; accent-color: var(--accent); }
+    button.ibtn.bt-pdrop { width: 24px; height: 24px; padding: 0; display: inline-grid; place-items: center; }
+    button.ibtn.bt-pdrop svg { width: 12px; height: 12px; }
+    .bt-dropped { font-size: 11.5px; }
+    button.linkbtn.bt-addq { align-self: flex-start; font-size: 12px; }
+    .bt-addq-row { display: flex; gap: 6px; align-items: center; }
+    .bt-addq-row .bt-addq-in { flex: 1; min-width: 0; height: 30px; font-size: 12px; }
+    .bt-addq-row .btn-sm { height: 30px; }
+    .bt-pval > button.bt-chip:not(.inline) { width: auto; flex: 1; min-width: 0; }
+    .bt-pwhere .bt-opt { font-size: 10.5px; gap: 3px; vertical-align: -1px; }
+    .bt-pwhere .bt-opt input { width: 11px; height: 11px; }
   `;
 
   // ---------- helpers
@@ -5277,9 +5292,10 @@
       out.push({ key: `p:${i}`, where: 'path', index: i, value: v, item: m ? m[1].split('.') : null });
     });
     for (const [k, v] of queryPairs(query)) {
-      const m = /^\{\{\s*item\.([\w$.-]+)\s*\}\}$/.exec(v);
+      // {{item.x?}}: an optional query value, left out when the item has none.
+      const m = /^\{\{\s*item\.([\w$.-]+)(\?)?\s*\}\}$/.exec(v);
       if (BRACES.test(v) && !m) continue;
-      out.push({ key: `q:${k}`, where: 'query', name: k, value: v, item: m ? m[1].split('.') : null });
+      out.push({ key: `q:${k}`, where: 'query', name: k, value: v, item: m ? m[1].split('.') : null, optional: !!m?.[2] });
     }
     const t = parseTemplateBody(req.body);
     if (t) {
@@ -5322,11 +5338,16 @@
     let pairs = queryPairs(u.query);
     const t = parseTemplateBody(req.body);
     const marks = { ...(t?.marks || {}) }; let n = Object.keys(marks).length;
-    const tok = (pt) => `{{item.${pt.item.join('.')}}}`;
+    const tok = (pt) => `{{item.${pt.item.join('.')}${pt.where === 'query' && pt.optional ? '?' : ''}}}`;
     const plain = (pt) => (pt.item && BRACES.test(String(pt.value)) ? pt.fallback ?? pt.value : pt.value);
     for (const pt of parts) {
       if (pt.where === 'path') segs[pt.index] = pt.item ? tok(pt) : encodeURIComponent(String(plain(pt)));
-      else if (pt.where === 'query') pairs = pairs.map(([k, x]) => (k === pt.name ? [k, pt.item ? tok(pt) : String(plain(pt))] : [k, x]));
+      else if (pt.where === 'query') {
+        const v = pt.item ? tok(pt) : String(plain(pt) ?? '');
+        if (pt.drop) pairs = pairs.filter(([k]) => k !== pt.name);
+        else if (pairs.some(([k]) => k === pt.name)) pairs = pairs.map(([k, x]) => (k === pt.name ? [k, v] : [k, x]));
+        else pairs.push([pt.name, v]); // a query parameter added in the dialog
+      }
       else if (t) {
         let o = t.obj; const p = pt.path;
         for (let i = 0; i < p.length - 1; i++) o = o[p[i]];
@@ -5346,7 +5367,11 @@
     const txt = (v) => (v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v));
     const u = urlParts(req.url);
     const path = u.path.split('/').map((s) => decSeg(s).replace(ITEM_RX, (m, p) => encodeURIComponent(txt(val(p))))).join('/');
-    const pairs = queryPairs(u.query).map(([k, x]) => [k, x.replace(ITEM_RX, (m, p) => txt(val(p)))]);
+    const pairs = queryPairs(u.query).flatMap(([k, x]) => {
+      const opt = /^\{\{\s*item\.([\w$.-]+)\?\s*\}\}$/.exec(x);
+      if (opt) { const v = getPath(item, opt[1].split('.')); return v == null || v === '' ? [] : [[k, txt(v)]]; }
+      return [[k, x.replace(ITEM_RX, (m, p) => txt(val(p)))]];
+    });
     const url = `${u.origin}${path}${pairs.length ? `?${pairs.map(([k, x]) => `${encKeep(k)}=${encKeep(x)}`).join('&')}` : ''}${u.hash}`;
     const headers = Object.fromEntries(Object.entries(req.headers || {}).map(([k, v]) => [k, String(v).replace(ITEM_RX, (m, p) => txt(val(p)))]));
     let body = req.body;
@@ -5623,7 +5648,40 @@
     }
     // Which parts get a row under Parameters: path and query values, ids, ones taken from the item, ones it
     // isn't sure about and ones you changed. Other body fields stay in Request body.
-    const isParam = (pt) => pt.where !== 'body' || !!pt.item || pt.sure === false || pt.touched || /id$/i.test(pt.name || '');
+    const isParam = (pt) => !pt.drop && (pt.where !== 'body' || !!pt.item || pt.sure === false || pt.touched || /id$/i.test(pt.name || ''));
+    // A query parameter row: Optional (left out when the item has no value; only for values from data) and ×.
+    function optionalBox(pt) {
+      const cb = h('input', { type: 'checkbox', checked: !!pt.optional, 'aria-label': `${pt.name} is optional` });
+      cb.addEventListener('change', () => { pt.optional = cb.checked; pt.touched = true; drawNotes(); });
+      return h('label', { class: 'bt-opt', title: 'Leave it out when the item has no value' }, cb, h('span', {}, 'Optional'));
+    }
+    function queryTools(pt) {
+      const kids = [];
+      const x = h('button', { type: 'button', class: 'ibtn bt-pdrop', 'aria-label': `Don’t send ${pt.name}`, title: `Don’t send ${pt.name}`, onclick: () => { closePop(); pt.drop = true; draw(); } });
+      setHTML(x, ICONS.x);
+      kids.push(x);
+      return h('span', { class: 'bt-ptools' }, ...kids);
+    }
+    // + Add query parameter: a name; its value comes from the item's field of that name when there is one.
+    let adding = false;
+    function addQueryRow() {
+      if (!adding) return h('button', { type: 'button', class: 'linkbtn bt-addq', onclick: () => { adding = true; drawRequest(); requestAnimationFrame(() => reqBox.querySelector('.bt-addq-in')?.focus()); } }, '+ Add query parameter');
+      const inp = h('input', { class: 'pf-tok mono bt-addq-in', placeholder: 'name, e.g. status', 'aria-label': 'Query parameter name', spellcheck: 'false' });
+      const add = () => {
+        const name = inp.value.trim();
+        if (!name) { inp.focus(); return; }
+        const had = parts.find((p) => p.where === 'query' && p.name === name);
+        if (had) had.drop = false;
+        else {
+          const norm = (x) => String(x).toLowerCase().replace(/[^a-z0-9]/g, '');
+          const field = leafPaths(src?.items || []).find((p) => norm(p.join('')) === norm(name) || norm(p[p.length - 1]) === norm(name));
+          parts.push({ key: `q:${name}`, where: 'query', name, value: '', orig: '', item: field || null, sure: !!field, touched: true, added: true, optional: !!field });
+        }
+        adding = false; draw();
+      };
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); adding = false; drawRequest(); } });
+      return h('div', { class: 'bt-addq-row' }, inp, h('button', { type: 'button', class: 'btn-sm', onclick: add }, 'Add'), h('button', { type: 'button', class: 'linkbtn', onclick: () => { adding = false; drawRequest(); } }, 'Cancel'));
+    }
 
     function drawSource() {
       const kids = [];
@@ -5652,11 +5710,18 @@
       const hidden = parts.length - rows.length;
       if (rows.length) {
         kids.push(h('div', { class: 'bt-params', role: 'table', 'aria-label': 'Parameters' },
-          ...rows.map((pt) => h('div', { class: 'bt-param', role: 'row' },
-            h('span', { class: 'bt-pname', role: 'rowheader' }, h('span', { class: 'mono' }, partName(pt)), h('span', { class: 'muted bt-pwhere' }, pt.where)),
+          ...rows.map((pt) => h('div', { class: `bt-param${pt.where === 'query' ? ' q' : ''}`, role: 'row' },
+            h('span', { class: 'bt-pname', role: 'rowheader' }, h('span', { class: 'mono' }, partName(pt)),
+              h('span', { class: 'muted bt-pwhere' }, pt.where === 'query' && pt.added ? 'query · added' : pt.where, pt.where === 'query' && pt.item ? [' · ', optionalBox(pt)] : null)),
             h('span', { class: 'bt-parrow muted', 'aria-hidden': 'true' }, '→'),
-            h('span', { class: 'bt-pval', role: 'cell' }, valueChip(pt))))));
+            h('span', { class: 'bt-pval', role: 'cell' }, valueChip(pt), pt.where === 'query' ? queryTools(pt) : null)))));
       } else kids.push(h('div', { class: 'muted bt-noparams' }, 'No parameters: it’s the same for every item.'));
+      const dropped = parts.filter((p) => p.drop);
+      if (dropped.length) {
+        kids.push(h('div', { class: 'muted bt-dropped' }, 'Not sent: ', ...dropped.flatMap((p, i) => [i ? ', ' : '', h('span', { class: 'mono' }, p.name), ' ',
+          h('button', { type: 'button', class: 'linkbtn', onclick: () => { p.drop = false; draw(); } }, 'Restore')])));
+      }
+      kids.push(addQueryRow());
       // The full body, with every value tappable: what Parameters doesn't list is here.
       const t = base.method !== 'GET' ? parseTemplateBody(base.body) : null;
       if (t || (base.body != null && base.method !== 'GET' && String(base.body).trim())) {
@@ -12406,6 +12471,7 @@
     if (e.key === 'Escape' && closeDlg) { // modal: Esc closes it wherever focus is
       if (e.composedPath()[0]?.classList?.contains('pf-rename')) return; // the rename box cancels itself
       if (e.composedPath().some((x) => x?.classList?.contains('pf-edit'))) return; // Esc in Edit cancels the edit (handled there)
+      if (e.composedPath().some((x) => x?.classList?.contains('bt-pop') || x?.classList?.contains('bt-addq-row'))) return; // the button dialog's value popover / new parameter close themselves
       const m = root?.querySelector('.pdlg-wrap .dmenu:not([hidden])');
       e.preventDefault(); e.stopPropagation();
       if (m) { menuClosers.forEach((fn) => fn(true)); return; } // an open ⋯ menu closes first

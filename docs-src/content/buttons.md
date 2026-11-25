@@ -30,6 +30,12 @@ Tap a value:
 
 Switching between the two keeps both until you close the dialog.
 
+## Query parameters
+
+- **+ Add query parameter**: type a name; if the items have a field with that name, it's used.
+- **×**: don't send this one (**Restore** brings it back).
+- **Optional** (for values from data): left out when the item has no value, instead of not sending the request. Saved as `{{item.status?}}`.
+
 ## Try it
 
 You land on the list's **Buttons** tab. The new button pulses on the first item. Tap it: the status shows on that row, and **Open** in the note opens the exact request.

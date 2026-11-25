@@ -5,7 +5,7 @@
 <script>try{const t=localStorage.getItem('rl-theme');if(t)document.documentElement.classList.add(t)}catch(e){}</script>
 </head><body>
 <header class="top"><button class="tbtn menu" id="mbtn" aria-expanded="false" aria-controls="side" aria-label="Pages">☰</button>
-<a class="brand" href="index.html"><img src="img/logo.png" alt=""><b>RESTless</b></a><span class="ver">v0.104.0</span><span class="sp"></span>
+<a class="brand" href="index.html"><img src="img/logo.png" alt=""><b>RESTless</b></a><span class="ver">v0.105.0</span><span class="sp"></span>
 <a class="tlink" href="demo/index.html">Live demo</a><a class="tlink" href="https://github.com/varnica95/restless">GitHub</a>
 <button class="tbtn" id="theme" aria-label="Switch between light and dark" title="Light / dark"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.8a6.2 6.2 0 0 1 0 12.4z" fill="currentColor"/></svg></button></header>
 <div class="wrap"><nav class="side" id="side" aria-label="Pages"><ul><li><a href="index.html">Overview</a></li><li><a href="getting-started.html">Getting started</a></li><li><a href="requests.html">Requests</a></li><li><a href="request-screen.html">The request screen</a></li><li><a href="mocks.html">Mock endpoints</a></li><li><a href="api-docs.html">API docs</a></li><li><a href="environments.html">Environments &amp; users</a></li><li><a href="variables.html">Variables</a></li><li><a href="buttons.html" class=on aria-current=page>Buttons</a></li><li><a href="testing-tools.html">Testing tools</a></li><li><a href="settings.html">Settings</a></li><li><a href="how-it-works.html">How it works</a></li><li><a href="demo/index.html">Live demo</a></li></ul></nav>
@@ -26,6 +26,12 @@
 <li><strong>Custom value</strong>: type it, e.g. <code>123</code>. In a JSON body <code>5</code> stays a number, <code>true</code> a boolean; anything else is text.</li>
 </ul>
 <p>Switching between the two keeps both until you close the dialog.</p>
+<h2 id="query-parameters">Query parameters</h2>
+<ul>
+<li><strong>+ Add query parameter</strong>: type a name; if the items have a field with that name, it's used.</li>
+<li><strong>×</strong>: don't send this one (<strong>Restore</strong> brings it back).</li>
+<li><strong>Optional</strong> (for values from data): left out when the item has no value, instead of not sending the request. Saved as <code>{{item.status?}}</code>.</li>
+</ul>
 <h2 id="try-it">Try it</h2>
 <p>You land on the list's <strong>Buttons</strong> tab. The new button pulses on the first item. Tap it: the status shows on that row, and <strong>Open</strong> in the note opens the exact request.</p>
 <ul>
@@ -37,6 +43,6 @@
 <h2 id="no-list-yet">No list yet?</h2>
 <p>The dialog offers <strong>Load the list now</strong>. In <strong>Setup → Buttons</strong>, <strong>Try an example</strong> starts from your most recent list.</p>
 <h2 id="manage-them">Manage them</h2>
-<p><strong>Buttons ▾</strong> above the items: <strong>Edit</strong>, <strong>Delete</strong> or <strong>Add a button…</strong>. <strong>Setup → Buttons</strong> lists every button: click one to edit it, <strong>⋯</strong> to delete it.</p><nav class="pn" aria-label="Previous and next"><a class="prev" href="variables.html"><span>Previous</span>Variables</a><a class="next" href="testing-tools.html"><span>Next</span>Testing tools</a></nav><footer>RESTless v0.104.0 · <a href="https://github.com/varnica95/restless">GitHub</a></footer></main>
-<aside class="toc" aria-label="On this page"><b>On this page</b><ul><li><a href="#what-a-button-is">What a button is</a></li><li><a href="#make-one">Make one</a></li><li><a href="#choose-a-value">Choose a value</a></li><li><a href="#try-it">Try it</a></li><li><a href="#pages-and-parents">Pages and parents</a></li><li><a href="#no-list-yet">No list yet?</a></li><li><a href="#manage-them">Manage them</a></li></ul></aside></div>
+<p><strong>Buttons ▾</strong> above the items: <strong>Edit</strong>, <strong>Delete</strong> or <strong>Add a button…</strong>. <strong>Setup → Buttons</strong> lists every button: click one to edit it, <strong>⋯</strong> to delete it.</p><nav class="pn" aria-label="Previous and next"><a class="prev" href="variables.html"><span>Previous</span>Variables</a><a class="next" href="testing-tools.html"><span>Next</span>Testing tools</a></nav><footer>RESTless v0.105.0 · <a href="https://github.com/varnica95/restless">GitHub</a></footer></main>
+<aside class="toc" aria-label="On this page"><b>On this page</b><ul><li><a href="#what-a-button-is">What a button is</a></li><li><a href="#make-one">Make one</a></li><li><a href="#choose-a-value">Choose a value</a></li><li><a href="#query-parameters">Query parameters</a></li><li><a href="#try-it">Try it</a></li><li><a href="#pages-and-parents">Pages and parents</a></li><li><a href="#no-list-yet">No list yet?</a></li><li><a href="#manage-them">Manage them</a></li></ul></aside></div>
 <script src="site.js"></script></body></html>
