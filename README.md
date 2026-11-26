@@ -366,6 +366,10 @@ After **Add button** you land on the list's **Buttons** tab, where the new butto
 
 **Many buttons:** each row shows one button, the one you used last (or the one you keep there), plus **▾** with the number of others. **▾** lists them grouped by method (**Open** for GET, **Change**, **Delete**), each with its method and path, with a search box once there are more than 7. **Buttons (20) ▾** above the items lists all of them with the same search: click one to edit it, **pin** to keep it on the rows (whatever you press later), **bin** to delete it, and **Add a button…** at the end. On narrow panels the row's button gets shorter.
 
+**Run on selected:** tick items (Shift+click ticks a range; the box above the list ticks all), then **Archive on 4** in the bar that appears (▾ for another button). It sends for each one after another; each row shows its status, and the bar shows *Archive: 3 ✓ · 1 ✕* with **Retry failed**, which sends again only for those. Values a button asks for are asked once for all of them, and a DELETE asks once (*Delete: 6 tasks?*). **Stop** while it runs. The app loads its list once at the end.
+
+**One item:** a response with one item, like `GET /api/tasks/2`, gets the Buttons tab too, with the buttons of its list (`/api/tasks`) for that item.
+
 **Review and send:** to send a button with different values once, choose **Review and send “Archive”…** at the top of **▾** (or the eye next to any button in it), or **Shift+click** the button. A box shows the request for that item: each parameter with where it comes from and its value filled in, and the **Request body**. Change anything, then **Send** (Ctrl+Enter). **Reset** puts the item's values back; nothing is saved to the button. Ask-each-time values are fields in the same box, so it asks once. **Review before sending** in the button's dialog makes every press open this box.
 
 A button belongs to its list's path with ids treated as "any id", so it shows on every page and filter (`?page=2`) and for every parent (`/projects/7/tasks` and `/projects/8/tasks`).

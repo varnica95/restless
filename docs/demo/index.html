@@ -5223,6 +5223,27 @@
     .bt-revopt { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dim); margin-top: -4px; }
     .bt-revopt input { width: 14px; height: 14px; margin: 0; accent-color: var(--accent); }
     @container rlmain (max-width: 360px) { button.bt-btn { max-width: 96px; } }
+    /* Buttons: select rows, run on selected */
+    .bt-row.has-sel { grid-template-columns: auto minmax(0, max-content) minmax(0, 1fr) auto auto; }
+    .bt-row.picked { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+    input.bt-sel { width: 14px; height: 14px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+    .bt-allw { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+    .bt-pane .bt-allw { padding-left: 8px; }
+    .bt-selbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 6px 0 2px; padding: 6px 8px 6px 10px; border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--line)); border-radius: 8px; background: color-mix(in srgb, var(--accent) 7%, transparent); font-size: 12px; }
+    .bt-selbar[hidden] { display: none; }
+    .bt-sel-n { font-weight: 600; }
+    .bt-sel-acts { display: inline-flex; gap: 0; }
+    .bt-sel-acts .bt-sel-run + .bt-more { border-top-left-radius: 0; border-bottom-left-radius: 0; margin-left: -1px; }
+    .bt-sel-acts .bt-sel-run:has(+ .bt-more) { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+    .bt-sel-done { display: inline-flex; align-items: center; gap: 8px; flex-basis: 100%; }
+    .bt-sel-n + .hspace + .linkbtn ~ .bt-sel-done, .bt-sel-done:only-child { flex-basis: auto; }
+    .bt-sel-sum { color: var(--ok, #3fb27f); font-weight: 600; }
+    .bt-sel-sum.bad { color: var(--warn, #d9a441); }
+    button.ibtn.bt-sel-x { width: 22px; height: 22px; padding: 0; display: inline-grid; place-items: center; margin-left: auto; }
+    button.ibtn.bt-sel-x svg { width: 12px; height: 12px; }
+    @container rlmain (max-width: 360px) { .bt-row.has-sel { grid-template-columns: auto minmax(0, 1fr) auto auto; } }
+    @container rlmain (max-width: 360px) { button.bt-btn.bt-sel-run { max-width: none; } }
+    button.bt-btn.bt-sel-run { max-width: none; }
   `;
 
   // ---------- helpers
@@ -7386,7 +7407,7 @@
   const itemId = (it) => it?.id ?? it?.uuid ?? it?._id ?? it?.key ?? null;
   // Send a button's request for one item, as Run does: to the active environment, as its user, with
   // {{variables}} filled. Returns { res, req } or null (cancelled, or the item lacks a field).
-  async function runButton(b, item, listEntry, { req: reviewed = null } = {}) {
+  async function runButton(b, item, listEntry, { req: reviewed = null, noApply = false } = {}) {
     const { req: req0, missing } = reviewed ? { req: reviewed, missing: [] } : fillItem(b.req, item);
     if (missing.length) { toast(`${b.name}: this item has no ${missing[0]}`, 'warn', 4500); return null; }
     // Values it asks for each time: the box is also the "are you sure" for a DELETE. A reviewed request was both.
@@ -7417,7 +7438,7 @@
     let res;
     try { res = await core.sendCopy(sendAs(env, filled, sendUrl)); } catch (err) { res = { status: 'failed', ms: 0, text: String(err?.message || err) }; }
     // A change that worked: the app loads its list again (as Apply to app does), quietly.
-    if (b.req.method !== 'GET' && typeof res.status === 'number' && res.status < 400 && listEntry && !listEntry.manual) core.applyToApp(listEntry).catch(() => {});
+    if (!noApply && b.req.method !== 'GET' && typeof res.status === 'number' && res.status < 400 && listEntry && !listEntry.manual) core.applyToApp(listEntry).catch(() => {});
     return { res, req: { ...filled, url: sendUrl } };
   }
 
@@ -7994,7 +8015,17 @@
   // row offers + Add button. A button just added pulses there, with a one-time tip.
   function itemsView(list, btns, ctx) {
     const st = ctx.state.btnRes || (ctx.state.btnRes = {});
-    const src = { on: { path: anyIdPath(pathOnly(ctx.url)), label: `GET ${pathOnly(ctx.url)}` }, url: ctx.url, items: list.items, at: list.at, entry: ctx.entry };
+    const single = !!list.single;
+    const src = single
+      ? { on: { path: list.onPath, label: `GET ${list.onPath}` }, url: ctx.url, items: list.items, at: '', entry: null }
+      : { on: { path: anyIdPath(pathOnly(ctx.url)), label: `GET ${pathOnly(ctx.url)}` }, url: ctx.url, items: list.items, at: list.at, entry: ctx.entry };
+    // Selected rows (by index) and a run over them, kept with the request tab like the results.
+    const canSel = !single && btns.length > 0 && list.items.length > 1;
+    const sel = ctx.state.sel || (ctx.state.sel = new Set());
+    if (!canSel) sel.clear();
+    const shown = Math.min(list.items.length, 200);
+    const rowApi = [];
+    let selBar = null; let allBox = null; let lastSel = null;
     const fresh = btnFocus && Date.now() - btnFocus.at < 15000 ? btnFocus : null;
     let coachSeen = false; try { coachSeen = !!localStorage.getItem(COACH_KEY); } catch { /* storage blocked */ }
     let box = null;
@@ -8029,9 +8060,10 @@
         const s = r.status;
         resEl.replaceChildren(h('button', { type: 'button', class: `sb bt-res-b ${typeof s === 'number' ? statusTone(s) : 's5'}${r.open ? ' on' : ''}`, 'aria-expanded': String(!!r.open),
           title: r.open ? 'Hide the response' : `${r.name} · ${s}${r.ms != null ? ` · ${fmtDur(r.ms)}` : ''}: show the response`,
-          onclick: () => { r.open = !r.open; showRes(); } }, typeof s === 'number' ? String(s) : 'failed'));
+          onclick: () => { r.open = !r.open; showRes(); } }, typeof s === 'number' ? String(s) : s === 'skipped' ? 'skipped' : 'failed'));
         drawOpen();
       };
+      rowApi[i] = { showRes, get el() { return rowEl; } };
       const openRun = (rq) => { const ne = core.addManual({ method: rq.method, url: rq.url, headers: rq.headers, body: rq.body, bodyKind: rq.bodyKind }); dock.tab = 'requests'; ss.set('__apiPeek.tab', 'requests'); openDetail(ne); };
       const go = async (b, ev = null, review = false) => {
         if (fresh) btnFocus = null;
@@ -8069,7 +8101,15 @@
       const acts = !btns.length
         ? (i === 0 ? [h('button', { type: 'button', class: 'bt-ghost', onclick: () => openButtonDlg({ list: src }) }, '+ Add button')] : [])
         : [btnEl(main), more];
-      rowEl = h('div', { class: `bt-row${!btns.length && i === 0 ? ' bt-row-ghost' : ''}`, role: 'listitem' },
+      const selBox = canSel ? h('input', { type: 'checkbox', class: 'bt-sel', checked: sel.has(i), 'aria-label': `Select ${title || id || `item ${i + 1}`}`, title: 'Select, to run a button on several (Shift+click selects a range)' }) : null;
+      selBox?.addEventListener('click', (ev) => {
+        const on = selBox.checked;
+        const range = ev.shiftKey && lastSel != null ? [Math.min(lastSel, i), Math.max(lastSel, i)] : [i, i];
+        for (let k = range[0]; k <= range[1]; k++) { if (on) sel.add(k); else sel.delete(k); const cb = rowApi[k]?.el?.querySelector('.bt-sel'); if (cb) cb.checked = on; rowApi[k]?.el?.classList.toggle('picked', on); }
+        lastSel = i; drawSel();
+      });
+      rowEl = h('div', { class: `bt-row${!btns.length && i === 0 ? ' bt-row-ghost' : ''}${canSel ? ' has-sel' : ''}${sel.has(i) ? ' picked' : ''}`, role: 'listitem' },
+        selBox,
         h('span', { class: 'bt-id mono', title: id != null ? String(id) : '' }, id != null ? String(id) : `#${i + 1}`),
         h('span', { class: 'bt-title', title }, title || h('span', { class: 'muted' }, '(no name)')),
         resEl,
@@ -8094,9 +8134,82 @@
         bottom: [{ label: 'Add a button…', icon: ICONS.plus, run: () => openButtonDlg({ list: src }) }] });
     });
     const listEl = h('div', { class: 'bt-list', role: 'list' }, ...(coach ? [rows[0], coach, ...rows.slice(1)] : rows));
+    // Run on selected: one after another, each row showing its result; Retry failed after.
+    const noun = itemNoun(src);
+    const setSel = (on) => { for (let k = 0; k < shown; k++) { if (on) sel.add(k); else sel.delete(k); const el = rowApi[k]?.el; if (el) { el.querySelector('.bt-sel').checked = on; el.classList.toggle('picked', on); } } drawSel(); };
+    async function runMany(b, idxs, prev = null) {
+      const bulk0 = ctx.state.bulk;
+      if (bulk0?.running) return;
+      const asks = askNames(b.req);
+      let answers = null;
+      if (asks.length) { answers = await askValues(b, asks, plural(idxs.length, noun)); if (!answers) return; }
+      else if (asksFirst(b)) {
+        const ok = await confirmDlg({ title: `${b.name}: ${plural(idxs.length, noun)}?`, intro: `${buttonPath(b)}, sent for each one after another.`, ok: `Send ${idxs.length}` });
+        if (!ok) return;
+      }
+      // A retry carries on the earlier run: same total, its successes kept.
+      const bk = ctx.state.bulk = prev && prev.b === b
+        ? { running: true, b, total: prev.total, done: prev.total - idxs.length, okN: prev.okN, failed: [] }
+        : { running: true, b, total: idxs.length, done: 0, okN: 0, failed: [] };
+      drawSel();
+      for (const i of idxs) {
+        if (bk.stop) break;
+        const it = list.items[i];
+        const { req: r0, missing } = fillItem(b.req, it);
+        if (missing.length) { st[i] = { name: b.name, status: 'skipped', text: `This ${noun} has no ${missing[0]}.`, open: false }; bk.failed.push(i); bk.done++; rowApi[i]?.showRes(); drawSel(); continue; }
+        st[i] = { busy: true }; rowApi[i]?.showRes();
+        const out = await runButton(b, it, ctx.entry, { req: answers ? fillAsk(r0, answers) : r0, noApply: true });
+        if (!out) { delete st[i]; rowApi[i]?.showRes(); bk.stop = true; break; } // a {{variable}} with no value: the rest would fail too
+        const ok = typeof out.res.status === 'number' && out.res.status < 400;
+        st[i] = { name: b.name, status: out.res.status, ms: out.res.ms, text: out.res.text, req: out.req, open: false };
+        bk.done++; if (ok) bk.okN++; else bk.failed.push(i);
+        rowApi[i]?.showRes(); drawSel();
+      }
+      bk.running = false;
+      if (bk.okN && b.req.method !== 'GET' && ctx.entry && !ctx.entry.manual) core.applyToApp(ctx.entry).catch(() => {});
+      toast(`${b.name}: ${bk.okN} of ${bk.total} worked${bk.failed.length ? `, ${bk.failed.length} failed` : ''}${bk.stop && bk.done < bk.total ? ' (stopped)' : ''}`, bk.failed.length ? 'warn' : '', 5000);
+      drawSel();
+    }
+    function drawSel() {
+      if (!selBar) return;
+      const n = [...sel].filter((k) => k < shown).length;
+      if (allBox) { allBox.checked = n > 0 && n === shown; allBox.indeterminate = n > 0 && n < shown; }
+      const bk = ctx.state.bulk;
+      const kids = [];
+      if (bk?.running) {
+        kids.push(h('span', { class: 'bt-sel-n' }, `${bk.b.name}: ${bk.done} of ${bk.total}…`), h('span', { class: 'hspace' }),
+          h('button', { type: 'button', class: 'linkbtn', onclick: () => { bk.stop = true; } }, 'Stop'));
+      } else if (n) {
+        const b = mainButton(btns, src.on.path);
+        const run = h('button', { type: 'button', class: 'bt-btn bt-sel-run', title: `${buttonPath(b)} for each selected ${noun}, one after another`, onclick: () => runMany(b, [...sel].filter((k) => k < shown).sort((x, y) => x - y)) });
+        const ic = h('span', { class: 'bt-ico', 'aria-hidden': 'true' }); setHTML(ic, ICONS.bolt); run.append(ic, h('span', {}, `${b.name} on ${n}`));
+        const pick = btns.length > 1 ? h('button', { type: 'button', class: 'bt-btn bt-more', 'aria-haspopup': 'menu', 'aria-label': 'Run another button on the selected', title: 'Another button' }) : null;
+        if (pick) { setHTML(pick, ICONS.chevDown); pick.addEventListener('click', () => openBtnMenu(pick, { label: `Run on ${plural(n, noun)}`, entries: btns.filter((x) => x !== b).map((x) => ({ b: x, run: () => runMany(x, [...sel].filter((k) => k < shown).sort((p, q) => p - q)) })) })); }
+        kids.push(h('span', { class: 'bt-sel-n' }, `${n} selected`), h('span', { class: 'bt-sel-acts' }, run, pick), h('span', { class: 'hspace' }),
+          h('button', { type: 'button', class: 'linkbtn', onclick: () => setSel(false) }, 'Clear'));
+      }
+      if (!bk?.running && bk && bk.done) {
+        const sum = h('span', { class: `bt-sel-sum${bk.failed.length ? ' bad' : ''}` }, `${bk.b.name}: ${bk.okN} ✓${bk.failed.length ? ` · ${bk.failed.length} ✕` : ''}`);
+        const retry = bk.failed.length ? h('button', { type: 'button', class: 'linkbtn', title: `Run ${bk.b.name} again on the ones that failed`, onclick: () => runMany(bk.b, bk.failed.slice(), bk) }, 'Retry failed') : null;
+        const x = h('button', { type: 'button', class: 'ibtn bt-sel-x', 'aria-label': 'Hide this summary', title: 'Hide', onclick: () => { ctx.state.bulk = null; drawSel(); } }); setHTML(x, ICONS.x);
+        kids.push(h('span', { class: 'bt-sel-done' }, sum, retry, x));
+      }
+      selBar.hidden = !kids.length;
+      selBar.replaceChildren(...kids);
+    }
+    if (canSel) {
+      allBox = h('input', { type: 'checkbox', class: 'bt-sel bt-sel-all', 'aria-label': `Select all ${plural(shown, noun)}`, title: 'Select all' });
+      allBox.addEventListener('change', () => setSel(allBox.checked));
+      selBar = h('div', { class: 'bt-selbar', role: 'status' });
+    }
+    const countEl = single
+      ? h('span', { class: 'bt-count' }, `This ${noun} · buttons of ${src.on.label}`)
+      : h('span', { class: 'bt-count' }, `${plural(list.items.length, noun)}${list.at.includes('.') ? ` in ${list.at}` : ''}${list.items.length > 200 ? ' · first 200 shown' : ''}`);
     box = h('div', { class: 'bt-items' },
-      h('div', { class: 'muted bt-items-h' }, h('span', { class: 'bt-count' }, `${plural(list.items.length, itemNoun(src))}${list.at.includes('.') ? ` in ${list.at}` : ''}${list.items.length > 200 ? ' · first 200 shown' : ''}`), manage),
+      h('div', { class: 'muted bt-items-h' }, allBox ? h('label', { class: 'bt-allw' }, allBox, countEl) : countEl, manage),
+      selBar,
       listEl);
+    drawSel();
     if (fresh) requestAnimationFrame(() => box.querySelector('.bt-btn.pulse')?.scrollIntoView({ block: 'nearest' }));
     return box;
   }
@@ -9530,8 +9643,17 @@
       if (!s0 || String(s0.m).toUpperCase() !== 'GET' || typeof s0.res.status !== 'number' || s0.res.status >= 400) return null;
       const key = `${s0.u}|${s0.res.text?.length}|${buttonsApi.count()}|${buttonsApi.list().map((b) => b.id).join()}`;
       if (listMemo.key === key) return listMemo.val;
-      const list = s0.res.text ? listItemsOf(s0.res.text) : null;
-      listMemo = { key, val: list ? { list, btns: buttonsApi.forCall('GET', s0.u), url: s0.u } : null };
+      let list = s0.res.text ? listItemsOf(s0.res.text) : null;
+      let btns = list ? buttonsApi.forCall('GET', s0.u) : [];
+      if (!list && s0.res.text) {
+        // One item (GET /api/tasks/2): the buttons of its list (/api/tasks), for this item.
+        const p = anyIdPath(urlParts(s0.u).path); // (pathOnly is something else in here)
+        const onPath = p.endsWith('/{}') ? p.slice(0, -3) : null;
+        let obj = null; try { obj = JSON.parse(s0.res.text); } catch { /* not JSON */ }
+        const here = onPath && obj && typeof obj === 'object' && !Array.isArray(obj) ? buttonsApi.list().filter((b) => b.on.path === onPath) : [];
+        if (here.length) { list = { items: [obj], at: '', single: true, onPath }; btns = here; }
+      }
+      listMemo = { key, val: list ? { list, btns, url: s0.u } : null };
       return listMemo.val;
     }
     function buttonsPane() {
@@ -9585,7 +9707,7 @@
         const n = count();
         if (id === 'buttons') {
           const ic = h('span', { class: 'tab-ic', 'aria-hidden': 'true' }); setHTML(ic, ICONS.bolt);
-          return h('button', { type: 'button', role: 'tab', 'aria-selected': String(d.tab === id), class: `tab tab-btns${d.tab === id ? ' on' : ''}`, title: 'Buttons on each item of this list', 'aria-label': n ? `Buttons (${n})` : 'Buttons', onclick: () => { d.tab = id; drawTabs(); drawPane(); drawBar(); } },
+          return h('button', { type: 'button', role: 'tab', 'aria-selected': String(d.tab === id), class: `tab tab-btns${d.tab === id ? ' on' : ''}`, title: listInfo()?.list.single ? 'Buttons for this item' : 'Buttons on each item of this list', 'aria-label': n ? `Buttons (${n})` : 'Buttons', onclick: () => { d.tab = id; drawTabs(); drawPane(); drawBar(); } },
             ic, h('span', { class: 'tab-l' }, label), n ? h('span', { class: 'tcount' }, `(${n})`) : null);
         }
         return h('button', { type: 'button', role: 'tab', 'aria-selected': String(d.tab === id), class: `tab${d.tab === id ? ' on' : ''}`, onclick: () => { d.tab = id; drawTabs(); drawPane(); drawBar(); } },

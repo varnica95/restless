@@ -56,6 +56,18 @@ The dialog offers **Load the list now**. In **Setup → Buttons**, **Try an exam
 
 Each row shows one button: the one you used last, or the one you keep there. **▾** next to it, with the number of others, lists the rest grouped by method (**Open**, **Change**, **Delete**), each with its path. With more than 7 there's a search box.
 
+## Run on several
+
+Tick the items (Shift+click ticks a range, the box above the list ticks all), then press **Archive on 4** in the bar (▾ for another button).
+
+- It sends for each one after another. Each row shows its status.
+- The bar shows how it went (*Archive: 3 ✓ · 1 ✕*), with **Retry failed** for the ones that didn't work.
+- Asked values and the DELETE confirmation come once for all of them.
+
+## One item
+
+Opening one item, like `GET /api/tasks/2`, shows the Buttons tab too, with its list's buttons for that item.
+
 ## Review and send
 
 To send different values just once: **▾ → Review and send…**, the eye next to any button in **▾**, or **Shift+click** the button. The box shows the request for that item with its values filled in, and the request body. Change what you need, then **Send** (Ctrl+Enter). **Reset** puts the item's values back. Nothing is saved to the button.
