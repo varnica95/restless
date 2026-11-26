@@ -3421,6 +3421,14 @@
     .bt-mi-meta { margin-left: auto; padding-left: 8px; font-size: 11px; color: var(--accent); flex: none; }
     .bt-mi-meta.warn { color: var(--warn, #d9a441); }
     button.bt-mi.dis, button.bt-mi:disabled { opacity: .45; cursor: default; }
+    /* Button dialog: Change… request picker */
+    .bt-menu { z-index: 70; }
+    .bt-sumrow { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .bt-sumrow .bt-sum { flex: 1; min-width: 0; }
+    button.linkbtn.bt-change { flex: none; font-size: 12px; }
+    button.bt-mi.sel { color: var(--accent); }
+    button.bt-mi.sel .bt-mi-n { font-weight: 600; }
+    .bt-mi-m { width: 40px; }
   `;
 
   // ---------- helpers
@@ -5683,6 +5691,40 @@
     }
     return out;
   }
+  // Every request a button could send, for the dialog's Change… picker: the ones that fit the list first,
+  // then each API docs endpoint, then the calls captured so far (one per endpoint). Path values come from
+  // the list's first item where they can ({taskId} → its id), so the dialog can map them.
+  function requestChoices(src, current) {
+    const first = src?.items?.[0] || {};
+    const origin = (() => { try { return new URL(src?.url || current?.url || location.href, location.href).origin; } catch { return location.origin; } })();
+    const out = []; const seen = new Set();
+    const keyOf = (m, url) => `${m} ${anyIdPath(pathOnly(url))}`;
+    const add = (group, req, sub = '', shown = null) => { const k = keyOf(req.method, req.url); if (seen.has(`${group}|${k}`) || (group !== 'Suggested' && seen.has(`Suggested|${k}`))) return; seen.add(`${group}|${k}`); out.push({ group, req, sub, key: k, shown: shown || anyIdPath(pathOnly(req.url)).replace(/\{\}/g, '{id}') }); };
+    if (src) for (const a of actionsFor(src)) add('Suggested', a, 'Fits this list');
+    const listTpl = src && specApi?.current ? specApi.match('GET', src.url)?.path : null;
+    for (const op of specApi?.current?.ops || []) {
+      const under = listTpl && op.path.startsWith(`${listTpl}/{`);
+      const url = origin + op.path.replace(/\{([^}]+)\}/g, (m, k) => {
+        const v = first[k] ?? (/id$/i.test(k) && (under || k === 'id') ? itemId(first) : null);
+        return encodeURIComponent(String(v ?? 1));
+      });
+      let body = null;
+      if (op.body?.schema && !['GET', 'HEAD', 'DELETE'].includes(op.method)) { try { body = JSON.stringify(specApi.sample(op.body.schema), null, 2); } catch { /* none */ } }
+      add('API docs', { method: op.method, url, headers: body ? { 'content-type': 'application/json' } : {}, body, bodyKind: body ? 'json' : null }, op.summary || '', op.path);
+    }
+    for (const r of core.state.requests) {
+      if (out.length > 600) break;
+      if (r.dryRun || !/^https?:/i.test(r.url || '')) continue;
+      add('Calls you’ve made', { method: r.method, url: r.url, headers: r.headers || {}, body: r.body ?? null, bodyKind: r.bodyKind || null }, r.manual ? 'Your request' : 'The app’s call');
+    }
+    const cur = current ? keyOf(current.method, current.url) : null;
+    if (specApi?.current) for (const c of out) {
+      if (c.group === 'API docs') continue;
+      let op = null; try { op = specApi.match(c.req.method, c.req.url); } catch { /* no match */ }
+      if (op?.path) { c.shown = op.path; if (c.group === 'Suggested' && op.summary) c.sub = `${op.summary} · fits this list`; }
+    }
+    return out.map((c) => ({ ...c, sel: c.key === cur }));
+  }
   const tplKeyOf = (req) => `${req.method} ${anyIdPath(urlParts(req.url).path.replace(ITEM_RX, '1'))}`;
   const HINTS_KEY = '__apiPeek.btnHints';
   const hintsOff = () => { try { return JSON.parse(localStorage.getItem(HINTS_KEY) || '[]'); } catch { return []; } };
@@ -5891,12 +5933,19 @@
       const u = urlParts(base.url);
       const pathShown = u.path.split('/').map((s, i) => { const pt = byKey.get(`p:${i}`); return pt ? `{${partName(pt)}}` : decSeg(s); }).join('/');
       const kids = [h('span', { class: 'bt-lab' }, 'Request')];
-      if (actions && actions.length > 1) {
-        const sel = h('select', { class: 'bt-act', 'aria-label': 'Request it sends' }, ...actions.map((a, i) => h('option', { value: String(i), selected: a === base }, `${a.method} ${pathOnly(a.url)}`)));
-        sel.addEventListener('change', () => { closePop(); base = actions[+sel.value]; guess = true; reset(); if (!named) nameIn.value = nameFor(base, src); draw(); });
-        kids.push(sel);
-      }
-      kids.push(h('div', { class: 'bt-sum mono', title: `${base.method} ${pathShown}` }, h('span', { class: `bt-m m-${base.method.toLowerCase()}` }, base.method), h('span', { class: 'bt-sum-p' }, pathShown)));
+      // Change…: any endpoint, with search (API docs, the calls made so far, the ones that fit this list).
+      const change = h('button', { type: 'button', class: 'linkbtn bt-change', 'aria-haspopup': 'menu', title: 'Send another request: any API docs endpoint or call you’ve made' }, 'Change…');
+      change.addEventListener('click', () => {
+        closePop();
+        const choices = requestChoices(src, base);
+        openBtnMenu(change, { label: 'Request it sends', noun: 'endpoints', width: 360,
+          entries: choices.map((c) => ({ group: c.group, label: c.shown, sub: c.sub, sel: c.sel, method: c.req.method,
+            run: () => { base = c.req; guess = true; reset(); if (!named) nameIn.value = nameFor(base, src); draw(); requestAnimationFrame(() => reqBox.querySelector('.bt-change')?.focus()); } })),
+          bottom: specApi?.current ? [] : [{ label: 'Load API docs to pick from every endpoint…', icon: ICONS.info, run: () => { closeEnvDlg(); root.querySelector('.tab[data-tab=docs]')?.click(); } }] });
+      });
+      kids.push(h('div', { class: 'bt-sumrow' },
+        h('div', { class: 'bt-sum mono', title: `${base.method} ${pathShown}` }, h('span', { class: `bt-m m-${base.method.toLowerCase()}` }, base.method), h('span', { class: 'bt-sum-p' }, pathShown)),
+        change));
       const rows = parts.filter(isParam);
       const hidden = parts.length - rows.length;
       if (rows.length) {
@@ -6030,7 +6079,9 @@
       else if (e.sub != null || e.meta != null) {
         // A plain entry: icon, name, a second line, and something on the right (a count).
         if (e.disabled) { main.disabled = true; main.classList.add('dis'); }
-        const ic = h('span', { class: 'bt-mi-ic', 'aria-hidden': 'true' }); if (e.icon) setHTML(ic, e.icon);
+        const ic = e.method ? h('span', { class: `bt-mi-m m-${e.method.toLowerCase()}` }, e.method) : h('span', { class: 'bt-mi-ic', 'aria-hidden': 'true' });
+        if (e.icon && !e.method) setHTML(ic, e.icon);
+        if (e.sel) { main.classList.add('sel'); main.setAttribute('aria-current', 'true'); }
         main.append(...[ic, h('span', { class: 'bt-mi-t' }, h('span', { class: 'bt-mi-n' }, e.label), e.sub ? h('span', { class: 'muted bt-mi-s' }, e.sub) : null),
           e.meta != null && e.meta !== '' ? h('span', { class: `bt-mi-meta${e.metaCls ? ` ${e.metaCls}` : ''}` }, e.meta) : null].filter(Boolean));
       } else { const ic = h('span', { class: 'bt-mi-ic', 'aria-hidden': 'true' }); if (e.icon) setHTML(ic, e.icon); main.append(ic, h('span', { class: 'bt-mi-n' }, e.label)); }
@@ -6043,12 +6094,14 @@
     };
     const draw = () => {
       const q = (search?.value || '').trim().toLowerCase();
-      const text = (e) => (e.b ? `${e.b.name} ${e.b.req.url}` : `${e.label} ${e.sub || ''}`).toLowerCase();
+      const text = (e) => (e.b ? `${e.b.name} ${e.b.req.url}` : `${e.method || ''} ${e.label} ${e.sub || ''}`).toLowerCase();
       const hits = entries.filter((e) => !q || text(e).includes(q));
-      const groups = entries.some((e) => e.b) ? ['Open', 'Change', 'Delete'].map((g) => [g, hits.filter((e) => methodGroup(e.b.req.method) === g)]).filter(([, l]) => l.length) : [['', hits]];
+      const named = [...new Set(entries.map((e) => e.group).filter(Boolean))];
+      const groups = entries.some((e) => e.b) ? ['Open', 'Change', 'Delete'].map((g) => [g, hits.filter((e) => methodGroup(e.b.req.method) === g)]).filter(([, l]) => l.length)
+        : named.length ? named.map((g) => [g, hits.filter((e) => e.group === g)]).filter(([, l]) => l.length) : [['', hits]];
       const kids = [];
       if (!q) kids.push(...top.map(item));
-      for (const [g, l] of groups) { if (g && (groups.length > 1 || top.length)) kids.push(h('div', { class: 'bt-menu-g', role: 'presentation' }, g)); kids.push(...l.map(item)); }
+      for (const [g, l] of groups) { if (g && (groups.length > 1 || top.length || named.length)) kids.push(h('div', { class: 'bt-menu-g', role: 'presentation' }, g)); kids.push(...l.map(item)); }
       if (q && !hits.length) kids.push(h('div', { class: 'muted bt-menu-none' }, `Nothing matches “${search.value.trim()}”.`));
       if (!q && bottom.length) kids.push(h('div', { class: 'bt-menu-sep', role: 'separator' }), ...bottom.map(item));
       listEl.replaceChildren(...kids);
@@ -13065,6 +13118,8 @@
     if (!pointerInPanel) closeOtherMenus(null); // a click on the page closes any open dropdown
   }, true);
   document.addEventListener('keydown', (e) => {
+    // An open ▾ menu (Tools, a row's buttons, a picker in a dialog) closes first, before anything else Esc does.
+    if (e.key === 'Escape' && btnMenuEl) { e.preventDefault(); e.stopPropagation(); closeBtnMenu(true); return; }
     const searchKey = (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) || ((isMac ? e.metaKey : e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k');
     if (searchKey && dockEl && dock.state === 'open' && onRequestList()) {
       const t = e.composedPath()[0];
@@ -13092,8 +13147,6 @@
       if (m) { menuClosers.forEach((fn) => fn(true)); return; } // an open ⋯ menu closes first
       closeDlg(); return;
     }
-    // An open ▾ menu (Tools, a row's buttons) closes first, before anything else Esc does in the panel.
-    if (e.key === 'Escape' && btnMenuEl) { e.preventDefault(); e.stopPropagation(); closeBtnMenu(true); return; }
     // Esc in a tool (Tools ▾ → Buttons, Run in bulk…): back to the request.
     if (e.key === 'Escape' && !btnMenuEl && reqView.detail?.inTool?.() && dock.tab === 'requests' && insidePanel(e) && !root.querySelector('.dmenu:not([hidden])')
       && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.composedPath?.()[0] || e.target)?.tagName || '')) { e.preventDefault(); e.stopPropagation(); reqView.detail.leaveTool(); return; }

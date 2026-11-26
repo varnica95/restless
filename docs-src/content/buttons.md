@@ -19,6 +19,8 @@ Pressing it on a step fills each placeholder from that step's object in the list
 
 **From a request:** after a successful **Run** of `/api/tasks/1` (any request with an id in its path), tap **Add** on *Make this a button on each task?*, then **Add button**. Or use **Tools ▾ → Buttons**
 
+**Change…**, next to the request, picks any endpoint: the ones that fit the list, every API docs endpoint, and the calls you've made, with search. The parameters fill in from the list.
+
 The dialog has the **Button name**, the **Data source** (the list it goes on) and the **Request**: its method and path, then **Parameters**, each value with where it comes from (`stepId → item.id`). The full body is folded under **Request body**. An **amber** value is one RESTless couldn't place: check it.
 
 ## Choose a value
