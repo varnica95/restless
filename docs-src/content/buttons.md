@@ -15,9 +15,9 @@ Pressing it on a step fills each placeholder from that step's object in the list
 
 ## Make one
 
-**From a list:** open the list call in **Requests**, then its **⚡ Buttons** tab (next to Query · Headers · Body). Tap the dashed **+ Add button** on the first item, then **Add button**.
+**From a list:** open the list call in **Requests**, then **Tools ▾ → Buttons**. Tap the dashed **+ Add button** on the first item, then **Add button**.
 
-**From a request:** after a successful **Run** of `/api/tasks/1` (any request with an id in its path), tap **Add** on *Make this a button on each task?*, then **Add button**. Or use **⋯ → Add as a button…**
+**From a request:** after a successful **Run** of `/api/tasks/1` (any request with an id in its path), tap **Add** on *Make this a button on each task?*, then **Add button**. Or use **Tools ▾ → Buttons**
 
 The dialog has the **Button name**, the **Data source** (the list it goes on) and the **Request**: its method and path, then **Parameters**, each value with where it comes from (`stepId → item.id`). The full body is folded under **Request body**. An **amber** value is one RESTless couldn't place: check it.
 
@@ -39,7 +39,7 @@ Switching between the two keeps both until you close the dialog.
 
 ## Try it
 
-You land on the list's **Buttons** tab. The new button pulses on the first item. Tap it: the status shows on that row, and **Open** in the note opens the exact request. Click the status to see the response under the row; an error opens by itself.
+You land in the list's **Buttons** (Tools ▾); **← Request** goes back. The new button pulses on the first item. Tap it: the status shows on that row, and **Open** in the note opens the exact request. Click the status to see the response under the row; an error opens by itself.
 
 - **DELETE** buttons ask before sending.
 - Any button that isn't a GET makes the app load its list again after it works.
@@ -66,7 +66,7 @@ Tick the items (Shift+click ticks a range, the box above the list ticks all), th
 
 ## One item
 
-Opening one item, like `GET /api/tasks/2`, shows the Buttons tab too, with its list's buttons for that item.
+Opening one item, like `GET /api/tasks/2`, offers Buttons in Tools ▾ too, with its list's buttons for that item.
 
 ## Review and send
 

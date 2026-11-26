@@ -5,7 +5,7 @@
 <script>try{const t=localStorage.getItem('rl-theme');if(t)document.documentElement.classList.add(t)}catch(e){}</script>
 </head><body>
 <header class="top"><button class="tbtn menu" id="mbtn" aria-expanded="false" aria-controls="side" aria-label="Pages">☰</button>
-<a class="brand" href="index.html"><img src="img/logo.png" alt=""><b>RESTless</b></a><span class="ver">v0.108.0</span><span class="sp"></span>
+<a class="brand" href="index.html"><img src="img/logo.png" alt=""><b>RESTless</b></a><span class="ver">v0.109.0</span><span class="sp"></span>
 <a class="tlink" href="demo/index.html">Live demo</a><a class="tlink" href="https://github.com/varnica95/restless">GitHub</a>
 <button class="tbtn" id="theme" aria-label="Switch between light and dark" title="Light / dark"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.8a6.2 6.2 0 0 1 0 12.4z" fill="currentColor"/></svg></button></header>
 <div class="wrap"><nav class="side" id="side" aria-label="Pages"><ul><li><a href="index.html">Overview</a></li><li><a href="getting-started.html">Getting started</a></li><li><a href="requests.html">Requests</a></li><li><a href="request-screen.html">The request screen</a></li><li><a href="mocks.html">Mock endpoints</a></li><li><a href="api-docs.html">API docs</a></li><li><a href="environments.html">Environments &amp; users</a></li><li><a href="variables.html">Variables</a></li><li><a href="buttons.html" class=on aria-current=page>Buttons</a></li><li><a href="testing-tools.html">Testing tools</a></li><li><a href="settings.html">Settings</a></li><li><a href="how-it-works.html">How it works</a></li><li><a href="demo/index.html">Live demo</a></li></ul></nav>
@@ -16,8 +16,8 @@
 </code></pre>
 <p>Pressing it on a step fills each placeholder from that step's object in the list response. Your <code>{{variables}}</code> work too; everything else is sent as written.</p>
 <h2 id="make-one">Make one</h2>
-<p><strong>From a list:</strong> open the list call in <strong>Requests</strong>, then its <strong>⚡ Buttons</strong> tab (next to Query · Headers · Body). Tap the dashed <strong>+ Add button</strong> on the first item, then <strong>Add button</strong>.</p>
-<p><strong>From a request:</strong> after a successful <strong>Run</strong> of <code>/api/tasks/1</code> (any request with an id in its path), tap <strong>Add</strong> on <em>Make this a button on each task?</em>, then <strong>Add button</strong>. Or use <strong>⋯ → Add as a button…</strong></p>
+<p><strong>From a list:</strong> open the list call in <strong>Requests</strong>, then <strong>Tools ▾ → Buttons</strong>. Tap the dashed <strong>+ Add button</strong> on the first item, then <strong>Add button</strong>.</p>
+<p><strong>From a request:</strong> after a successful <strong>Run</strong> of <code>/api/tasks/1</code> (any request with an id in its path), tap <strong>Add</strong> on <em>Make this a button on each task?</em>, then <strong>Add button</strong>. Or use <strong>Tools ▾ → Buttons</strong></p>
 <p>The dialog has the <strong>Button name</strong>, the <strong>Data source</strong> (the list it goes on) and the <strong>Request</strong>: its method and path, then <strong>Parameters</strong>, each value with where it comes from (<code>stepId → item.id</code>). The full body is folded under <strong>Request body</strong>. An <strong>amber</strong> value is one RESTless couldn't place: check it.</p>
 <h2 id="choose-a-value">Choose a value</h2>
 <p>Tap a value:</p>
@@ -34,7 +34,7 @@
 <li><strong>Optional</strong> (for values from data): left out when the item has no value, instead of not sending the request. Saved as <code>{{item.status?}}</code>.</li>
 </ul>
 <h2 id="try-it">Try it</h2>
-<p>You land on the list's <strong>Buttons</strong> tab. The new button pulses on the first item. Tap it: the status shows on that row, and <strong>Open</strong> in the note opens the exact request. Click the status to see the response under the row; an error opens by itself.</p>
+<p>You land in the list's <strong>Buttons</strong> (Tools ▾); <strong>← Request</strong> goes back. The new button pulses on the first item. Tap it: the status shows on that row, and <strong>Open</strong> in the note opens the exact request. Click the status to see the response under the row; an error opens by itself.</p>
 <ul>
 <li><strong>DELETE</strong> buttons ask before sending.</li>
 <li>Any button that isn't a GET makes the app load its list again after it works.</li>
@@ -53,7 +53,7 @@
 <li>Asked values and the DELETE confirmation come once for all of them.</li>
 </ul>
 <h2 id="one-item">One item</h2>
-<p>Opening one item, like <code>GET /api/tasks/2</code>, shows the Buttons tab too, with its list's buttons for that item.</p>
+<p>Opening one item, like <code>GET /api/tasks/2</code>, offers Buttons in Tools ▾ too, with its list's buttons for that item.</p>
 <h2 id="review-and-send">Review and send</h2>
 <p>To send different values just once: <strong>▾ → Review and send…</strong>, the eye next to any button in <strong>▾</strong>, or <strong>Shift+click</strong> the button. The box shows the request for that item with its values filled in, and the request body. Change what you need, then <strong>Send</strong> (Ctrl+Enter). <strong>Reset</strong> puts the item's values back. Nothing is saved to the button.</p>
 <ul>
@@ -61,6 +61,6 @@
 <li><strong>Review before sending</strong> in the button's dialog opens this box on every press.</li>
 </ul>
 <h2 id="manage-them">Manage them</h2>
-<p><strong>Buttons (20) ▾</strong> above the items lists every button, with search: click one to edit it, the <strong>pin</strong> keeps it on the rows, the <strong>bin</strong> deletes it, and <strong>Add a button…</strong> is at the end. <strong>Setup → Buttons</strong> lists every button: click one to edit it, <strong>⋯</strong> to delete it.</p><nav class="pn" aria-label="Previous and next"><a class="prev" href="variables.html"><span>Previous</span>Variables</a><a class="next" href="testing-tools.html"><span>Next</span>Testing tools</a></nav><footer>RESTless v0.108.0 · <a href="https://github.com/varnica95/restless">GitHub</a></footer></main>
+<p><strong>Buttons (20) ▾</strong> above the items lists every button, with search: click one to edit it, the <strong>pin</strong> keeps it on the rows, the <strong>bin</strong> deletes it, and <strong>Add a button…</strong> is at the end. <strong>Setup → Buttons</strong> lists every button: click one to edit it, <strong>⋯</strong> to delete it.</p><nav class="pn" aria-label="Previous and next"><a class="prev" href="variables.html"><span>Previous</span>Variables</a><a class="next" href="testing-tools.html"><span>Next</span>Testing tools</a></nav><footer>RESTless v0.109.0 · <a href="https://github.com/varnica95/restless">GitHub</a></footer></main>
 <aside class="toc" aria-label="On this page"><b>On this page</b><ul><li><a href="#what-a-button-is">What a button is</a></li><li><a href="#make-one">Make one</a></li><li><a href="#choose-a-value">Choose a value</a></li><li><a href="#query-parameters">Query parameters</a></li><li><a href="#try-it">Try it</a></li><li><a href="#pages-and-parents">Pages and parents</a></li><li><a href="#no-list-yet">No list yet?</a></li><li><a href="#many-buttons">Many buttons</a></li><li><a href="#run-on-several">Run on several</a></li><li><a href="#one-item">One item</a></li><li><a href="#review-and-send">Review and send</a></li><li><a href="#manage-them">Manage them</a></li></ul></aside></div>
 <script src="site.js"></script></body></html>

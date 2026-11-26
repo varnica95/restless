@@ -5244,6 +5244,35 @@
     @container rlmain (max-width: 360px) { .bt-row.has-sel { grid-template-columns: auto minmax(0, 1fr) auto auto; } }
     @container rlmain (max-width: 360px) { button.bt-btn.bt-sel-run { max-width: none; } }
     button.bt-btn.bt-sel-run { max-width: none; }
+    /* Tools ▾, chips, tool view */
+    button.hbox.rq-toolsbtn { width: auto; display: inline-flex; align-items: center; gap: 5px; padding: 0 9px; font-size: 12.5px; font-weight: 500; color: var(--fg); }
+    button.hbox.rq-toolsbtn .advico svg { width: 13px; height: 13px; }
+    .rq-tools-chev { display: inline-grid; place-items: center; color: var(--dim); }
+    .rq-tools-chev svg { width: 11px; height: 11px; }
+    @container rlmain (max-width: 560px) { .rq-tools-l { display: none; } button.hbox.rq-toolsbtn { padding: 0 7px; gap: 3px; } }
+    .tv-off { display: none !important; }
+    .rq-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 8px; }
+    .rq-chips[hidden] { display: none; }
+    button.rq-chip { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--fg); font-size: 11.5px; cursor: pointer; font-family: inherit; }
+    button.rq-chip:hover { border-color: var(--accent); }
+    button.rq-chip.warn { border-color: color-mix(in srgb, var(--warn, #d9a441) 55%, transparent); background: color-mix(in srgb, var(--warn, #d9a441) 14%, transparent); color: var(--warn-fg, var(--fg)); }
+    button.rq-chip.bad { border-color: color-mix(in srgb, var(--bad, #e5484d) 45%, transparent); }
+    .rq-chip-ic { display: inline-grid; place-items: center; color: var(--accent); }
+    button.rq-chip.warn .rq-chip-ic { color: var(--warn, #d9a441); }
+    .rq-chip-ic svg { width: 11px; height: 11px; }
+    .rq-toolview { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+    .rq-toolview[hidden] { display: none; }
+    .tv-bar { display: flex; align-items: center; gap: 8px; min-width: 0; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+    button.tv-back { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 10px 0 6px; border: 1px solid var(--line); border-radius: 7px; background: transparent; color: var(--fg); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; flex: none; }
+    button.tv-back:hover { border-color: var(--accent); }
+    button.tv-back .advico svg { width: 13px; height: 13px; }
+    .tv-url { font-size: 11.5px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .rq-toolview .rq-tool { margin: 0; }
+    .rq-toolview .tool-x, .rq-toolview .cclose { display: none; }
+    .tv-btns .bt-pane { padding: 0; }
+    .bt-mi-meta { margin-left: auto; padding-left: 8px; font-size: 11px; color: var(--accent); flex: none; }
+    .bt-mi-meta.warn { color: var(--warn, #d9a441); }
+    button.bt-mi.dis, button.bt-mi:disabled { opacity: .45; cursor: default; }
   `;
 
   // ---------- helpers
@@ -7841,16 +7870,22 @@
     if (refocus) a?.focus?.();
   }
   // entries: [{ b, run(ev), side: [{ icon, label, run, on }] }]; top: entries above the groups (no search).
-  function openBtnMenu(anchor, { label, entries, top = [], bottom = [] }) {
+  function openBtnMenu(anchor, { label, entries, top = [], bottom = [], noun = 'buttons', width = 290 }) {
     if (btnMenuEl?._anchor === anchor) { closeBtnMenu(); return; }
     closeBtnMenu();
-    const search = entries.length > 7 ? h('input', { class: 'pf-tok bt-menu-q', placeholder: `Search ${entries.length} buttons`, 'aria-label': 'Search buttons', spellcheck: 'false' }) : null;
+    const search = entries.length > 7 ? h('input', { class: 'pf-tok bt-menu-q', placeholder: `Search ${entries.length} ${noun}`, 'aria-label': `Search ${noun}`, spellcheck: 'false' }) : null;
     const listEl = h('div', { class: 'bt-menu-l', role: 'menu', 'aria-label': label });
     const item = (e) => {
       const main = h('button', { type: 'button', class: `bt-mi${e.cls ? ` ${e.cls}` : ''}`, role: 'menuitem', title: e.title || (e.b ? buttonPath(e.b) : ''),
         onclick: (ev) => { closeBtnMenu(); e.run(ev); } });
       if (e.b) main.append(h('span', { class: `bt-mi-m m-${e.b.req.method.toLowerCase()}` }, e.b.req.method === 'DELETE' ? 'DEL' : e.b.req.method), h('span', { class: 'bt-mi-t' }, h('span', { class: 'bt-mi-n' }, e.b.name), h('span', { class: 'muted mono bt-mi-s' }, urlParts(e.b.req.url).path.replace(ITEM_RX, (m, p) => `{${p}}`).replace(ASK_RX, (m, n) => `{${n}?}`))));
-      else { const ic = h('span', { class: 'bt-mi-ic', 'aria-hidden': 'true' }); if (e.icon) setHTML(ic, e.icon); main.append(ic, h('span', { class: 'bt-mi-n' }, e.label)); }
+      else if (e.sub != null || e.meta != null) {
+        // A plain entry: icon, name, a second line, and something on the right (a count).
+        if (e.disabled) { main.disabled = true; main.classList.add('dis'); }
+        const ic = h('span', { class: 'bt-mi-ic', 'aria-hidden': 'true' }); if (e.icon) setHTML(ic, e.icon);
+        main.append(...[ic, h('span', { class: 'bt-mi-t' }, h('span', { class: 'bt-mi-n' }, e.label), e.sub ? h('span', { class: 'muted bt-mi-s' }, e.sub) : null),
+          e.meta != null && e.meta !== '' ? h('span', { class: `bt-mi-meta${e.metaCls ? ` ${e.metaCls}` : ''}` }, e.meta) : null].filter(Boolean));
+      } else { const ic = h('span', { class: 'bt-mi-ic', 'aria-hidden': 'true' }); if (e.icon) setHTML(ic, e.icon); main.append(ic, h('span', { class: 'bt-mi-n' }, e.label)); }
       const side = (e.side || []).map((s) => {
         const sb = h('button', { type: 'button', class: `ibtn bt-mi-side${s.on ? ' on' : ''}${s.danger ? ' danger' : ''}`, 'aria-label': s.label, title: s.label, onclick: (ev) => { ev.stopPropagation(); closeBtnMenu(); s.run(ev); } });
         setHTML(sb, s.icon);
@@ -7860,12 +7895,13 @@
     };
     const draw = () => {
       const q = (search?.value || '').trim().toLowerCase();
-      const hits = entries.filter((e) => !q || e.b.name.toLowerCase().includes(q) || e.b.req.url.toLowerCase().includes(q));
-      const groups = ['Open', 'Change', 'Delete'].map((g) => [g, hits.filter((e) => methodGroup(e.b.req.method) === g)]).filter(([, l]) => l.length);
+      const text = (e) => (e.b ? `${e.b.name} ${e.b.req.url}` : `${e.label} ${e.sub || ''}`).toLowerCase();
+      const hits = entries.filter((e) => !q || text(e).includes(q));
+      const groups = entries.some((e) => e.b) ? ['Open', 'Change', 'Delete'].map((g) => [g, hits.filter((e) => methodGroup(e.b.req.method) === g)]).filter(([, l]) => l.length) : [['', hits]];
       const kids = [];
       if (!q) kids.push(...top.map(item));
-      for (const [g, l] of groups) { if (groups.length > 1 || top.length) kids.push(h('div', { class: 'bt-menu-g', role: 'presentation' }, g)); kids.push(...l.map(item)); }
-      if (q && !hits.length) kids.push(h('div', { class: 'muted bt-menu-none' }, `No button matches “${search.value.trim()}”.`));
+      for (const [g, l] of groups) { if (g && (groups.length > 1 || top.length)) kids.push(h('div', { class: 'bt-menu-g', role: 'presentation' }, g)); kids.push(...l.map(item)); }
+      if (q && !hits.length) kids.push(h('div', { class: 'muted bt-menu-none' }, `Nothing matches “${search.value.trim()}”.`));
       if (!q && bottom.length) kids.push(h('div', { class: 'bt-menu-sep', role: 'separator' }), ...bottom.map(item));
       listEl.replaceChildren(...kids);
     };
@@ -7873,7 +7909,7 @@
     const menu = h('div', { class: 'bt-menu' }, search, listEl);
     menu._anchor = anchor;
     menu.addEventListener('keydown', (e) => {
-      const its = [...menu.querySelectorAll('.bt-mi')];
+      const its = [...menu.querySelectorAll('.bt-mi:not(:disabled)')];
       const i = its.indexOf(menu.ownerDocument.activeElement === menu ? null : (e.composedPath?.()[0]));
       if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeBtnMenu(true); }
       else if (e.key === 'ArrowDown') { e.preventDefault(); (its[i + 1] || its[0])?.focus(); }
@@ -7885,7 +7921,7 @@
     btnMenuEl = menu;
     // Under the ▾, right-aligned, inside the panel (above it when there's no room below).
     const d = dockEl.getBoundingClientRect(); const a = anchor.getBoundingClientRect();
-    const w = Math.min(290, d.width - 16);
+    const w = Math.min(width, d.width - 16);
     menu.style.width = `${w}px`;
     menu.style.left = `${Math.max(8, Math.min(a.right - d.left - w, d.width - w - 8))}px`;
     const below = a.bottom - d.top + 4;
@@ -9573,6 +9609,14 @@
     // Header: back · method · URL (with copy) · Run · ⋯. Filled with the actions at the end of this screen.
     const runSlot = h('div', { class: 'rq-run' });
     const menuSlot = h('div', { class: 'rq-menu' });
+    // Tools ▾ next to Run: each tool opens over the whole panel (toolView), with ← Request back to the form.
+    // Chips under the request show what's on or has results (a live simulation, a bulk run, buttons).
+    const toolView = h('section', { class: 'rq-toolview', hidden: true, 'aria-label': 'Tool' });
+    const chipsEl = h('div', { class: 'rq-chips', hidden: true });
+    const toolsBtn = h('button', { type: 'button', class: 'hbox rq-toolsbtn', 'aria-haspopup': 'menu', 'aria-label': 'Tools', title: 'Tools: buttons, bulk runs, every user, edge cases, simulation, compare' });
+    { const i = h('span', { class: 'advico', 'aria-hidden': 'true' }); setHTML(i, ICONS.tools); const c = h('span', { class: 'rq-tools-chev', 'aria-hidden': 'true' }); setHTML(c, ICONS.chevDown); toolsBtn.append(i, h('span', { class: 'rq-tools-l' }, 'Tools'), c); }
+    let cmpMenuItems = [];
+    let tvWas = null; let btnHost = null;
     const backBtn = h('button', { type: 'button', class: 'rq-back', onclick: closeDetail,
       title: `Back to ${d.backTo === 'focus' ? 'the element' : d.backTo === 'docs' ? 'API docs' : 'all requests'} (Esc)`, 'aria-label': 'Back' });
     setHTML(backBtn, ICONS.chevLeft);
@@ -9606,7 +9650,7 @@
       entry.prev ? h('span', { class: 'tag prev', title: 'Captured before the page reloaded' }, 'before reload') : null,
     ].filter(Boolean);
     const head = h('div', { class: 'rq-head' },
-      h('div', { class: 'rq-bar' }, (() => { const c = h('span', { class: 'mselchev', 'aria-hidden': 'true' }); setHTML(c, ICONS.chev); return h('span', { class: 'mselwrap' }, methodSel, c); })(), urlBox, runSlot, menuSlot),
+      h('div', { class: 'rq-bar' }, (() => { const c = h('span', { class: 'mselchev', 'aria-hidden': 'true' }); setHTML(c, ICONS.chev); return h('span', { class: 'mselwrap' }, methodSel, c); })(), urlBox, runSlot, toolsBtn, menuSlot),
       pathErr,
       pathVars,
       metaRight,
@@ -9634,7 +9678,6 @@
       ['params', 'Query', () => activeParams().length],
       ['headers', 'Headers', () => activeHeaders().length],
       ['body', 'Body', () => null],
-      ...(listInfo() ? [['buttons', 'Buttons', () => listInfo()?.btns.length || 0]] : []),
     ];
     // Buttons: a GET whose response is a list gets a Buttons tab, with its items and their buttons.
     let listMemo = { key: null, val: null };
@@ -9701,8 +9744,8 @@
     }
     function drawTabs() {
       // A button just added to this list: open its tab (once).
-      if (btnFocus && d.focusFor !== btnFocus.id && listInfo()?.btns.some((b) => b.id === btnFocus.id)) { d.tab = 'buttons'; d.focusFor = btnFocus.id; }
-      if (d.tab === 'buttons' && !listInfo()) d.tab = 'params';
+      if (btnFocus && d.focusFor !== btnFocus.id && listInfo()?.btns.some((b) => b.id === btnFocus.id)) { d.tool = 'buttons'; d.focusFor = btnFocus.id; requestAnimationFrame(() => drawLower()); }
+      if (d.tab === 'buttons') d.tab = 'params'; // Buttons moved to Tools ▾
       tabsEl.replaceChildren(...tabList().map(([id, label, count]) => {
         const n = count();
         if (id === 'buttons') {
@@ -9745,7 +9788,7 @@
         size && r ? h('span', { class: 'rq-m', title: isRun ? 'Size of your Run\'s response' : 'Size of the response' }, fmtSize(size)) : null,
       ].filter(Boolean);
       // Entry to the Simulation card, when it's closed (it's always open while a simulation is set up).
-      const simBtn = d.lower !== 'simulate' && !entry.manual && !entry.paused ? (() => {
+      const simBtn = false ? (() => {
         const b = h('button', { type: 'button', class: 'rvtool simbtn', title: 'Simulate response: change what the app gets back for this endpoint',
           onclick: () => { d.lower = 'simulate'; drawLower(); drawLowerHead(); drawBar(); requestAnimationFrame(() => toolCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' })); } });
         const i = h('span', { class: 'advico', 'aria-hidden': 'true' }); setHTML(i, ICONS.flask);
@@ -10084,6 +10127,7 @@
           entry.responseText != null ? { id: 'cmp-pick', label: 'Another call…', sub: 'Pick it in the list, any endpoint', run: () => startComparePick(entry) } : null,
           ...(hasA ? others : []).map((e, i) => ({ id: `ce-${e.id ?? 'local'}`, env: e, label: e.name, sub: `Send it to ${hostOf(e.url)} too`, section: i === 0 ? 'Another environment' : null, run: () => runOnEnv(e) })),
         ].filter(Boolean);
+        cmpMenuItems = items;
         if (!items.length) return null;
         const face = h('span', { class: 'rvlabel-w' });
         const ic = h('span', { class: 'advico', 'aria-hidden': 'true' }); setHTML(ic, ICONS.compare);
@@ -10091,7 +10135,8 @@
         // The first item opens the "Another response" group when there's no previous call or run to show.
         if (items[0] && !items[0].section && items[0].id === 'cmp-pick') items[0] = { ...items[0], section: 'Another response' };
         if (items[0]?.id === 'cmp-run') items[0] = { ...items[0], section: 'Another response' };
-        return dropMenu('Compare with', items, { icon: face, btnClass: 'rvtool cmpmenu', persistent: cleanups, align: 'right', title: 'Compare this response with another response or another environment' });
+        cmpMenuItems = items; void face; // offered in Tools ▾ → Compare
+        return null;
       })();
 
       if (src === 'compare') return compareView(sources, group);
@@ -11385,7 +11430,122 @@
       { const i = h('span', { class: 'advico', 'aria-hidden': 'true' }); setHTML(i, ICONS.play); run.append(i, 'Run'); }
       cmpLine.replaceChildren(methodBadge(draft.method), h('span', { class: 'mono cl-url', title: shown }, shown), edit, run);
     }
-    function drawLower() {
+    // ---------- Tools ▾ and the tool view
+    function activeTool() {
+      if (d.tool === 'buttons' && listInfo()) return 'buttons';
+      if (d.respSource === 'perm' && d.perm) return 'perm';
+      if (d.lower === 'simulate' && !entry.manual) return 'simulate';
+      if (d.lower === 'mock' || d.lower === 'edge') return d.lower;
+      return null;
+    }
+    const TOOL_NAME = { buttons: 'Buttons', perm: 'Try with every user', simulate: 'Simulate response', mock: 'Run in bulk', edge: 'Test edge cases' };
+    const backToApp = () => (d.copy && !d.copy.preview ? 'copy' : 'app');
+    function leaveTool() {
+      const t = activeTool();
+      d.tool = null;
+      if (t === 'perm') d.respSource = backToApp();
+      if (t === 'mock' || t === 'edge' || t === 'simulate') d.lower = 'response'; // a bulk run carries on; its chip shows it
+      drawLower(); drawLowerHead(); drawBar();
+      requestAnimationFrame(() => toolsBtn.focus({ preventScroll: true }));
+    }
+    function openToolById(id) {
+      if (id === 'buttons') {
+        if (listInfo()) { d.tool = 'buttons'; if (d.respSource === 'perm') d.respSource = backToApp(); d.lower = 'response'; drawLower(); return; }
+        if (!routeOk()) { say('Fix the address first.', 'warn'); return; }
+        openButtonDlg({ req: current(runEnv(), { raw: true }) }); return;
+      }
+      d.tool = null;
+      if (id === 'perm') { if (d.perm) { d.respSource = 'perm'; d.lower = 'response'; drawLower(); drawLowerHead(); } return; }
+      if (id === 'perm-new') { runAsEveryUser(); return; }
+      if (d.respSource === 'perm' || d.respSource === 'compare') d.respSource = backToApp();
+      d.lower = id; drawLower(); drawLowerHead(); drawBar();
+    }
+    function openCompareMenu() {
+      openBtnMenu(toolsBtn, { label: 'Compare with', noun: 'responses', width: 300,
+        entries: cmpMenuItems.map((it) => ({ label: it.label, sub: it.sub || '', icon: it.env ? ICONS.globe || ICONS.compare : ICONS.compare,
+          run: () => { d.tool = null; if (d.lower !== 'response') d.lower = 'response'; it.run(); requestAnimationFrame(() => (cmpLine.hidden ? toolsBtn : cmpLine.querySelector('button'))?.focus({ preventScroll: true })); } })) });
+    }
+    toolsBtn.addEventListener('click', () => {
+      const li = listInfo();
+      const nUsers = (() => { try { return everyUserRows(current(runEnv(), { raw: true }), runEnv()).length; } catch { return 0; } })();
+      const st = simState();
+      openBtnMenu(toolsBtn, { label: 'Tools', width: 290, entries: [
+        { label: 'Buttons', icon: ICONS.bolt, sub: li ? (li.list.single ? 'Actions on this item' : 'Actions on each item of the list') : 'Make this request a button on a list',
+          meta: li?.btns.length ? String(li.btns.length) : '', run: () => openToolById('buttons'),
+          side: li ? [{ icon: ICONS.plus, label: 'Add this request as a button…', run: () => { if (!routeOk()) { say('Fix the address first.', 'warn'); return; } openButtonDlg({ req: current(runEnv(), { raw: true }) }); } }] : [] },
+        { label: 'Run in bulk', icon: ICONS.cube, sub: 'Many times, with generated data', meta: d.mock?.running ? 'running' : '', run: () => openToolById('mock') },
+        { label: 'Try with every user', icon: ICONS.user, sub: nUsers < 2 ? 'Add a user in Send to first' : `Send it as each of the ${nUsers} users`, disabled: nUsers < 2, run: () => openToolById('perm-new') },
+        { label: 'Test edge cases', icon: ICONS.spark, sub: 'Empty, too long, wrong type…', meta: d.edge?.running ? 'running' : '', run: () => openToolById('edge') },
+        { label: 'Simulate response', icon: ICONS.flask, sub: entry.manual ? 'Only for the app’s own calls' : 'Change what the app gets back', disabled: !!entry.manual,
+          meta: st !== 'off' ? SIM_CHIP[st] : '', metaCls: 'warn', run: () => openToolById('simulate') },
+        { label: 'Compare', icon: ICONS.compare, sub: cmpMenuItems.length ? 'With another response or environment' : 'Needs a second response', disabled: !cmpMenuItems.length, run: openCompareMenu },
+      ] });
+    });
+    function drawChips() {
+      const kids = [];
+      const chip = (id, label, { cls = '', icon = null, title = '' } = {}) => {
+        const b = h('button', { type: 'button', class: `rq-chip${cls ? ` ${cls}` : ''}`, title: title || `Open ${TOOL_NAME[id] || id}`, onclick: () => openToolById(id) });
+        if (icon) { const i = h('span', { class: 'rq-chip-ic', 'aria-hidden': 'true' }); setHTML(i, icon); b.append(i); }
+        b.append(h('span', {}, label));
+        return b;
+      };
+      const st = entry.manual || entry.paused ? 'off' : simState();
+      if (st !== 'off') kids.push(chip('simulate', `Simulation · ${SIM_CHIP[st]}`, { cls: st === 'draft' || st === 'used' ? 'soft' : 'warn', icon: ICONS.flask, title: SIM_TIP[st] }));
+      const m = d.mock;
+      if (m?.results?.length) {
+        const done = m.results.filter((r) => r.status != null || r.error); const bad = done.filter((r) => r.error || r.status >= 400).length;
+        kids.push(chip('mock', m.running ? `Bulk: ${done.length}/${m.results.length}…` : `Bulk: ${done.length - bad} ✓${bad ? ` · ${bad} ✕` : ''}`, { icon: ICONS.cube, cls: !m.running && bad ? 'bad' : '' }));
+      }
+      const E = d.edge;
+      if (E?.results?.length) {
+        const done = E.results.filter((r) => r.state && r.state !== 'wait').length;
+        kids.push(chip('edge', E.running ? `Edge cases: ${done}/${E.results.length}…` : `Edge cases: ${done} run`, { icon: ICONS.spark }));
+      }
+      if (d.perm) {
+        const rows = d.perm.rows.filter((r) => !r.skip); const done = rows.filter((r) => r.state === 'done' || r.state === 'failed').length;
+        kids.push(chip('perm', done < rows.length ? `Every user: ${done}/${rows.length}…` : `Every user: ${rows.length}`, { icon: ICONS.user }));
+      }
+      const li = listInfo();
+      if (li?.btns.length) kids.push(chip('buttons', plural(li.btns.length, 'button'), { icon: ICONS.bolt, title: li.list.single ? 'Buttons for this item' : 'Buttons on each item of this list' }));
+      chipsEl.hidden = !kids.length;
+      chipsEl.replaceChildren(...kids);
+      toolsBtn.classList.toggle('on', kids.length > 0);
+    }
+    // Into or out of a tool: the panel starts at the top (under its header), not wherever it was scrolled.
+    const toTop = () => { let sc = mainEl; while (sc && sc !== dockEl && !(sc.scrollHeight > sc.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(sc).overflowY))) sc = sc.parentElement; if (sc) sc.scrollTop = 0; };
+    function syncView() {
+      const t = activeTool();
+      const on = !!t;
+      [cmpLine, head, actBar, tabsEl, pane, chipsEl].forEach((el) => el.classList.toggle('tv-off', on));
+      lower.classList.toggle('tv-off', on && t !== 'simulate' && t !== 'perm');
+      toolView.hidden = !on;
+      if (on) {
+        let shown = entry.url;
+        try { const u = new URL(current().url, location.href); shown = u.pathname + u.search; } catch { /* keep */ }
+        const back = h('button', { type: 'button', class: 'tv-back', title: 'Back to the request (Esc)', onclick: leaveTool });
+        { const i = h('span', { class: 'advico', 'aria-hidden': 'true' }); setHTML(i, ICONS.chevLeft); back.append(i, 'Request'); }
+        const bar = h('div', { class: 'tv-bar' }, back, methodBadge(draft.method), h('span', { class: 'mono tv-url', title: shown }, shown));
+        const kids = [bar];
+        if (t === 'buttons') {
+          if (!btnHost || tvWas !== 'buttons') btnHost = h('div', { class: 'tv-btns' }, buttonsPane());
+          kids.push(btnHost);
+        } else btnHost = null;
+        if (t === 'mock' || t === 'edge' || t === 'simulate') kids.push(toolCard);
+        if (t === 'simulate' || t === 'perm') kids.push(lower);
+        toolView.replaceChildren(...kids);
+        if (tvWas !== t) requestAnimationFrame(() => { toTop(); back.focus({ preventScroll: true }); });
+      } else {
+        if (toolCard.parentNode !== mainEl) pane.after(toolCard);
+        if (lower.parentNode !== mainEl) toolCard.after(lower);
+        btnHost = null;
+        if (tvWas) requestAnimationFrame(toTop);
+      }
+      tvWas = t;
+      drawChips();
+    }
+    function drawLower() { drawLower0(); syncView(); }
+    d.inTool = () => !!activeTool(); d.leaveTool = leaveTool;
+    function drawLower0() {
       lowerPane.replaceChildren(responsePane());
       setCmpLayout();
       const tool = d.lower === 'simulate' && !entry.manual ? 'simulate' : d.lower === 'mock' ? 'mock' : d.lower === 'edge' ? 'edge' : null;
@@ -11723,7 +11883,7 @@
         const extraBtns = (msg.extra || []).filter((x) => x.tagName === 'BUTTON');
         const extraOther = (msg.extra || []).filter((x) => x.tagName !== 'BUTTON');
         actBar.hidden = false;
-        actBar.className = `msgline ${msg.cls || ''}`;
+        actBar.className = `msgline ${msg.cls || ''}${tvWas ? ' tv-off' : ''}`; // hidden while a tool has the panel
         actBar.replaceChildren(
           h('span', { class: 'ml-ico', 'aria-hidden': 'true' }, msg.cls === 'warn' ? '!' : msg.cls === 'info' ? '✓' : '…'),
           h('span', { class: 'ml-text' }, msg.text),
@@ -11937,31 +12097,29 @@
         { id: 'bp-next', label: 'Break on next call', sub: bp?.once ? 'On · click to turn off' : null, title: 'Pause the app\'s next call to this endpoint so you can edit, continue or drop it', icon: ICONS.pause, checked: bp?.once === true, run: () => setBreak(true) },
         { id: 'bp-every', label: 'Break on every call', sub: bp && !bp.once ? 'On · click to turn off' : null, title: 'Pause every call to this endpoint until you remove the breakpoint (also in Setup)', icon: ICONS.pause, checked: !!bp && !bp.once, run: () => setBreak(false) },
       ];
-      const runMenu = { id: 'run-sub', label: 'Send copies', icon: ICONS.play, sepBefore: true, title: 'Send this request yourself, several times or several ways; the app doesn\'t see these',
+      const runMenu = null && { id: 'run-sub', label: 'Send copies', icon: ICONS.play, sepBefore: true, title: 'Send this request yourself, several times or several ways; the app doesn\'t see these',
         children: [bulkItem, runAllItem, edgeItem].filter(Boolean),
         sub: d.lower === 'edge' ? 'Open below' : null };
-      const testMenu = entry.manual ? null : { id: 'test-sub', label: 'Change the app\'s call', icon: ICONS.spark, title: 'Fake the response the app gets, or pause its call before it goes out',
-        children: [simItem, ...bpKids].filter(Boolean),
-        sub: bp ? `Breakpoint on: ${bp.once ? 'next call' : 'every call'}` : ['simulate', 'mock'].includes(d.lower) ? 'Open below' : null };
+      const testMenu = entry.manual ? null : { id: 'test-sub', label: 'Pause the app\'s call', icon: ICONS.pause, title: 'Pause the app\'s call before it goes out, to edit, continue or drop it',
+        children: bpKids, sub: bp ? `On: ${bp.once ? 'next call' : 'every call'}` : null };
       const mockItem = (entry.mocked || d.copy?.mocked) && mockOf(d.copy?.mocked ? d.copy : entry)
         ? { id: 'editmock', label: 'Edit mock', icon: ICONS.cube, title: 'The response came from a mock endpoint', run: () => editMockFor(d.copy?.mocked ? d.copy : entry) } : null;
-      const btnItem = { id: 'add-btn', label: 'Add as a button…', icon: ICONS.bolt, title: 'A button on each item of a list: pressing it sends this request with that item’s values',
+      const btnItem0 = { id: 'add-btn', label: 'Add as a button…', icon: ICONS.bolt, title: 'A button on each item of a list: pressing it sends this request with that item’s values',
         run: () => { if (!routeOk()) { say('Fix the address first.', 'warn'); return; } openButtonDlg({ req: current(runEnv(), { raw: true }) }); } };
+      void btnItem0; void simItem; void bulkItem; void runAllItem; void edgeItem; // these moved to Tools ▾
       applyWas = canApply();
       const items = entry.manual ? [
         mockItem,
         dupItem,
-        btnItem,
         { ...copyMenu, sepBefore: true },
-        { ...runMenu, sepBefore: false }, testMenu,
+        testMenu,
         { id: 'import', label: 'Import cURL…', title: 'Replace this request with a pasted curl command', icon: ICONS.download, sepBefore: true, run: () => { reqView.importing = { into: entry }; renderTab(); } },
         { id: 'delete', label: 'Delete request', icon: ICONS.trash, danger: true, sepBefore: true, run: () => { core.state.requests = core.state.requests.filter((r) => r !== entry); core.refresh(); closeTab(d); } },
       ] : [
         mockItem,
         dupItem,
-        btnItem,
         { ...copyMenu, sepBefore: true },
-        { ...runMenu, sepBefore: false }, testMenu,
+        testMenu,
         { id: 'apply', label: 'Apply to app', disabled: !applyWas, sub: applyWas ? applyPlan() : 'Nothing to apply yet. Edit the request first', title: 'Save the change and make the app repeat this call, so the page shows the result.\nCalls from a button or field are re-run on the page; calls made while the page loads need a reload.', icon: ICONS.upload, sepBefore: true, run: applyToApp },
       ];
       const m = dropMenu('Request actions', items.filter(Boolean), { icon: ICONS.more, menuClass: 'compactmenu', btnClass: `hbox sq${bp ? ' on' : ''}`, title: bp ? `More actions (breakpoint on: ${bp.once ? 'next call' : 'every call'})` : 'More actions' });
@@ -12027,7 +12185,6 @@
         sim.delay = r0.delayMs || 0;
         syncSim();
         if (r0.once) d.simArmed = { id: r0.id, at: Date.now() };
-        d.lower = 'simulate';
       }
     }
     // The card follows its state when it changes elsewhere (the app used a next-call simulation, Rules).
@@ -12039,7 +12196,9 @@
       drawLower(); drawLowerHead();
     });
     buildMenu();
-    mainEl.append(cmpLine, head, actBar, tabsEl, pane, toolCard, lower);
+    mainEl.append(cmpLine, head, actBar, chipsEl, tabsEl, pane, toolCard, lower, toolView);
+    // Chips follow runs that go on while you're back on the request (a bulk run, every user).
+    { const iv = setInterval(() => { if (reqView.detail !== d) return; if (d.mock?.running || d.edge?.running || d.perm?.rows.some((r) => r.state === 'busy' || r.state === 'wait')) drawChips(); }, 600); cleanups.push(() => clearInterval(iv)); }
     drawTabs();
     drawConfig();
     drawLower();
@@ -12244,6 +12403,7 @@
     reload: svg('<path d="M13.25 8A5.25 5.25 0 1 1 11.6 4.2"/><path d="M13.25 2.75v3h-3"/>'),
     chevRight: svg('<path d="M6.25 4.5 9.75 8l-3.5 3.5"/>'),
     chevLeft: svg('<path d="M9.75 4.5 6.25 8l3.5 3.5"/>'),
+    tools: svg('<path d="M10.2 2.3a3.3 3.3 0 0 0-3.9 4.3L2.4 10.5a1.3 1.3 0 0 0 1.9 1.9l3.9-3.9a3.3 3.3 0 0 0 4.3-3.9l-2 2-1.6-.4-.4-1.6Z"/>'),
     chevUp: svg('<path d="M4.5 9.75 8 6.25l3.5 3.5"/>'),
     chevDown: svg('<path d="M4.5 6.25 8 9.75l3.5-3.5"/>'),
     monitor: svg('<rect x="2" y="2.75" width="12" height="8.5" rx="1.5"/><path d="M6 14h4M8 11.25V14"/>'),
@@ -14784,6 +14944,11 @@
       if (m) { menuClosers.forEach((fn) => fn(true)); return; } // an open ⋯ menu closes first
       closeDlg(); return;
     }
+    // An open ▾ menu (Tools, a row's buttons) closes first, before anything else Esc does in the panel.
+    if (e.key === 'Escape' && btnMenuEl) { e.preventDefault(); e.stopPropagation(); closeBtnMenu(true); return; }
+    // Esc in a tool (Tools ▾ → Buttons, Run in bulk…): back to the request.
+    if (e.key === 'Escape' && !btnMenuEl && reqView.detail?.inTool?.() && dock.tab === 'requests' && insidePanel(e) && !root.querySelector('.dmenu:not([hidden])')
+      && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.composedPath?.()[0] || e.target)?.tagName || '')) { e.preventDefault(); e.stopPropagation(); reqView.detail.leaveTool(); return; }
     if (e.key === 'Escape' && insidePanel(e)) {
       const t = e.composedPath()[0];
       // Escape in the search box clears it first.

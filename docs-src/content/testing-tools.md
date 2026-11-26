@@ -10,11 +10,11 @@ Click the **wifi** button in the header. Every call the app makes now fails, as 
 
 ## Try with every user
 
-**⋯ → Send copies → Try with every user** sends the request as each user of the environment and lists the status for each. A quick permission check: *Admin 200, Viewer 403*. It needs at least one saved user; until then it's greyed out.
+**Tools ▾ → Try with every user** sends the request as each user of the environment and lists the status for each. A quick permission check: *Admin 200, Viewer 403*. It needs at least one saved user; until then it's greyed out.
 
 ## Test edge cases
 
-**⋯ → Send copies → Test edge cases** sends the request again with one field changed at a time: empty, too long, wrong type, out of range, missing.
+**Tools ▾ → Test edge cases** sends the request again with one field changed at a time: empty, too long, wrong type, out of range, missing.
 
 - ✓ **rejected** (4xx): what you want.
 - ⚠ **accepted** (2xx): maybe missing validation.
